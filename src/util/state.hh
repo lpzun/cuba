@@ -21,12 +21,14 @@
 namespace cuba {
 
 /// the size of threads
-using size_t = unsigned short;
+using size_t = ushort;
 
 /// control state definition
-using control_state = unsigned int;
+using control_state = uint;
 /// define stack symbol
-using stack_symbol = unsigned int;
+using stack_symbol = uint;
+
+using id_thread_state = uint;
 
 template<typename T> class alphabet {
 public:
@@ -165,6 +167,9 @@ public:
     thread_state();
     thread_state(const control_state& s, const stack_symbol& l);
     ~thread_state();
+
+    static control_state S;
+    static stack_symbol L;
 
     /**
      * @return the stack symbol of current thread state
@@ -348,6 +353,14 @@ private:
     cstack W;
 };
 
+class global_state {
+public:
+    global_state();
+    ~global_state();
+
+private:
+};
+
 /**
  * overloading operator <<: print a configuration of the CPDS
  * @param os
@@ -362,6 +375,61 @@ inline ostream& operator<<(ostream& os, const global_config& c) {
     return os;
 }
 
-} /* namespace bssp */
+using id_transition = uint;
+
+/**
+ * define the type of stack operations:
+ * PUSH  : push an element to the stack
+ * POP   : pop an element from the stack
+ * UPDATE: overwrite the top element in the stack
+ */
+enum class type_stack_operation {
+    PUSH, POP, UPDATE
+};
+
+/**
+ * define type of thread state transitions
+ * FORK: spawn a new thread
+ * NORM: the normal thread state transitions
+ * BRCT: the broadcast transitions
+ */
+enum class type_synchronization {
+    FORK, NORM, BRCT
+};
+
+template<typename T> class transition {
+public:
+    transition(const T& src, const T& dst, const type_stack_operation& oper,
+            const type_synchronization& sync) :
+            src(src), dst(dst), oper(oper), sync(sync) {
+    }
+    ~transition() {
+    }
+
+    T get_dst() const {
+        return dst;
+    }
+
+    type_stack_operation get_oper_type() const {
+        return oper;
+    }
+
+    T get_src() const {
+        return src;
+    }
+
+    type_synchronization get_sync_type() const {
+        return sync;
+    }
+
+private:
+    T src;
+    T dst;
+    type_stack_operation oper;
+    type_synchronization sync;
+};
+
+}
+/* namespace bssp */
 
 #endif /* UTIL_STATE_HH_ */

@@ -9,6 +9,9 @@
 
 namespace cuba {
 
+control_state thread_state::S;
+stack_symbol thread_state::L;
+
 /**
  * default constructor
  */

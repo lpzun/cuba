@@ -8,26 +8,54 @@
 #ifndef CMD_HH_
 #define CMD_HH_
 
+#include <cstdlib>
 #include <iostream>
 #include <ostream>
+#include <sstream>
 #include <string>
 #include <map>
-#include <list>
+#include <deque>
 #include <vector>
 #include <algorithm>
-#include <cstdlib>
+#include <stdexcept>
 
-#include "algs.hh"
-
+using std::runtime_error;
 using std::ostream;
+using std::ostringstream;
 using std::string;
 using std::map;
-using std::list;
+using std::deque;
 using std::vector;
 using std::cout;
 using std::endl;
 
 extern string v_info;
+
+using ushort = unsigned short;
+using ulong = unsigned long int;
+
+namespace cmd {
+
+enum class alignment {
+    LEFTJUST, RIGHTJUST, CENTERED
+};
+
+template<class T> string widthify(const T& x, const ushort& width = 0,
+        const alignment& c = alignment::CENTERED, const char& fill = ' ');
+
+/**
+ * @brief customized runtime_error class for command line class
+ */
+class cmd_runtime_error: public runtime_error {
+public:
+    cmd_runtime_error() :
+            runtime_error("") {
+    }
+
+    cmd_runtime_error(const std::string& msg) :
+            runtime_error(msg) {
+    }
+};
 
 class Arguments {
 public:
@@ -148,7 +176,7 @@ public:
     cmd_line();
     ~cmd_line();
 
-    struct Help {
+    struct help {
     };
 
     void get_command_line(const int argc, const char* const * const argv);
@@ -220,8 +248,8 @@ private:
     const string help_message;
     string v_info;
 
-    map<short, deque<Options>> options;
-    map<short, deque<Switch>> switches;
+    map<short, deque<Options>> cmd_options;
+    map<short, deque<Switch>> cmd_switches;
     vector<string> types;
 
     void create_argument_list();
@@ -236,8 +264,8 @@ private:
 
     void get_command_line(const string& prog, const vector<string>& args);
 
-    void print_usage_info(const string& prog_name, cushort& indent = 1,
+    void print_usage_info(const string& prog_name, const ushort& indent = 1,
             ostream& out = cout) const;
 };
-
+}
 #endif /* CMD_HH_ */
