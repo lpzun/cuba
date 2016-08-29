@@ -45,6 +45,10 @@ public:
         return worklist.back();
     }
 
+    T top() const {
+        return worklist.back();
+    }
+
     void push(const T& _value) {
         worklist.emplace_back(_value);
     }
@@ -156,6 +160,85 @@ template<typename T> inline bool operator!=(const alphabet<T>& a1,
     return !(a1 == a2);
 }
 
+class thread_state {
+public:
+    thread_state();
+    thread_state(const control_state& s, const stack_symbol& l);
+    ~thread_state();
+
+    /**
+     * @return the stack symbol of current thread state
+     */
+    stack_symbol get_symbol() const {
+        return l;
+    }
+
+    /**
+     * @return the control state of current thread state
+     */
+    control_state get_state() const {
+        return s;
+    }
+
+private:
+    control_state s;
+    stack_symbol l;
+};
+
+/**
+ * overloading operator <<
+ * @param os
+ * @param s
+ * @return ostream
+ */
+inline ostream& operator<<(ostream& os, const thread_state& t) {
+    os << "(" << t.get_state() << "," << t.get_symbol() << ")";
+    return os;
+}
+
+/**
+ * overloading operator <
+ * @param t1
+ * @param t2
+ * @return bool
+ */
+inline bool operator<(const thread_state& t1, const thread_state& t2) {
+    return (t1.get_state() < t2.get_state())
+            && (t1.get_symbol() < t2.get_symbol());
+}
+
+/**
+ * overloading operator >
+ * @param t1
+ * @param t2
+ * @return bool
+ */
+inline bool operator>(const thread_state& t1, const thread_state& t2) {
+    return t2 < t1;
+}
+
+/**
+ * overloading operator ==
+ * @param t1
+ * @param t2
+ * @return bool
+ */
+inline bool operator==(const thread_state& t1, const thread_state& t2) {
+    return (t1.get_state() == t2.get_state())
+            && (t1.get_symbol() == t2.get_symbol());
+}
+
+/**
+ * overloading operator !=
+ * @param t1
+ * @param t2
+ * @return bool
+ */
+inline bool operator!=(const thread_state& t1, const thread_state& t2) {
+    return (t1.get_state() == t2.get_state())
+            && (t1.get_symbol() == t2.get_symbol());
+}
+
 /// the stack for a single PDS
 using sstack = alphabet<stack_symbol>;
 /**
@@ -174,6 +257,10 @@ public:
 
     const sstack& get_stack() const {
         return w;
+    }
+
+    thread_state top() const {
+        return thread_state(s, w.top());
     }
 
 private:

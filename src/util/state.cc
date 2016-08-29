@@ -10,6 +10,28 @@
 namespace cuba {
 
 /**
+ * default constructor
+ */
+thread_state::thread_state() :
+        s(0), l(0) {
+}
+
+/**
+ * constructor with a control state and a stack symbol
+ * @param s
+ * @param l
+ */
+thread_state::thread_state(const control_state& s, const stack_symbol& l) :
+        s(s), l(l) {
+}
+
+/**
+ * destructor
+ */
+thread_state::~thread_state() {
+}
+
+/**
  * A default constructor without any input parameters
  */
 thread_config::thread_config() :

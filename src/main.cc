@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : cuba.cpp
+// Name        : Context-UnBounded Analysis Concurrent Software
 // Author      : Peizun Liu
 // Version     :
 // Copyright   : Your copyright notice
@@ -10,6 +10,6 @@
 using namespace std;
 
 int main() {
-	cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+
 	return 0;
 }
