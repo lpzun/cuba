@@ -333,8 +333,41 @@ inline bool operator!=(const thread_config& c1, const thread_config& c2) {
 /// the set of stacks in CPDS
 using cstack = vector<sstack>;
 
+class global_state {
+public:
+    global_state(const control_state& s, const size_t& n);
+    global_state(const control_state& s, const vector<control_state>& L);
+    ~global_state();
+
+    const vector<stack_symbol>& get_local() const {
+        return L;
+    }
+
+    control_state get_state() const {
+        return s;
+    }
+
+private:
+    control_state s;
+    vector<stack_symbol> L;
+};
+
 /**
- * a configuration (s|w1,...,wn) of a CPDS is an element of Qx(L*)^n
+ * overloading operator <<: print a global state
+ * @param os
+ * @param c
+ * @return bool
+ */
+inline ostream& operator<<(ostream& os, const global_state& g) {
+    os << "(" << g.get_state() << "|";
+    for (auto i = 0; i < g.get_local().size() - 1; ++i)
+        cout << g.get_local()[i] << ",";
+    os << g.get_local()[g.get_local().size() - 1] << ")";
+    return os;
+}
+
+/**
+ * A configuration (s|w1,...,wn) of a CPDS is an element of Qx(L*)^n
  */
 class global_config {
 public:
@@ -350,17 +383,11 @@ public:
         return W;
     }
 
+    global_state top();
+
 private:
     control_state s;
     cstack W;
-};
-
-class global_state {
-public:
-    global_state();
-    ~global_state();
-
-private:
 };
 
 /**
@@ -371,9 +398,9 @@ private:
  */
 inline ostream& operator<<(ostream& os, const global_config& c) {
     os << "(" << c.get_state() << "|";
-    for (const auto& w : c.get_stacks())
-        os << w << ",";
-    os << ")";
+    for (auto i = 0; i < c.get_stacks().size() - 1; ++i)
+        os << c.get_stacks()[i] << ",";
+    os << c.get_stacks()[c.get_stacks().size() - 1] << ")";
     return os;
 }
 
@@ -390,6 +417,27 @@ enum class type_stack_operation {
 };
 
 /**
+ * overloading operator <<
+ * @param os
+ * @param t
+ * @return ostream
+ */
+inline ostream& operator<<(ostream& os, const type_stack_operation& t) {
+    switch (t) {
+    case type_stack_operation::PUSH:
+        os << '+';
+        break;
+    case type_stack_operation::POP:
+        os << '-';
+        break;
+    default:
+        os << '!';
+        break;
+    }
+    return os;
+}
+
+/**
  * define type of thread state transitions
  * FORK: spawn a new thread
  * NORM: the normal thread state transitions
@@ -398,6 +446,27 @@ enum class type_stack_operation {
 enum class type_synchronization {
     FORK, NORM, BRCT
 };
+
+/**
+ * overloading operator <<
+ * @param os
+ * @param t
+ * @return ostream
+ */
+inline ostream& operator<<(ostream& os, const type_synchronization& t) {
+    switch (t) {
+    case type_synchronization::FORK:
+        os << '+';
+        break;
+    case type_synchronization::BRCT:
+        os << '~';
+        break;
+    default:
+        os << '-';
+        break;
+    }
+    return os;
+}
 
 template<typename T> class transition {
 public:
@@ -432,6 +501,6 @@ private:
 };
 
 }
-/* namespace bssp */
+/* namespace cuba */
 
 #endif /* UTIL_STATE_HH_ */

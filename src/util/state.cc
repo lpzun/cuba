@@ -84,6 +84,34 @@ thread_config::~thread_config() {
 }
 
 /**
+ * A constructor with a control state and the size of local part
+ * @param s
+ * @param n
+ */
+global_state::global_state(const control_state& s, const size_t& n) :
+        s(s), L(n) {
+
+}
+
+/**
+ * A constructor with a control state and a vector of local states
+ * @param s
+ * @param L
+ */
+global_state::global_state(const control_state& s,
+        const vector<stack_symbol>& L) :
+        s(s), L(L) {
+
+}
+
+/**
+ * destructor
+ */
+global_state::~global_state() {
+
+}
+
+/**
  * A constructor with a control state and the number of concurrent
  * components
  * @param s
@@ -109,6 +137,18 @@ global_config::global_config(const control_state& s, const cstack& W) :
  */
 global_config::~global_config() {
 
+}
+
+/**
+ * return a top configuration
+ * @return a global state
+ */
+global_state global_config::top() {
+    vector<stack_symbol> Z(W.size());
+    for (auto i = 0; i < W.size(); ++i) {
+        Z[i] = W[i].top();
+    }
+    return global_state(s, Z);
 }
 
 } /* namespace bssp */

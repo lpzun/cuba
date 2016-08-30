@@ -40,12 +40,9 @@ int main(const int argc, const char * const * const argv) {
 
         const string& n = cmd.arg_value(cmd_line::exp_mode_opts(), "--threads");
 
-        cout << filename << " " << initl << " " << final << " " << n
-                << endl;
-
         CUBA cuba(filename, initl, final);
-
         cuba.context_unbounded_analysis(std::stoul(n));
+
     } catch (const cmd::cmd_runtime_error& e) {
         e.what();
     } catch (const cuba::cuba_runtime_error& e) {

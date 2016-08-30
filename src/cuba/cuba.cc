@@ -58,7 +58,7 @@ void CUBA::parse_PDS(const string& filename) {
     string sep;
     vertex src, dst;
     while (new_in >> s1 >> l1 >> sep >> s2 >> l2) {
-        cout << s1 << " " << l1 << " " << sep << " " << s2 << " " << l2 << "\n";
+        //cout << s1 << " " << l1 << " " << sep << " " << s2 << " " << l2 << "\n";
 
         /// step 1: handle (s1, l1)
         const thread_state src_TS(s1, l1);
@@ -109,8 +109,8 @@ void CUBA::parse_PDS(const string& filename) {
         cout << thread_state::S << " " << thread_state::L << "\n";
         for (const auto& r : active_R) {
             cout << active_Q[r.get_src()] << " ";
-            cout << pds_parser::print_type_stack_operation(r.get_oper_type());
-            cout << pds_parser::print_type_synchronization(r.get_sync_type());
+            cout << r.get_oper_type();
+            cout << r.get_sync_type();
             cout << ">";
             cout << " " << active_Q[r.get_dst()];
             cout << "\n";
@@ -146,9 +146,33 @@ thread_state CUBA::parse_TS(const string& s) {
 /////////////////////////////////////////////////////////////////////////
 
 void CUBA::context_unbounded_analysis(const size_t& n) {
-    cout << initl_TS << " " << final_TS << endl;
-    cout << n << endl;
+//    cout << initl_TS << " " << final_TS << endl;
+//    cout << n << endl;
     auto size = reachable_thread_states(n);
+
+    cout << "The number of reachable thread states is: " << size << endl;
+}
+
+/**
+ *
+ * @param n
+ * @return
+ */
+uint CUBA::reachable_thread_states(const size_t& n) {
+    cstack W(n, sstack());
+    for (auto i = 0; i < n; ++i) {
+        W[i].push(initl_TS.get_symbol());
+    }
+
+    deque<global_config> worklist;
+    worklist.emplace_back(initl_TS.get_state(), W);
+
+    cout << worklist.front() << endl;
+
+    while (!worklist.empty()) {
+        break;
+    }
+    return 0;
 }
 
 } /* namespace cuba */
