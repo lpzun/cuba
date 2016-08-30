@@ -19,8 +19,13 @@ CUBA::CUBA(const string& filename, const string& initl, const string& final) :
 CUBA::~CUBA() {
 }
 
+/////////////////////////////////////////////////////////////////////////
+/// PART 1. The following are the definitions for parsing input PDS
+///
+/////////////////////////////////////////////////////////////////////////
+
 /**
- *
+ * To parse the input PDS
  * @param filename
  */
 void CUBA::parse_PDS(const string& filename) {
@@ -115,9 +120,9 @@ void CUBA::parse_PDS(const string& filename) {
 }
 
 /**
- *
+ * To parse the input initial/final thread state
  * @param s
- * @return
+ * @return thread state
  */
 thread_state CUBA::parse_TS(const string& s) {
     if (s.find('|') == std::string::npos) { /// s is store in a file
@@ -135,9 +140,15 @@ thread_state CUBA::parse_TS(const string& s) {
     return pds_parser::create_thread_state_from_str(s);
 }
 
+/////////////////////////////////////////////////////////////////////////
+/// PART 2. The following are the definitions for context-unbounded
+/// analysis.
+/////////////////////////////////////////////////////////////////////////
+
 void CUBA::context_unbounded_analysis(const size_t& n) {
     cout << initl_TS << " " << final_TS << endl;
     cout << n << endl;
+    auto size = reachable_thread_states(n);
 }
 
 } /* namespace cuba */

@@ -37,7 +37,7 @@ private:
     thread_state initl_TS;
     thread_state final_TS;
 
-    vector<vector<bool>> reached_Q;
+    uint reachable_thread_states(const size_t& n);
 };
 
 } /* namespace cuba */
