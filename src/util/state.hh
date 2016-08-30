@@ -48,6 +48,8 @@ public:
     }
 
     T top() const {
+        if (worklist.empty())
+            throw cuba_runtime_error("Stack is empty!");
         return worklist.back();
     }
 
@@ -57,7 +59,7 @@ public:
 
     T pop() {
         if (worklist.empty())
-            throw;
+            throw cuba_runtime_error("Stack is empty!");
         auto res = worklist.back();
         worklist.pop_back();
         return res;
@@ -65,7 +67,7 @@ public:
 
     void overwrite(const T& _value) {
         if (worklist.empty())
-            throw;
+            throw cuba_runtime_error("Stack is empty!");
         worklist.pop_back();
         worklist.push_back(_value);
     }
@@ -459,7 +461,7 @@ using id_transition = uint;
  * UPDATE: overwrite the top element in the stack
  */
 enum class type_stack_operation {
-    PUSH, POP, UPDATE
+    PUSH, POP, OVERWRITE
 };
 
 /**
@@ -514,6 +516,9 @@ inline ostream& operator<<(ostream& os, const type_synchronization& t) {
     return os;
 }
 
+/**
+ * transition class
+ */
 template<typename T> class transition {
 public:
     transition(const T& src, const T& dst, const type_stack_operation& oper,
@@ -545,6 +550,19 @@ private:
     type_stack_operation oper;
     type_synchronization sync;
 };
+
+/**
+ * overloading the operator <<
+ * @param os
+ * @param r
+ * @return ostream
+ */
+template<typename T>
+inline ostream& operator<<(ostream& os, const transition<T>& r) {
+    os << r.get_src() << " ";
+    os << r.get_oper_type() << r.get_sync_type() << ">";
+    os << " " << r.get_dst();
+}
 
 }
 /* namespace cuba */

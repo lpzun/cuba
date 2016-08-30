@@ -149,14 +149,13 @@ void CUBA::context_unbounded_analysis(const size_t& n) {
 //    cout << initl_TS << " " << final_TS << endl;
 //    cout << n << endl;
     auto size = reachable_thread_states(n);
-
     cout << "The number of reachable thread states is: " << size << endl;
 }
 
 /**
- *
+ * To compute the set of reachable thread states
  * @param n
- * @return
+ * @return the number of reachable thread states
  */
 uint CUBA::reachable_thread_states(const size_t& n) {
     cstack W(n, sstack());
@@ -167,12 +166,59 @@ uint CUBA::reachable_thread_states(const size_t& n) {
     deque<global_config> worklist;
     worklist.emplace_back(initl_TS.get_state(), W);
 
-    cout << worklist.front() << endl;
-
     while (!worklist.empty()) {
-        break;
+        const auto& tau = worklist.front();
+        worklist.pop_front();
+        cout << tau << "\n";
+
     }
     return 0;
+}
+
+/**
+ * step forward, to compute the direct successors
+ * @param tau
+ * @return a list of global configurations
+ */
+deque<global_config> CUBA::step(const global_config& tau) {
+    deque<global_config> worklist;
+
+    const auto& q = tau.get_state();
+    const auto& W = tau.get_stacks();
+    for (auto i = 0; i < W.size(); ++i) {
+        auto ifind = mapping_Q.find(thread_state(q, W[i].top()));
+        if (ifind != mapping_Q.end()) {
+            const auto& transs = PDS[ifind->second];
+            for (const auto& rid : transs) {
+                const auto& r = active_R[rid];
+                const auto& src = r.get_src();
+                const auto& dst = r.get_dst();
+
+                switch (r.get_oper_type()) {
+                case type_stack_operation::PUSH: {
+                    auto _W = W;
+                    _W[i].push(active_Q[dst].get_symbol());
+                    worklist.emplace_back(active_Q[dst].get_state(), _W);
+                }
+                    break;
+                case type_stack_operation::POP: {
+                    auto _W = W;
+                    _W[i].pop();
+                    worklist.emplace_back(active_Q[dst].get_state(), _W);
+
+                }
+                    break;
+                default: {
+                    auto _W = W;
+                    _W[i].overwrite(active_Q[dst].get_symbol());
+                    worklist.emplace_back(active_Q[dst].get_state(), _W);
+                }
+                    break;
+                }
+            }
+        }
+    }
+    return worklist;
 }
 
 } /* namespace cuba */

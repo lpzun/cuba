@@ -42,6 +42,7 @@ private:
     thread_state final_TS;
 
     uint reachable_thread_states(const size_t& n);
+    deque<global_config> step(const global_config& tau);
 };
 
 /////////////////////////////////////////////////////////////////////////

@@ -67,7 +67,7 @@ type_stack_operation pds_parser::parse_type_stack_operation(const char& c) {
     case '-':
         return type_stack_operation::POP;
     case '!':
-        return type_stack_operation::UPDATE;
+        return type_stack_operation::OVERWRITE;
     default:
         throw cuba_runtime_error("illegal transition!");
     }
