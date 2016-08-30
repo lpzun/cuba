@@ -9,16 +9,14 @@
 
 namespace cuba {
 
-CUBA::CUBA(const string& filename, const string& init, const string& final) :
-        state_to_ID(), active_Q(), active_R(), PDS() {
+CUBA::CUBA(const string& filename, const string& initl, const string& final) :
+        mapping_Q(), active_Q(), active_R(), PDS(), initl_TS(), final_TS() {
     parse_PDS(filename);
+    initl_TS = parse_TS(initl);
+    final_TS = parse_TS(final);
 }
 
 CUBA::~CUBA() {
-}
-
-void context_unbounded_analysis(const size_t& n) {
-
 }
 
 /**
@@ -33,10 +31,11 @@ void CUBA::parse_PDS(const string& filename) {
     ifstream org_in(filename.c_str());
     if (!org_in.good())
         throw cuba_runtime_error("Input file does not exist!");
-    pds_parser::remove_comments(org_in, filename + ".tmp", prop::COMMENT);
+    pds_parser::remove_comments(org_in, "/tmp/tmp.pds.no_comment",
+            prop::COMMENT);
     org_in.close();
 
-    ifstream new_in(filename + ".tmp");
+    ifstream new_in("/tmp/tmp.pds.no_comment");
     new_in >> thread_state::S >> thread_state::L;
 
     active_Q.reserve(thread_state::S * thread_state::L);
@@ -61,12 +60,12 @@ void CUBA::parse_PDS(const string& filename) {
         if (!visited[s1][l1]) {
             active_Q.emplace_back(src_TS);
 
-            state_to_ID.emplace(src_TS, state_id);
+            mapping_Q.emplace(src_TS, state_id);
             src = state_id++;
             visited[s1][l1] = true;
         } else {
-            auto ifind = state_to_ID.find(src_TS);
-            if (ifind != state_to_ID.end())
+            auto ifind = mapping_Q.find(src_TS);
+            if (ifind != mapping_Q.end())
                 src = ifind->second;
             else
                 throw cuba_runtime_error("thread state is mistakenly marked!");
@@ -77,12 +76,12 @@ void CUBA::parse_PDS(const string& filename) {
         if (!visited[s2][l2]) {
             active_Q.emplace_back(dst_TS);
 
-            state_to_ID.emplace(dst_TS, state_id);
+            mapping_Q.emplace(dst_TS, state_id);
             dst = state_id++;
             visited[s2][l2] = true;
         } else {
-            auto ifind = state_to_ID.find(dst_TS);
-            if (ifind != state_to_ID.end())
+            auto ifind = mapping_Q.find(dst_TS);
+            if (ifind != mapping_Q.end())
                 dst = ifind->second;
             else
                 throw cuba_runtime_error("thread state is mistakenly marked!");
@@ -105,9 +104,13 @@ void CUBA::parse_PDS(const string& filename) {
         cout << thread_state::S << " " << thread_state::L << "\n";
         for (const auto& r : active_R) {
             cout << active_Q[r.get_src()] << " ";
-
+            cout << pds_parser::print_type_stack_operation(r.get_oper_type());
+            cout << pds_parser::print_type_synchronization(r.get_sync_type());
+            cout << ">";
             cout << " " << active_Q[r.get_dst()];
+            cout << "\n";
         }
+        cout << endl;
     }
 }
 
@@ -117,7 +120,24 @@ void CUBA::parse_PDS(const string& filename) {
  * @return
  */
 thread_state CUBA::parse_TS(const string& s) {
+    if (s.find('|') == std::string::npos) { /// s is store in a file
+        ifstream in(s.c_str());
+        if (in.good()) {
+            string content;
+            std::getline(in, content);
+            in.close();
+            return pds_parser::create_thread_state_from_str(content);
+        } else {
+            throw cuba_runtime_error(
+                    "parse_input_SS: input state file is unknown!");
+        }
+    }
+    return pds_parser::create_thread_state_from_str(s);
+}
 
+void CUBA::context_unbounded_analysis(const size_t& n) {
+    cout << initl_TS << " " << final_TS << endl;
+    cout << n << endl;
 }
 
 } /* namespace cuba */

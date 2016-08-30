@@ -252,6 +252,8 @@ using sstack = alphabet<stack_symbol>;
 class thread_config {
 public:
     thread_config();
+    thread_config(const control_state& s, const stack_symbol& l);
+    thread_config(const thread_state& t);
     thread_config(const control_state& s, const sstack& w);
     thread_config(const thread_config& c);
     ~thread_config();

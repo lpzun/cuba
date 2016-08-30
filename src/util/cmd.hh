@@ -245,6 +245,7 @@ private:
     string VERSION;
 
     ushort name_width;
+    ushort xwidth;
     const string help_message;
     string v_info;
 

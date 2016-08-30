@@ -26,7 +26,9 @@ public:
             const char& delim = '|');
 
     static type_stack_operation parse_type_stack_operation(const char& c);
+    static char print_type_stack_operation(const type_stack_operation& t);
     static type_synchronization parse_type_synchronization(const char& c);
+    static char print_type_synchronization(const type_synchronization& t);
 private:
     static void remove_comments(istream& in, ostream& out,
             const string& comment);

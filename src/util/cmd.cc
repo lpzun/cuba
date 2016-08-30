@@ -44,7 +44,7 @@ template<class T> string widthify(const T& x, const ushort& width,
 ///////////////////////////////////////////////////////////////////////////////
 cmd_line::cmd_line() :
         SHORT_HELP_OPT("-h"), LONG_HELP_OPT("--help"), SHORT_VERSION_OPT("-v"), LONG_VERSION_OPT(
-                "--version"), VERSION("v1.0"), name_width(0), help_message(
+                "--version"), VERSION("v1.0"), name_width(0), xwidth(10), help_message(
                 "Use " + string(SHORT_HELP_OPT) + " or " + string(LONG_HELP_OPT)
                         + " for help"), v_info(), cmd_options(), cmd_switches(), types() {
     this->create_argument_list();
@@ -134,8 +134,8 @@ void cmd_line::add_option(const short& type, const string& short_name,
     this->cmd_options[type].push_back(
             Options(type, short_name, long_name, meaning, default_value));
     this->name_width =
-            name_width < short_name.size() + long_name.size() + 5 ?
-                    short_name.size() + long_name.size() + 5 : name_width;
+            name_width < short_name.size() + long_name.size() + xwidth ?
+                    short_name.size() + long_name.size() + xwidth : name_width;
 }
 
 /**
@@ -150,8 +150,8 @@ void cmd_line::add_switch(const short& type, const string& short_name,
     this->cmd_switches[type].push_back(
             Switch(type, short_name, long_name, meaning));
     this->name_width =
-            name_width < short_name.size() + long_name.size() + 5 ?
-                    short_name.size() + long_name.size() + 5 : name_width;
+            name_width < short_name.size() + long_name.size() + xwidth ?
+                    short_name.size() + long_name.size() + xwidth : name_width;
 }
 
 /**
@@ -245,7 +245,6 @@ void cmd_line::create_argument_list() {
     vector<string> types(opts_types(), "");
     types[1] = "Problem instance:";
     types[2] = "Exploration mode:";
-//	types[3] = "SMT Solver options:";
     types[3] = "Other options:";
 
     v_info = create_version_info();
@@ -256,9 +255,8 @@ void cmd_line::create_argument_list() {
 
     /// problem instance
     this->add_option(prob_inst_opts(), "-f", "--input-file",
-            "boolean program or thread transition system", "X");
+            "a pushdown system or a Boolean program", "X");
 
-    /// this->add_switch(prob_inst_opts(), "-t", "--input-tts", "input is tts");
     this->add_option(prob_inst_opts(), "-a", "--target",
             "a target thread state (e.g., 0|0)", "0|0");
     this->add_option(prob_inst_opts(), "-i", "--initial",
@@ -268,8 +266,10 @@ void cmd_line::create_argument_list() {
             "show the adjacency list");
 
     /// exploration mode
-    this->add_option(exp_mode_opts(), "-m", "--mode",
-            "\"S\" sequential BSSP; \"S\" concurrent BSSP", "S");
+//    this->add_option(exp_mode_opts(), "-m", "--mode",
+//            "\"S\" sequential BSSP; \"S\" concurrent BSSP", "S");
+    this->add_option(exp_mode_opts(), "-n", "--threads",
+            "the upper bound of the number of threads", "1");
 
     /// other options
     this->add_switch(other_opts(), "-cmd", "--cmd-line",

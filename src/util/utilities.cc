@@ -74,6 +74,22 @@ type_stack_operation pds_parser::parse_type_stack_operation(const char& c) {
 }
 
 /**
+ *
+ * @param t
+ * @return
+ */
+char pds_parser::print_type_stack_operation(const type_stack_operation& t) {
+    switch (t) {
+    case type_stack_operation::PUSH:
+        return '+';
+    case type_stack_operation::POP:
+        return '-';
+    default:
+        return '!';
+    }
+}
+
+/**
  * parse the type of synchronization
  * +: fork a new thread
  * ~: broadcast
@@ -92,7 +108,22 @@ type_synchronization pds_parser::parse_type_synchronization(const char& c) {
     default:
         throw cuba_runtime_error("illegal transition!");
     }
+}
 
+/**
+ *
+ * @param t
+ * @return
+ */
+char pds_parser::print_type_synchronization(const type_synchronization& t) {
+    switch (t) {
+    case type_synchronization::FORK:
+        return '+';
+    case type_synchronization::BRCT:
+        return '~';
+    default:
+        return '-';
+    }
 }
 
 /**
