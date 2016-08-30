@@ -366,6 +366,13 @@ inline ostream& operator<<(ostream& os, const global_state& g) {
     return os;
 }
 
+inline bool operator<(const global_state& g1, const global_state& g2) {
+    if (g1.get_state() == g2.get_state()) {
+
+    }
+    return g1.get_state() < g2.get_state();
+}
+
 /**
  * A configuration (s|w1,...,wn) of a CPDS is an element of Qx(L*)^n
  */
