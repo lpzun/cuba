@@ -9,10 +9,17 @@
 #define UTIL_UTILITIES_HH_
 
 #include "heads.hh"
-#include "state.hh"
 
 namespace cuba {
+class algs {
+public:
+    template<typename T>
+    static int compare(const vector<T>& v1, const vector<T>& v2,
+            const bool& is_symmetry);
 
+private:
+
+};
 } /* namespace cuba */
 
 #endif /* UTIL_UTILITIES_HH_ */

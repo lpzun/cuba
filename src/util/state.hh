@@ -16,7 +16,7 @@
 #ifndef UTIL_STATE_HH_
 #define UTIL_STATE_HH_
 
-#include "heads.hh"
+#include "utilities.hh"
 
 namespace cuba {
 
@@ -366,11 +366,50 @@ inline ostream& operator<<(ostream& os, const global_state& g) {
     return os;
 }
 
+/**
+ * overloading operator <
+ * @param g1
+ * @param g2
+ * @return bool
+ */
 inline bool operator<(const global_state& g1, const global_state& g2) {
     if (g1.get_state() == g2.get_state()) {
-
+        return algs::compare(g1.get_local(), g2.get_local(), true) == -1;
     }
     return g1.get_state() < g2.get_state();
+}
+
+/**
+ * overloading operator >
+ * @param g1
+ * @param g2
+ * @return bool
+ */
+inline bool operator>(const global_state& g1, const global_state& g2) {
+    return g2 < g1;
+}
+
+/**
+ * overloading operator ==
+ * @param g1
+ * @param g2
+ * @return bool
+ */
+inline bool operator==(const global_state& g1, const global_state& g2) {
+    if (g1.get_state() == g2.get_state()) {
+        return algs::compare(g1.get_local(), g2.get_local(), true) == 0;
+    }
+    return false;
+}
+
+/**
+ * overloading operator !=
+ * @param g1
+ * @param g2
+ * @return bool
+ */
+inline bool operator!=(const global_state& g1, const global_state& g2) {
+    return !(g1 == g2);
 }
 
 /**

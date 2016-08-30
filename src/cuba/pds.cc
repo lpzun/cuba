@@ -118,7 +118,7 @@ void pds_parser::remove_comments(istream& in, ostream& out,
         const string& comment) {
     string line;
     while (getline(in, line = "")) {
-        const size_t comment_start = line.find(comment);
+        auto comment_start = line.find(comment);
         out
                 << (comment_start == string::npos ?
                         line : line.substr(0, comment_start)) << endl;

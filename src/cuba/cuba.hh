@@ -8,7 +8,7 @@
 #ifndef CUBA_CUBA_HH_
 #define CUBA_CUBA_HH_
 
-#include "../util/utilities.hh"
+#include "../util/state.hh"
 #include "../util/prop.hh"
 
 namespace cuba {
