@@ -1,5 +1,6 @@
 /**
  * @brief prop.hh
+ * This is a property class
  *
  * @date  : Aug 29, 2016
  * @author: lpzun

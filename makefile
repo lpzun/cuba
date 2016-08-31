@@ -15,7 +15,7 @@
 # See an example in EXAMPLES/makefile-local-vars.                         #
 ###########################################################################
 # Override these variables (or add new ones) locally
-APP	         = gkm # the name of application
+APP	         = cuba # the name of application
 SATDIR       =# /usr/local/Z3#                                             # config your z3 include here
 ILIBS        =-lz#-L $(SATDIR)/lib -lz3#                                  -lm
 IINCLUDE     =# -I $(SATDIR)/include/#                                      

@@ -32,56 +32,55 @@ using id_thread_state = uint;
 
 template<typename T> class alphabet {
 public:
-    inline alphabet() :
-            worklist() {
-    }
+	inline alphabet() :
+			worklist() {
+	}
 
-    inline alphabet(const deque<T>& worklist) :
-            worklist(worklist) {
-    }
+	inline alphabet(const deque<T>& worklist) :
+			worklist(worklist) {
+	}
 
-    inline ~alphabet() {
-    }
+	inline ~alphabet() {
+	}
 
-    T top() {
-        return worklist.back();
-    }
+	T top() {
+		return worklist.back();
+	}
 
-    T top() const {
-        if (worklist.empty())
-            throw cuba_runtime_error("Stack is empty!");
-        return worklist.back();
-    }
+	T top() const {
+		if (worklist.empty())
+			throw cuba_runtime_error("Stack is empty!");
+		return worklist.back();
+	}
 
-    void push(const T& _value) {
-        worklist.emplace_back(_value);
-    }
+	void push(const T& _value) {
+		worklist.emplace_back(_value);
+	}
 
-    T pop() {
-        if (worklist.empty())
-            throw cuba_runtime_error("Stack is empty!");
-        auto res = worklist.back();
-        worklist.pop_back();
-        return res;
-    }
+	T pop() {
+		if (worklist.empty())
+			throw cuba_runtime_error("Stack is empty!");
+		auto res = worklist.back();
+		worklist.pop_back();
+		return res;
+	}
 
-    void overwrite(const T& _value) {
-        if (worklist.empty())
-            throw cuba_runtime_error("Stack is empty!");
-        worklist.pop_back();
-        worklist.push_back(_value);
-    }
+	void overwrite(const T& _value) {
+		if (worklist.empty())
+			throw cuba_runtime_error("Stack is empty!");
+		worklist[worklist.size() - 1] = _value;
+	}
 
-    bool empty() const {
-        return worklist.empty();
-    }
+	bool empty() const {
+		return worklist.empty();
+	}
 
-    const deque<T>& get_worklist() const {
-        return worklist;
-    }
+	const deque<T>& get_worklist() const {
+		return worklist;
+	}
 
 private:
-    deque<T> worklist;
+	deque<T> worklist;
 };
 
 /**
@@ -91,10 +90,10 @@ private:
  * @return ostream
  */
 template<typename T> inline ostream& operator<<(ostream& os,
-        const alphabet<T>& a) {
-    for (const T& s : a.get_worklist())
-        os << s;
-    return os;
+		const alphabet<T>& a) {
+	for (const T& s : a.get_worklist())
+		os << s;
+	return os;
 }
 
 /**
@@ -104,22 +103,22 @@ template<typename T> inline ostream& operator<<(ostream& os,
  * @return bool
  */
 template<typename T> inline bool operator<(const alphabet<T>& a1,
-        const alphabet<T>& a2) {
-    if (a1.get_worklist().size() == a2.get_worklist().size()) {
-        auto ia1 = a1.get_worklist().cbegin();
-        auto ia2 = a2.get_worklist().cbegin();
-        while (ia1 != a1.get_worklist().cend()) {
-            if (*ia1 < *ia2) {
-                return true;
-            } else if (*ia1 > *ia2) {
-                return false;
-            } else {
-                ++ia1, ++ia2;
-            }
-        }
-        return false;
-    }
-    return a1.get_worklist().size() < a2.get_worklist().size();
+		const alphabet<T>& a2) {
+	if (a1.get_worklist().size() == a2.get_worklist().size()) {
+		auto ia1 = a1.get_worklist().cbegin();
+		auto ia2 = a2.get_worklist().cbegin();
+		while (ia1 != a1.get_worklist().cend()) {
+			if (*ia1 < *ia2) {
+				return true;
+			} else if (*ia1 > *ia2) {
+				return false;
+			} else {
+				++ia1, ++ia2;
+			}
+		}
+		return false;
+	}
+	return a1.get_worklist().size() < a2.get_worklist().size();
 }
 
 /**
@@ -129,8 +128,8 @@ template<typename T> inline bool operator<(const alphabet<T>& a1,
  * @return bool
  */
 template<typename T> inline bool operator>(const alphabet<T>& a1,
-        const alphabet<T>& a2) {
-    return a2 < a1;
+		const alphabet<T>& a2) {
+	return a2 < a1;
 }
 
 /**
@@ -140,17 +139,17 @@ template<typename T> inline bool operator>(const alphabet<T>& a1,
  * @return bool
  */
 template<typename T> inline bool operator==(const alphabet<T>& a1,
-        const alphabet<T>& a2) {
-    if (a1.get_worklist().size() != a2.get_worklist().size())
-        return false;
-    auto iter1 = a1.get_worklist().cbegin();
-    auto iter2 = a2.get_worklist().cbegin();
-    while (iter1 != a1.get_worklist().cend()) {
-        if (*iter1 != *iter2)
-            return false;
-        ++iter1, ++iter2;
-    }
-    return true;
+		const alphabet<T>& a2) {
+	if (a1.get_worklist().size() != a2.get_worklist().size())
+		return false;
+	auto ia1 = a1.get_worklist().cbegin();
+	auto ia2 = a2.get_worklist().cbegin();
+	while (ia1 != a1.get_worklist().cend()) {
+		if (*ia1 != *ia2)
+			return false;
+		++ia1, ++ia2;
+	}
+	return true;
 }
 
 /**
@@ -160,36 +159,39 @@ template<typename T> inline bool operator==(const alphabet<T>& a1,
  * @return bool
  */
 template<typename T> inline bool operator!=(const alphabet<T>& a1,
-        const alphabet<T>& a2) {
-    return !(a1 == a2);
+		const alphabet<T>& a2) {
+	return !(a1 == a2);
 }
 
+/**
+ * the thread state class
+ */
 class thread_state {
 public:
-    thread_state();
-    thread_state(const control_state& s, const stack_symbol& l);
-    ~thread_state();
+	thread_state();
+	thread_state(const control_state& s, const stack_symbol& l);
+	~thread_state();
 
-    static control_state S;
-    static stack_symbol L;
+	static control_state S;
+	static stack_symbol L;
 
-    /**
-     * @return the stack symbol of current thread state
-     */
-    stack_symbol get_symbol() const {
-        return l;
-    }
+	/**
+	 * @return the stack symbol of current thread state
+	 */
+	stack_symbol get_symbol() const {
+		return l;
+	}
 
-    /**
-     * @return the control state of current thread state
-     */
-    control_state get_state() const {
-        return s;
-    }
+	/**
+	 * @return the control state of current thread state
+	 */
+	control_state get_state() const {
+		return s;
+	}
 
 private:
-    control_state s;
-    stack_symbol l;
+	control_state s;
+	stack_symbol l;
 };
 
 /**
@@ -199,8 +201,8 @@ private:
  * @return ostream
  */
 inline ostream& operator<<(ostream& os, const thread_state& t) {
-    os << "(" << t.get_state() << "," << t.get_symbol() << ")";
-    return os;
+	os << "(" << t.get_state() << "," << t.get_symbol() << ")";
+	return os;
 }
 
 /**
@@ -210,8 +212,8 @@ inline ostream& operator<<(ostream& os, const thread_state& t) {
  * @return bool
  */
 inline bool operator<(const thread_state& t1, const thread_state& t2) {
-    return (t1.get_state() < t2.get_state())
-            && (t1.get_symbol() < t2.get_symbol());
+	return (t1.get_state() < t2.get_state())
+			&& (t1.get_symbol() < t2.get_symbol());
 }
 
 /**
@@ -221,7 +223,7 @@ inline bool operator<(const thread_state& t1, const thread_state& t2) {
  * @return bool
  */
 inline bool operator>(const thread_state& t1, const thread_state& t2) {
-    return t2 < t1;
+	return t2 < t1;
 }
 
 /**
@@ -231,8 +233,8 @@ inline bool operator>(const thread_state& t1, const thread_state& t2) {
  * @return bool
  */
 inline bool operator==(const thread_state& t1, const thread_state& t2) {
-    return (t1.get_state() == t2.get_state())
-            && (t1.get_symbol() == t2.get_symbol());
+	return (t1.get_state() == t2.get_state())
+			&& (t1.get_symbol() == t2.get_symbol());
 }
 
 /**
@@ -242,8 +244,8 @@ inline bool operator==(const thread_state& t1, const thread_state& t2) {
  * @return bool
  */
 inline bool operator!=(const thread_state& t1, const thread_state& t2) {
-    return (t1.get_state() == t2.get_state())
-            && (t1.get_symbol() == t2.get_symbol());
+	return (t1.get_state() == t2.get_state())
+			&& (t1.get_symbol() == t2.get_symbol());
 }
 
 /// the stack for a single PDS
@@ -253,28 +255,28 @@ using sstack = alphabet<stack_symbol>;
  */
 class thread_config {
 public:
-    thread_config();
-    thread_config(const control_state& s, const stack_symbol& l);
-    thread_config(const thread_state& t);
-    thread_config(const control_state& s, const sstack& w);
-    thread_config(const thread_config& c);
-    ~thread_config();
+	thread_config();
+	thread_config(const control_state& s, const stack_symbol& l);
+	thread_config(const thread_state& t);
+	thread_config(const control_state& s, const sstack& w);
+	thread_config(const thread_config& c);
+	~thread_config();
 
-    control_state get_state() const {
-        return s;
-    }
+	control_state get_state() const {
+		return s;
+	}
 
-    const sstack& get_stack() const {
-        return w;
-    }
+	const sstack& get_stack() const {
+		return w;
+	}
 
-    thread_state top() const {
-        return thread_state(s, w.top());
-    }
+	thread_state top() const {
+		return thread_state(s, w.top());
+	}
 
 private:
-    control_state s; /// control state
-    sstack w; /// stack content
+	control_state s; /// control state
+	sstack w; /// stack content
 };
 
 /**
@@ -285,8 +287,8 @@ private:
  * @return ostream
  */
 inline ostream& operator<<(ostream& os, const thread_config& c) {
-    os << "(" << c.get_state() << "," << c.get_stack() << ")";
-    return os;
+	os << "(" << c.get_state() << "," << c.get_stack() << ")";
+	return os;
 }
 
 /**
@@ -296,9 +298,9 @@ inline ostream& operator<<(ostream& os, const thread_config& c) {
  * @return bool
  */
 inline bool operator<(const thread_config& c1, const thread_config& c2) {
-    if (c1.get_state() == c2.get_state())
-        return c1.get_stack() < c2.get_stack();
-    return c1.get_state() < c2.get_state();
+	if (c1.get_state() == c2.get_state())
+		return c1.get_stack() < c2.get_stack();
+	return c1.get_state() < c2.get_state();
 }
 
 /**
@@ -308,7 +310,7 @@ inline bool operator<(const thread_config& c1, const thread_config& c2) {
  * @return bool
  */
 inline bool operator>(const thread_config& c1, const thread_config& c2) {
-    return c2 < c1;
+	return c2 < c1;
 }
 
 /**
@@ -318,8 +320,8 @@ inline bool operator>(const thread_config& c1, const thread_config& c2) {
  * @return bool
  */
 inline bool operator==(const thread_config& c1, const thread_config& c2) {
-    return (c1.get_state() == c2.get_state())
-            && (c1.get_stack() == c2.get_stack());
+	return (c1.get_state() == c2.get_state())
+			&& (c1.get_stack() == c2.get_stack());
 }
 
 /**
@@ -329,7 +331,7 @@ inline bool operator==(const thread_config& c1, const thread_config& c2) {
  * @return bool
  */
 inline bool operator!=(const thread_config& c1, const thread_config& c2) {
-    return !(c1 == c2);
+	return !(c1 == c2);
 }
 
 /// the set of stacks in CPDS
@@ -337,21 +339,21 @@ using cstack = vector<sstack>;
 
 class global_state {
 public:
-    global_state(const control_state& s, const size_t& n);
-    global_state(const control_state& s, const vector<control_state>& L);
-    ~global_state();
+	global_state(const control_state& s, const size_t& n);
+	global_state(const control_state& s, const vector<control_state>& L);
+	~global_state();
 
-    const vector<stack_symbol>& get_local() const {
-        return L;
-    }
+	const vector<stack_symbol>& get_local() const {
+		return L;
+	}
 
-    control_state get_state() const {
-        return s;
-    }
+	control_state get_state() const {
+		return s;
+	}
 
 private:
-    control_state s;
-    vector<stack_symbol> L;
+	control_state s;
+	vector<stack_symbol> L;
 };
 
 /**
@@ -361,11 +363,12 @@ private:
  * @return bool
  */
 inline ostream& operator<<(ostream& os, const global_state& g) {
-    os << "(" << g.get_state() << "|";
-    for (auto i = 0; i < g.get_local().size() - 1; ++i)
-        cout << g.get_local()[i] << ",";
-    os << g.get_local()[g.get_local().size() - 1] << ")";
-    return os;
+	os << "(" << g.get_state() << "|";
+	if (g.get_local().size() > 0)
+		os << g.get_local()[0];
+	for (auto i = 1; i < g.get_local().size(); ++i)
+		cout << "," << g.get_local()[i];
+	return os;
 }
 
 /**
@@ -375,10 +378,10 @@ inline ostream& operator<<(ostream& os, const global_state& g) {
  * @return bool
  */
 inline bool operator<(const global_state& g1, const global_state& g2) {
-    if (g1.get_state() == g2.get_state()) {
-        return algs::compare(g1.get_local(), g2.get_local(), true) == -1;
-    }
-    return g1.get_state() < g2.get_state();
+	if (g1.get_state() == g2.get_state()) {
+		return utils::compare(g1.get_local(), g2.get_local(), true) == -1;
+	}
+	return g1.get_state() < g2.get_state();
 }
 
 /**
@@ -388,7 +391,7 @@ inline bool operator<(const global_state& g1, const global_state& g2) {
  * @return bool
  */
 inline bool operator>(const global_state& g1, const global_state& g2) {
-    return g2 < g1;
+	return g2 < g1;
 }
 
 /**
@@ -398,10 +401,10 @@ inline bool operator>(const global_state& g1, const global_state& g2) {
  * @return bool
  */
 inline bool operator==(const global_state& g1, const global_state& g2) {
-    if (g1.get_state() == g2.get_state()) {
-        return algs::compare(g1.get_local(), g2.get_local(), true) == 0;
-    }
-    return false;
+	if (g1.get_state() == g2.get_state()) {
+		return utils::compare(g1.get_local(), g2.get_local(), true) == 0;
+	}
+	return false;
 }
 
 /**
@@ -411,7 +414,7 @@ inline bool operator==(const global_state& g1, const global_state& g2) {
  * @return bool
  */
 inline bool operator!=(const global_state& g1, const global_state& g2) {
-    return !(g1 == g2);
+	return !(g1 == g2);
 }
 
 /**
@@ -419,23 +422,25 @@ inline bool operator!=(const global_state& g1, const global_state& g2) {
  */
 class global_config {
 public:
-    global_config(const control_state& s, const size_t& n);
-    global_config(const control_state& s, const cstack& W);
-    ~global_config();
+	global_config(const control_state& s, const size_t& n);
+	global_config(const control_state& s, const cstack& W);
+	global_config(const global_config& g);
+	~global_config();
 
-    control_state get_state() const {
-        return s;
-    }
+	control_state get_state() const {
+		return s;
+	}
 
-    const cstack& get_stacks() const {
-        return W;
-    }
+	const cstack& get_stacks() const {
+		return W;
+	}
 
-    global_state top();
+	global_state top();
+	global_state top() const;
 
 private:
-    control_state s;
-    cstack W;
+	control_state s;
+	cstack W;
 };
 
 /**
@@ -445,11 +450,53 @@ private:
  * @return bool
  */
 inline ostream& operator<<(ostream& os, const global_config& c) {
-    os << "(" << c.get_state() << "|";
-    for (auto i = 0; i < c.get_stacks().size() - 1; ++i)
-        os << c.get_stacks()[i] << ",";
-    os << c.get_stacks()[c.get_stacks().size() - 1] << ")";
-    return os;
+	os << "(" << c.get_state() << "|";
+	if (c.get_stacks().size() > 0)
+		os << c.get_stacks()[0];
+	for (int i = 1; i < c.get_stacks().size(); ++i)
+		os << "," << c.get_stacks()[i];
+	os << ")";
+	return os;
+}
+
+/**
+ * overloading the operator <
+ * @param g1
+ * @param g2
+ * @return bool
+ */
+inline bool operator<(const global_config& g1, const global_config& g2) {
+	return g1.top() < g2.top();
+}
+
+/**
+ * overloading the operator >
+ * @param g1
+ * @param g2
+ * @return bool
+ */
+inline bool operator>(const global_config& g1, const global_config& g2) {
+	return g2 < g1;
+}
+
+/**
+ * overloading the operator ==
+ * @param g1
+ * @param g2
+ * @return bool
+ */
+inline bool operator==(const global_config& g1, const global_config& g2) {
+	return g1.top() == g2.top();
+}
+
+/**
+ * overloading the operator !=
+ * @param g1
+ * @param g2
+ * @return bool
+ */
+inline bool operator!=(const global_config& g1, const global_config& g2) {
+	return !(g1 == g2);
 }
 
 using id_transition = uint;
@@ -461,7 +508,7 @@ using id_transition = uint;
  * UPDATE: overwrite the top element in the stack
  */
 enum class type_stack_operation {
-    PUSH, POP, OVERWRITE
+	PUSH, POP, OVERWRITE
 };
 
 /**
@@ -471,18 +518,18 @@ enum class type_stack_operation {
  * @return ostream
  */
 inline ostream& operator<<(ostream& os, const type_stack_operation& t) {
-    switch (t) {
-    case type_stack_operation::PUSH:
-        os << '+';
-        break;
-    case type_stack_operation::POP:
-        os << '-';
-        break;
-    default:
-        os << '!';
-        break;
-    }
-    return os;
+	switch (t) {
+	case type_stack_operation::PUSH:
+		os << '+';
+		break;
+	case type_stack_operation::POP:
+		os << '-';
+		break;
+	default:
+		os << '!';
+		break;
+	}
+	return os;
 }
 
 /**
@@ -492,7 +539,7 @@ inline ostream& operator<<(ostream& os, const type_stack_operation& t) {
  * BRCT: the broadcast transitions
  */
 enum class type_synchronization {
-    FORK, NORM, BRCT
+	FORK, NORM, BRCT
 };
 
 /**
@@ -502,18 +549,18 @@ enum class type_synchronization {
  * @return ostream
  */
 inline ostream& operator<<(ostream& os, const type_synchronization& t) {
-    switch (t) {
-    case type_synchronization::FORK:
-        os << '+';
-        break;
-    case type_synchronization::BRCT:
-        os << '~';
-        break;
-    default:
-        os << '-';
-        break;
-    }
-    return os;
+	switch (t) {
+	case type_synchronization::FORK:
+		os << '+';
+		break;
+	case type_synchronization::BRCT:
+		os << '~';
+		break;
+	default:
+		os << '-';
+		break;
+	}
+	return os;
 }
 
 /**
@@ -521,34 +568,34 @@ inline ostream& operator<<(ostream& os, const type_synchronization& t) {
  */
 template<typename T> class transition {
 public:
-    transition(const T& src, const T& dst, const type_stack_operation& oper,
-            const type_synchronization& sync) :
-            src(src), dst(dst), oper(oper), sync(sync) {
-    }
-    ~transition() {
-    }
+	transition(const T& src, const T& dst, const type_stack_operation& oper,
+			const type_synchronization& sync) :
+			src(src), dst(dst), oper(oper), sync(sync) {
+	}
+	~transition() {
+	}
 
-    T get_dst() const {
-        return dst;
-    }
+	T get_dst() const {
+		return dst;
+	}
 
-    type_stack_operation get_oper_type() const {
-        return oper;
-    }
+	type_stack_operation get_oper_type() const {
+		return oper;
+	}
 
-    T get_src() const {
-        return src;
-    }
+	T get_src() const {
+		return src;
+	}
 
-    type_synchronization get_sync_type() const {
-        return sync;
-    }
+	type_synchronization get_sync_type() const {
+		return sync;
+	}
 
 private:
-    T src;
-    T dst;
-    type_stack_operation oper;
-    type_synchronization sync;
+	T src;
+	T dst;
+	type_stack_operation oper;
+	type_synchronization sync;
 };
 
 /**
@@ -559,9 +606,9 @@ private:
  */
 template<typename T>
 inline ostream& operator<<(ostream& os, const transition<T>& r) {
-    os << r.get_src() << " ";
-    os << r.get_oper_type() << r.get_sync_type() << ">";
-    os << " " << r.get_dst();
+	os << r.get_src() << " ";
+	os << r.get_oper_type() << r.get_sync_type() << ">";
+	os << " " << r.get_dst();
 }
 
 }

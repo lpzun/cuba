@@ -16,7 +16,7 @@ stack_symbol thread_state::L = 0;
  * default constructor
  */
 thread_state::thread_state() :
-        s(0), l(0) {
+		s(0), l(0) {
 }
 
 /**
@@ -25,7 +25,7 @@ thread_state::thread_state() :
  * @param l
  */
 thread_state::thread_state(const control_state& s, const stack_symbol& l) :
-        s(s), l(l) {
+		s(s), l(l) {
 }
 
 /**
@@ -38,7 +38,7 @@ thread_state::~thread_state() {
  * A default constructor without any input parameters
  */
 thread_config::thread_config() :
-        s(), w() {
+		s(), w() {
 }
 
 /**
@@ -47,8 +47,8 @@ thread_config::thread_config() :
  * @param l
  */
 thread_config::thread_config(const control_state& s, const stack_symbol& l) :
-        s(s), w() {
-    w.push(l);
+		s(s), w() {
+	w.push(l);
 }
 
 /**
@@ -56,8 +56,8 @@ thread_config::thread_config(const control_state& s, const stack_symbol& l) :
  * @param t
  */
 thread_config::thread_config(const thread_state& t) :
-        s(t.get_state()), w() {
-    w.push(t.get_symbol());
+		s(t.get_state()), w() {
+	w.push(t.get_symbol());
 }
 /**
  * A constructor with a control state and an alphabet
@@ -65,7 +65,7 @@ thread_config::thread_config(const thread_state& t) :
  * @param w
  */
 thread_config::thread_config(const control_state& s, const sstack& w) :
-        s(s), w(w) {
+		s(s), w(w) {
 }
 
 /**
@@ -73,7 +73,7 @@ thread_config::thread_config(const control_state& s, const sstack& w) :
  * @param c
  */
 thread_config::thread_config(const thread_config& c) :
-        s(c.get_state()), w(c.get_stack()) {
+		s(c.get_state()), w(c.get_stack()) {
 }
 
 /**
@@ -89,7 +89,7 @@ thread_config::~thread_config() {
  * @param n
  */
 global_state::global_state(const control_state& s, const size_t& n) :
-        s(s), L(n) {
+		s(s), L(n) {
 
 }
 
@@ -99,8 +99,8 @@ global_state::global_state(const control_state& s, const size_t& n) :
  * @param L
  */
 global_state::global_state(const control_state& s,
-        const vector<stack_symbol>& L) :
-        s(s), L(L) {
+		const vector<stack_symbol>& L) :
+		s(s), L(L) {
 
 }
 
@@ -118,7 +118,7 @@ global_state::~global_state() {
  * @param n
  */
 global_config::global_config(const control_state& s, const size_t& n) :
-        s(s), W(n) {
+		s(s), W(n) {
 
 }
 
@@ -128,7 +128,16 @@ global_config::global_config(const control_state& s, const size_t& n) :
  * @param W
  */
 global_config::global_config(const control_state& s, const cstack& W) :
-        s(s), W(W) {
+		s(s), W(W) {
+
+}
+
+/**
+ * A constructor with a global configuration
+ * @param g
+ */
+global_config::global_config(const global_config& g) :
+		s(g.get_state()), W(g.get_stacks()) {
 
 }
 
@@ -143,12 +152,24 @@ global_config::~global_config() {
  * return a top configuration
  * @return a global state
  */
+global_state global_config::top() const {
+	vector<stack_symbol> L(W.size());
+	for (auto i = 0; i < W.size(); ++i) {
+		L[i] = W[i].top();
+	}
+	return global_state(s, L);
+}
+
+/**
+ * return a top configuration
+ * @return a global state
+ */
 global_state global_config::top() {
-    vector<stack_symbol> Z(W.size());
-    for (auto i = 0; i < W.size(); ++i) {
-        Z[i] = W[i].top();
-    }
-    return global_state(s, Z);
+	vector<stack_symbol> L(W.size());
+	for (auto i = 0; i < W.size(); ++i) {
+		L[i] = W[i].top();
+	}
+	return global_state(s, L);
 }
 
 } /* namespace bssp */
