@@ -62,14 +62,14 @@ using std::bitset;
 using std::shared_ptr;
 using std::unique_ptr;
 
-typedef const short cshort;
-typedef const int cint;
-typedef const long clong;
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
-typedef const unsigned short cushort;
-typedef const unsigned int cuint;
-typedef const unsigned long culong;
+using cshort = const short;
+using cint = const int;
+using clong = const long;
+using ushort = unsigned short;
+using uint = unsigned int;
+using ulong = unsigned long;
+using cushort = const unsigned short;
+using cuint = const unsigned int;
+using culong = const unsigned long;
 
 #endif /* HEADS_HH_ */

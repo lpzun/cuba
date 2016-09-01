@@ -166,7 +166,7 @@ uint CUBA::reachable_thread_states(const size_t& n) {
 
 	marking_Q = vector<vector<bool>>(thread_state::S,
 			vector<bool>(thread_state::L, false));
-	marking_Q[initl_TS.get_state()][initl_TS.get_symbol()] = true;
+	marking(initl_TS.get_state(), initl_TS.get_symbol());
 
 	while (!worklist.empty()) {
 		const auto tau = worklist.front();
@@ -219,8 +219,8 @@ antichain CUBA::step(const global_config& tau) {
 	const auto& q = tau.get_state();
 	const auto& W = tau.get_stacks();
 	for (auto i = 0; i < W.size(); ++i) {
-		if (!marking_Q[q][W[i].top()])
-			marking_Q[q][W[i].top()] = true;
+
+		marking(q, W[i].top());
 
 		auto ifind = mapping_Q.find(thread_state(q, W[i].top()));
 		if (ifind != mapping_Q.end()) {
@@ -228,8 +228,8 @@ antichain CUBA::step(const global_config& tau) {
 			for (const auto& rid : transs) {
 				const auto& r = active_R[rid];
 				const auto& dst = active_Q[r.get_dst()];
-				if (!marking_Q[dst.get_state()][dst.get_symbol()])
-					marking_Q[dst.get_state()][dst.get_symbol()] = true;
+
+				marking(dst.get_state(), dst.get_symbol());
 
 				switch (r.get_oper_type()) {
 				case type_stack_operation::PUSH: {
@@ -255,6 +255,16 @@ antichain CUBA::step(const global_config& tau) {
 		}
 	}
 	return worklist;
+}
+
+/**
+ *
+ * @param s
+ * @param l
+ */
+void CUBA::marking(const control_state& s, const stack_symbol& l) {
+	if (!marking_Q[s][l])
+		marking_Q[s][l] = true;
 }
 
 } /* namespace cuba */
