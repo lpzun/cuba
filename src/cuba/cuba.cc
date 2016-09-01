@@ -56,23 +56,22 @@ void CUBA::parse_PDS(const string& filename) {
 	control_state s1, s2; /// control states
 	stack_symbol l1, l2;  /// stack symbols
 	string sep;
-	vertex src, dst;
+	vertex src = 0, dst = 0;
 	while (new_in >> s1 >> l1 >> sep >> s2 >> l2) {
-		//cout << s1 << " " << l1 << " " << sep << " " << s2 << " " << l2 << "\n";
+//		cout << s1 << " " << l1 << " " << sep << " " << s2 << " " << l2 << "\n";
 
 		/// step 1: handle (s1, l1)
 		const thread_state src_TS(s1, l1);
 		if (!visited[s1][l1]) {
 			active_Q.emplace_back(src_TS);
-
 			mapping_Q.emplace(src_TS, state_id);
 			src = state_id++;
 			visited[s1][l1] = true;
 		} else {
 			auto ifind = mapping_Q.find(src_TS);
-			if (ifind != mapping_Q.end())
+			if (ifind != mapping_Q.end()) {
 				src = ifind->second;
-			else
+			} else
 				throw cuba_runtime_error("thread state is mistakenly marked!");
 		}
 
@@ -80,7 +79,6 @@ void CUBA::parse_PDS(const string& filename) {
 		const thread_state dst_TS(s2, l2);
 		if (!visited[s2][l2]) {
 			active_Q.emplace_back(dst_TS);
-
 			mapping_Q.emplace(dst_TS, state_id);
 			dst = state_id++;
 			visited[s2][l2] = true;
@@ -156,7 +154,6 @@ void CUBA::context_unbounded_analysis(const size_t& n) {
  * @return the number of reachable thread states
  */
 uint CUBA::reachable_thread_states(const size_t& n) {
-	cout << initl_TS << " " << final_TS << " " << n << "\n";
 	cstack W(n, sstack());
 	for (auto i = 0; i < n; ++i) {
 		W[i].push(initl_TS.get_symbol());
@@ -166,6 +163,10 @@ uint CUBA::reachable_thread_states(const size_t& n) {
 	worklist.emplace_back(initl_TS.get_state(), W);
 
 	vector<antichain> R(thread_state::S);
+
+	marking_Q = vector<vector<bool>>(thread_state::S,
+			vector<bool>(thread_state::L, false));
+	marking_Q[initl_TS.get_state()][initl_TS.get_symbol()] = true;
 
 	while (!worklist.empty()) {
 		const auto tau = worklist.front();
@@ -183,8 +184,15 @@ uint CUBA::reachable_thread_states(const size_t& n) {
 		/// add current configuration into reachable set
 		R[tau.get_state()].emplace_back(tau);
 	}
-	cout << "2222222222222222222\n";
-	return 0;
+
+	int counting = 0;
+	for (int i = 0; i < thread_state::S; ++i) {
+		for (int j = 0; j < thread_state::L; ++j) {
+			if (marking_Q[i][j])
+				++counting;
+		}
+	}
+	return counting;
 }
 
 /**
@@ -211,13 +219,18 @@ antichain CUBA::step(const global_config& tau) {
 	const auto& q = tau.get_state();
 	const auto& W = tau.get_stacks();
 	for (auto i = 0; i < W.size(); ++i) {
+		if (!marking_Q[q][W[i].top()])
+			marking_Q[q][W[i].top()] = true;
+
 		auto ifind = mapping_Q.find(thread_state(q, W[i].top()));
 		if (ifind != mapping_Q.end()) {
 			const auto& transs = PDS[ifind->second];
 			for (const auto& rid : transs) {
 				const auto& r = active_R[rid];
-
 				const auto& dst = active_Q[r.get_dst()];
+				if (!marking_Q[dst.get_state()][dst.get_symbol()])
+					marking_Q[dst.get_state()][dst.get_symbol()] = true;
+
 				switch (r.get_oper_type()) {
 				case type_stack_operation::PUSH: {
 					auto _W = W;

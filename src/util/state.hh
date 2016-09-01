@@ -212,8 +212,9 @@ inline ostream& operator<<(ostream& os, const thread_state& t) {
  * @return bool
  */
 inline bool operator<(const thread_state& t1, const thread_state& t2) {
-	return (t1.get_state() < t2.get_state())
-			&& (t1.get_symbol() < t2.get_symbol());
+	if (t1.get_state() == t2.get_state())
+		return t1.get_symbol() < t2.get_symbol();
+	return t1.get_state() < t2.get_state();
 }
 
 /**
@@ -244,8 +245,7 @@ inline bool operator==(const thread_state& t1, const thread_state& t2) {
  * @return bool
  */
 inline bool operator!=(const thread_state& t1, const thread_state& t2) {
-	return (t1.get_state() == t2.get_state())
-			&& (t1.get_symbol() == t2.get_symbol());
+	return !(t1 == t2);
 }
 
 /// the stack for a single PDS
@@ -379,7 +379,7 @@ inline ostream& operator<<(ostream& os, const global_state& g) {
  */
 inline bool operator<(const global_state& g1, const global_state& g2) {
 	if (g1.get_state() == g2.get_state()) {
-		return utils::compare(g1.get_local(), g2.get_local(), true) == -1;
+		return algs::compare(g1.get_local(), g2.get_local(), true) == -1;
 	}
 	return g1.get_state() < g2.get_state();
 }
@@ -402,7 +402,7 @@ inline bool operator>(const global_state& g1, const global_state& g2) {
  */
 inline bool operator==(const global_state& g1, const global_state& g2) {
 	if (g1.get_state() == g2.get_state()) {
-		return utils::compare(g1.get_local(), g2.get_local(), true) == 0;
+		return algs::compare(g1.get_local(), g2.get_local(), true) == 0;
 	}
 	return false;
 }

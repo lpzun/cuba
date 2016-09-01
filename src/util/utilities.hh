@@ -11,7 +11,7 @@
 #include "heads.hh"
 
 namespace cuba {
-class utils {
+class algs {
 public:
 	template<typename T>
 	static int compare(const vector<T>& v1, const vector<T>& v2,
@@ -34,7 +34,7 @@ private:
  *         +1: v1 > v2;
  */
 template<typename T>
-int utils::compare(const vector<T>& v1, const vector<T>& v2,
+int algs::compare(const vector<T>& v1, const vector<T>& v2,
 		const bool& is_symmetry) {
 	if (v1.size() != v2.size()) {
 		throw cuba_runtime_error("algs::compare: sizes are not equal!");
@@ -47,15 +47,13 @@ int utils::compare(const vector<T>& v1, const vector<T>& v2,
 		std::sort(tv2.begin(), tv2.end());
 	}
 
-	auto iv1 = tv1.begin();
-	auto iv2 = tv2.begin();
-	while (iv1 != tv1.end()) {
-		if (*iv1 < *iv2) {
+	auto iv1 = tv1.cbegin();
+	auto iv2 = tv2.cbegin();
+	while (iv1 != tv1.cend()) {
+		if (*iv1 < *iv2)
 			return -1;
-		}
-		if (*iv1 > *iv2) {
+		if (*iv1 > *iv2)
 			return 1;
-		}
 		++iv1, ++iv2; /// *iv1 == *iv2
 	}
 	return 0;

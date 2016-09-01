@@ -46,6 +46,7 @@ private:
 	uint reachable_thread_states(const size_t& n);
 	antichain step(const global_config& tau);
 	bool is_reachable(const global_config& tau, const antichain& R);
+	vector<vector<bool>> marking_Q;
 };
 
 /////////////////////////////////////////////////////////////////////////
