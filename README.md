@@ -7,3 +7,14 @@ Context-Unbounded Analysis for Concurrent Software
 
 # Usage
 ./cuba -h [--help]
+
+# Code Details
+
+## cuba
+cuba contains the algorithms for _Context-Unbounded Analysis for Concurrent Software_. 
+
+## util
+util contains all code that uses in this project. 
+
+_state.hh state.cc_: 
+the data structures that designs for this project. 
