@@ -159,8 +159,9 @@ uint CUBA::reachable_thread_states(const size_t& n) {
 		W[i].push(initl_TS.get_symbol());
 	}
 
+	ctx_bound k = 0;
 	antichain worklist;
-	worklist.emplace_back(initl_TS.get_state(), W);
+	worklist.emplace_back(0, k, initl_TS.get_state(), W);
 
 	vector<antichain> R(thread_state::S);
 
@@ -218,6 +219,7 @@ antichain CUBA::step(const global_config& tau) {
 	antichain worklist;
 	const auto& q = tau.get_state();
 	const auto& W = tau.get_stacks();
+	const auto& k = tau.get_context_k();
 	for (auto i = 0; i < W.size(); ++i) {
 
 		marking(q, W[i].top());
@@ -235,19 +237,19 @@ antichain CUBA::step(const global_config& tau) {
 				case type_stack_operation::PUSH: {
 					auto _W = W;
 					_W[i].push(dst.get_symbol());
-					worklist.emplace_back(dst.get_state(), _W);
+					worklist.emplace_back(0, k + 1, dst.get_state(), _W);
 				}
 					break;
 				case type_stack_operation::POP: {
 					auto _W = W;
 					_W[i].pop();
-					worklist.emplace_back(dst.get_state(), _W);
+					worklist.emplace_back(0, k + 1, dst.get_state(), _W);
 				}
 					break;
 				default: {
 					auto _W = W;
 					_W[i].overwrite(dst.get_symbol());
-					worklist.emplace_back(dst.get_state(), _W);
+					worklist.emplace_back(0, k + 1, dst.get_state(), _W);
 				}
 					break;
 				}
@@ -258,7 +260,7 @@ antichain CUBA::step(const global_config& tau) {
 }
 
 /**
- *
+ * set thread state (s,l) as reachable
  * @param s
  * @param l
  */

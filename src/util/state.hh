@@ -30,6 +30,9 @@ using stack_symbol = uint;
 
 using id_thread_state = uint;
 
+using id_thread = ushort;
+using ctx_bound = ushort;
+
 template<typename T> class alphabet {
 public:
 	inline alphabet() :
@@ -423,7 +426,10 @@ inline bool operator!=(const global_state& g1, const global_state& g2) {
 class global_config {
 public:
 	global_config(const control_state& s, const size_t& n);
-	global_config(const control_state& s, const cstack& W);
+	global_config(const id_thread& id, const ctx_bound& k,
+			const control_state& s, const size_t& n);
+	global_config(const id_thread& id, const ctx_bound& k,
+			const control_state& s, const cstack& W);
 	global_config(const global_config& g);
 	~global_config();
 
@@ -435,10 +441,20 @@ public:
 		return W;
 	}
 
+	ctx_bound get_context_k() const {
+		return k;
+	}
+
+	id_thread get_thread_id() const {
+		return id;
+	}
+
 	global_state top();
 	global_state top() const;
 
 private:
+	id_thread id; /// the active thread that reach current configuration
+	ctx_bound k; /// the number of context switches used to reach current configuration
 	control_state s;
 	cstack W;
 };

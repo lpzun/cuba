@@ -118,17 +118,34 @@ global_state::~global_state() {
  * @param n
  */
 global_config::global_config(const control_state& s, const size_t& n) :
-		s(s), W(n) {
+		id(0), k(0), s(s), W(n) {
+}
+
+/**
+ * A constructor with a thread id,a  context bound k, a control state
+ * and the number of concurrent
+ * @param id
+ * @param k
+ * @param s
+ * @param n
+ */
+global_config::global_config(const id_thread& id, const ctx_bound& k,
+		const control_state& s, const size_t& n) :
+		id(id), k(k), s(s), W(n) {
 
 }
 
 /**
- * A constructor with a control state and concurrent components
+ * A constructor with a thread id,a  context bound k, a control state
+ * and the number of concurrent
+ * @param id
+ * @param k
  * @param s
  * @param W
  */
-global_config::global_config(const control_state& s, const cstack& W) :
-		s(s), W(W) {
+global_config::global_config(const id_thread& id, const ctx_bound& k,
+		const control_state& s, const cstack& W) :
+		id(id), k(k), s(s), W(W) {
 
 }
 
@@ -137,7 +154,8 @@ global_config::global_config(const control_state& s, const cstack& W) :
  * @param g
  */
 global_config::global_config(const global_config& g) :
-		s(g.get_state()), W(g.get_stacks()) {
+		id(g.get_thread_id()), k(g.get_context_k()), s(g.get_state()), W(
+				g.get_stacks()) {
 
 }
 
