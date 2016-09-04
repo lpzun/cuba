@@ -154,8 +154,8 @@ global_config::global_config(const id_thread& id, const ctx_bound& k,
  * @param g
  */
 global_config::global_config(const global_config& g) :
-		id(g.get_thread_id()), k(g.get_context_k()), s(g.get_state()), W(
-				g.get_stacks()) {
+		id(g.get_thread_id()), k(g.get_context_k()), s(g.get_state()), ///
+		W(g.get_stacks()) {
 
 }
 
