@@ -155,62 +155,90 @@ void CUBA::context_bounded_analysis(const size_t& n, const size_k& k) {
 }
 
 /**
- * To compute the set of reachable thread states
+ * This procedure is to compute the set of reachable thread/global states
+ * of a program P running by n threads and with up to k context switches.
  * @param n: the number of threads
- * @param k: the number of context switches
+ * @param k: the upper bound of context switches
  * @return the number of reachable thread/global states
  */
 uint CUBA::bounded_reachability(const size_t& n, const size_k& k) {
-	cstack W(n, sstack());
-	for (auto i = 0; i < n; ++i) {
-		W[i].push(initl_TS.get_symbol());
+	/// step 1: build the initial  global configuration
+	///         Here we build the set of initial stacks
+	stack_vec W_0(n, sstack()); /// the set of initial stacks
+	for (auto tid = 0; tid < n; ++tid) {
+		W_0[tid].push(initl_TS.get_symbol());
 	}
 
+	/// step 2: set the data structures that used in the exploration
+	///         procedure
+	/// the set of unexplored global configurations
 	antichain worklist;
-	worklist.emplace_back(0, 0, initl_TS.get_state(), W);
-	vector<antichain> R(thread_state::S);
+	/// set the initial global configuration
+	worklist.emplace_back(0, 0, initl_TS.get_state(), W_0);
+	/// the set of reachable global configurations
+	vector<antichain> explored(thread_state::S);
 
+	/// step 2.1: this part is used to mark the reachable thread states
 	this->marking_Q = vector<vector<bool>>(thread_state::S,
 			vector<bool>(thread_state::L, false));
 	this->marking(initl_TS.get_state(), initl_TS.get_symbol());
 
+	/// step 3: the exploration procedure: it is based on BFS
 	while (!worklist.empty()) {
+		/// step 3.1: remove an element from worklist
 		const auto tau = worklist.front();
 		worklist.pop_front();
-		cout << tau << "\n";
+		cout << tau << "\n"; /// deleting ---------------------
 
-		if (is_reachable(tau, R[tau.get_state()]))
+		/// step 3.2: discard it if tau is already explored
+		if (is_reachable(tau, explored[tau.get_state()]))
 			continue;
 
+		/// step 3.3: compute its successors and process them
+		///           one by one
 		const auto& images = step(tau);
 		for (const auto& _tau : images) {
-			cout << "  " << _tau << "\n";
+			cout << "  " << _tau << "\n"; /// deleting ---------------------
 			worklist.emplace_back(_tau);
 		}
-		/// add current configuration into reachable set
-		R[tau.get_state()].emplace_back(tau);
+		/// step 3.4: add current configuration to explored set
+		explored[tau.get_state()].emplace_back(tau);
 	}
 
+	/// step 4: compute the set of reachable thread states
 	int counting = 0;
-	for (int i = 0; i < thread_state::S; ++i) {
-		for (int j = 0; j < thread_state::L; ++j) {
-			if (marking_Q[i][j])
+	for (auto s = 0; s < thread_state::S; ++s) {
+		for (auto l = 0; l < thread_state::L; ++l) {
+			if (marking_Q[s][l])
 				++counting;
 		}
 	}
-	return counting;
+	return counting; /// return the number of reachable thread states
 }
 
 /**
+ * This procedure is to determine whether there exists g \in explored such that
+ *  (1) g == tau;
+ *  (2) g.id == tau.id /\ g.s == tau.s /\ g.W == tau.W /\ g.k < tau.k.
+ * It returns true if any of above conditions satisfies. Otherwise, it returns
+ * false.
  *
+ * One special case is that: there exists g \in explored such that
+ *    g.id == tau.id /\ g.s == tau.s /\ g.W == tau.W /\ g.k > tau.k,
+ * then, the procedure replaces g by tau except returning false.
  * @param tau
  * @param R
  * @return bool
  */
-bool CUBA::is_reachable(const global_config& tau, const antichain& R) {
-	for (const auto& g : R) {
-		if (g == tau)
+bool CUBA::is_reachable(const global_config& tau, antichain& R) {
+	for (auto& g : R) {
+		if (g == tau) {
+			if (g.get_context_k() > tau.get_context_k()) {
+				g.set_context_k(tau.get_context_k());
+				return false;
+			}
 			return true;
+		}
 	}
 	return false;
 }

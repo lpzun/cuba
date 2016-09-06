@@ -340,7 +340,7 @@ inline bool operator!=(const thread_config& c1, const thread_config& c2) {
 }
 
 /// the set of stacks in CPDS
-using cstack = vector<sstack>;
+using stack_vec = vector<sstack>;
 
 class global_state {
 public:
@@ -431,7 +431,7 @@ public:
 	global_config(const id_thread& id, const ctx_bound& k,
 			const control_state& s, const size_t& n);
 	global_config(const id_thread& id, const ctx_bound& k,
-			const control_state& s, const cstack& W);
+			const control_state& s, const stack_vec& W);
 	global_config(const global_config& g);
 	~global_config();
 
@@ -439,12 +439,16 @@ public:
 		return s;
 	}
 
-	const cstack& get_stacks() const {
+	const stack_vec& get_stacks() const {
 		return W;
 	}
 
 	ctx_bound get_context_k() const {
 		return k;
+	}
+
+	void set_context_k(const ctx_bound& k) {
+		this->k = k;
 	}
 
 	id_thread get_thread_id() const {
@@ -458,7 +462,7 @@ private:
 	id_thread id; /// the active thread that reach current configuration
 	ctx_bound k; /// the number of context switches used to reach current configuration
 	control_state s;
-	cstack W;
+	stack_vec W;
 };
 
 /**

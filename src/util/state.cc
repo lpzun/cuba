@@ -144,7 +144,7 @@ global_config::global_config(const id_thread& id, const ctx_bound& k,
  * @param W
  */
 global_config::global_config(const id_thread& id, const ctx_bound& k,
-		const control_state& s, const cstack& W) :
+		const control_state& s, const stack_vec& W) :
 		id(id), k(k), s(s), W(W) {
 
 }

@@ -46,7 +46,7 @@ private:
 
 	uint bounded_reachability(const size_t& n, const size_k& k);
 	antichain step(const global_config& tau);
-	bool is_reachable(const global_config& tau, const antichain& R);
+	bool is_reachable(const global_config& tau, antichain& R);
 	vector<vector<bool>> marking_Q;
 	void marking(const control_state& s, const stack_symbol& l);
 };

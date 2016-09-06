@@ -35,8 +35,8 @@ c1 := (2,5,s|w1,...,wn),
 c2 := (3,5,s|w1,...,wn),
 c3 := (2,6,s|w1,...,wk)
 
-**Theorem**: c1 and c2 can never be merged, while c1 and c3 can be merged.
+**Theorem 1**: c1 and c2 can never be merged, while c1 and c3 can be merged.
 
-**Lemma** successors(c1) \subset successors(c3)
+**Lemma 2**: successors(c1) \subset successors(c3)
 
   
