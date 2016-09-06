@@ -42,6 +42,7 @@ private:
 
 	thread_state initl_TS;
 	thread_state final_TS;
+	ctx_bound k_bound;
 
 	uint bounded_reachability(const size_t& n, const size_k& k);
 	antichain step(const global_config& tau);

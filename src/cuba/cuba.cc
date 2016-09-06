@@ -10,7 +10,8 @@
 namespace cuba {
 
 CUBA::CUBA(const string& filename, const string& initl, const string& final) :
-		mapping_Q(), active_Q(), active_R(), PDS(), initl_TS(), final_TS() {
+		mapping_Q(), active_Q(), active_R(), PDS(), initl_TS(), final_TS(), //
+		k_bound(1) {
 	parse_PDS(filename);
 	initl_TS = parse_TS(initl);
 	final_TS = parse_TS(final);
@@ -166,13 +167,12 @@ uint CUBA::bounded_reachability(const size_t& n, const size_k& k) {
 	}
 
 	antichain worklist;
-	worklist.emplace_back(0, k, initl_TS.get_state(), W);
-
+	worklist.emplace_back(0, 0, initl_TS.get_state(), W);
 	vector<antichain> R(thread_state::S);
 
-	marking_Q = vector<vector<bool>>(thread_state::S,
+	this->marking_Q = vector<vector<bool>>(thread_state::S,
 			vector<bool>(thread_state::L, false));
-	marking(initl_TS.get_state(), initl_TS.get_symbol());
+	this->marking(initl_TS.get_state(), initl_TS.get_symbol());
 
 	while (!worklist.empty()) {
 		const auto tau = worklist.front();
@@ -222,39 +222,43 @@ bool CUBA::is_reachable(const global_config& tau, const antichain& R) {
  */
 antichain CUBA::step(const global_config& tau) {
 	antichain worklist;
-	const auto& q = tau.get_state();
-	const auto& W = tau.get_stacks();
-	const auto& k = tau.get_context_k();
-	for (auto i = 0; i < W.size(); ++i) {
+	const auto& q = tau.get_state();     /// the control state of tau
+	const auto& W = tau.get_stacks();    /// the stacks of tau
+	const auto& k = tau.get_context_k(); /// the context switches to tau
+	const auto& t = tau.get_thread_id(); /// the previous thread id to tau
 
-		marking(q, W[i].top());
+	if (k == k_bound)
+		return worklist;
 
-		auto ifind = mapping_Q.find(thread_state(q, W[i].top()));
+	auto _k = k + 1; /// assume context switch will happen
+	for (auto tid = 0; tid < W.size(); ++tid) {
+		if (tid == t) /// if no context switch
+			_k = k;
+		this->marking(q, W[tid].top());
+		auto ifind = mapping_Q.find(thread_state(q, W[tid].top()));
 		if (ifind != mapping_Q.end()) {
 			const auto& transs = PDS[ifind->second];
 			for (const auto& rid : transs) {
 				const auto& r = active_R[rid];
 				const auto& dst = active_Q[r.get_dst()];
-
-				marking(dst.get_state(), dst.get_symbol());
-
+				this->marking(dst.get_state(), dst.get_symbol());
 				switch (r.get_oper_type()) {
 				case type_stack_operation::PUSH: {
 					auto _W = W;
-					_W[i].push(dst.get_symbol());
-					worklist.emplace_back(0, k + 1, dst.get_state(), _W);
+					_W[tid].push(dst.get_symbol());
+					worklist.emplace_back(tid, _k, dst.get_state(), _W);
 				}
 					break;
 				case type_stack_operation::POP: {
 					auto _W = W;
-					_W[i].pop();
-					worklist.emplace_back(0, k + 1, dst.get_state(), _W);
+					_W[tid].pop();
+					worklist.emplace_back(tid, _k, dst.get_state(), _W);
 				}
 					break;
 				default: {
 					auto _W = W;
-					_W[i].overwrite(dst.get_symbol());
-					worklist.emplace_back(0, k + 1, dst.get_state(), _W);
+					_W[tid].overwrite(dst.get_symbol());
+					worklist.emplace_back(tid, _k, dst.get_state(), _W);
 				}
 					break;
 				}

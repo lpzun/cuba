@@ -468,7 +468,8 @@ private:
  * @return bool
  */
 inline ostream& operator<<(ostream& os, const global_config& c) {
-	os << "(" << c.get_state() << "|";
+	os << "(" << c.get_thread_id() << "," << c.get_context_k() << ",";
+	os << c.get_state() << "|";
 	if (c.get_stacks().size() > 0)
 		os << c.get_stacks()[0];
 	for (int i = 1; i < c.get_stacks().size(); ++i)
