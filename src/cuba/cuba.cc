@@ -143,23 +143,28 @@ thread_state CUBA::parse_TS(const string& s) {
 /// analysis.
 /////////////////////////////////////////////////////////////////////////
 
-void CUBA::context_unbounded_analysis(const size_t& n) {
-	auto size = reachable_thread_states(n);
+/**
+ * The procedure of context-bounded analysis
+ * @param n: the number of threads
+ * @param k: the number of context switches
+ */
+void CUBA::context_bounded_analysis(const size_t& n, const size_k& k) {
+	auto size = bounded_reachability(n, k);
 	cout << "The number of reachable thread states is: " << size << endl;
 }
 
 /**
  * To compute the set of reachable thread states
- * @param n
- * @return the number of reachable thread states
+ * @param n: the number of threads
+ * @param k: the number of context switches
+ * @return the number of reachable thread/global states
  */
-uint CUBA::reachable_thread_states(const size_t& n) {
+uint CUBA::bounded_reachability(const size_t& n, const size_k& k) {
 	cstack W(n, sstack());
 	for (auto i = 0; i < n; ++i) {
 		W[i].push(initl_TS.get_symbol());
 	}
 
-	ctx_bound k = 0;
 	antichain worklist;
 	worklist.emplace_back(0, k, initl_TS.get_state(), W);
 

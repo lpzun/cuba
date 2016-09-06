@@ -22,6 +22,8 @@ namespace cuba {
 
 /// the size of threads
 using size_t = ushort;
+/// the size of context switches
+using size_k = ushort;
 
 /// control state definition
 using control_state = uint;
@@ -30,8 +32,8 @@ using stack_symbol = uint;
 
 using id_thread_state = uint;
 
-using id_thread = ushort;
-using ctx_bound = ushort;
+using id_thread = size_t;
+using ctx_bound = size_k;
 
 template<typename T> class alphabet {
 public:

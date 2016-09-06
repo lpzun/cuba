@@ -28,7 +28,7 @@ public:
 	CUBA(const string& filename, const string& initl, const string& final);
 	~CUBA();
 
-	void context_unbounded_analysis(const size_t& n);
+	void context_bounded_analysis(const size_t& n, const size_k& k);
 
 private:
 	/// Part 1: parse a pushdown system (PDS)
@@ -43,7 +43,7 @@ private:
 	thread_state initl_TS;
 	thread_state final_TS;
 
-	uint reachable_thread_states(const size_t& n);
+	uint bounded_reachability(const size_t& n, const size_k& k);
 	antichain step(const global_config& tau);
 	bool is_reachable(const global_config& tau, const antichain& R);
 	vector<vector<bool>> marking_Q;
