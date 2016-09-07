@@ -32,7 +32,7 @@ public:
 
 private:
 	/// Part 1: parse a pushdown system (PDS)
-	map<thread_state, vertex> mapping_Q; /// mapping a control state to its ID
+	vector<vector<vertex>> mapping_Q; /// mapping a control state to its ID
 	vector<thread_state> active_Q;       /// active control states
 	vector<transition<vertex>> active_R; /// active transitions
 	adj_list PDS;
@@ -47,7 +47,7 @@ private:
 	uint bounded_reachability(const size_t& n, const size_k& k);
 	antichain step(const global_config& tau);
 	bool is_reachable(const global_config& tau, antichain& R);
-	vector<vector<bool>> marking_Q;
+	vector<vector<bool>> reachable_T;
 	void marking(const control_state& s, const stack_symbol& l);
 	vertex retrieve(const control_state& s, const stack_symbol& l);
 };

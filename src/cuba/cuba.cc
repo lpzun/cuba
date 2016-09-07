@@ -54,6 +54,9 @@ void CUBA::parse_PDS(const string& filename) {
 	vector<vector<bool>> visited(thread_state::S,
 			vector<bool>(thread_state::L, false));
 
+	mapping_Q = vector<vector<vertex>>(thread_state::S,
+			vector<vertex>(thread_state::L, 0));
+
 	control_state s1, s2; /// control states
 	stack_symbol l1, l2;  /// stack symbols
 	string sep;
@@ -65,30 +68,22 @@ void CUBA::parse_PDS(const string& filename) {
 		const thread_state src_TS(s1, l1);
 		if (!visited[s1][l1]) {
 			active_Q.emplace_back(src_TS);
-			mapping_Q.emplace(src_TS, state_id);
+			mapping_Q[s1][l1] = state_id;
 			src = state_id++;
 			visited[s1][l1] = true;
 		} else {
-			auto ifind = mapping_Q.find(src_TS);
-			if (ifind != mapping_Q.end()) {
-				src = ifind->second;
-			} else
-				throw cuba_runtime_error("thread state is mistakenly marked!");
+			src = mapping_Q[s1][l1];
 		}
 
 		/// step 2: handle (s2, l2)
 		const thread_state dst_TS(s2, l2);
 		if (!visited[s2][l2]) {
 			active_Q.emplace_back(dst_TS);
-			mapping_Q.emplace(dst_TS, state_id);
+			mapping_Q[s2][l2] = state_id;
 			dst = state_id++;
 			visited[s2][l2] = true;
 		} else {
-			auto ifind = mapping_Q.find(dst_TS);
-			if (ifind != mapping_Q.end())
-				dst = ifind->second;
-			else
-				throw cuba_runtime_error("thread state is mistakenly marked!");
+			dst = mapping_Q[s2][l2];
 		}
 
 		/// step 3: handle transitions
@@ -101,8 +96,9 @@ void CUBA::parse_PDS(const string& filename) {
 				pds_parser::parse_type_synchronization(sep[1]));
 		PDS[src].emplace_back(trans_id++);
 	}
-
 	new_in.close();
+	active_Q.shrink_to_fit();
+
 	if (prop::OPT_PRINT_ADJ || prop::OPT_PRINT_ALL) {
 		cout << "The original PDS: " << "\n";
 		cout << thread_state::S << " " << thread_state::L << "\n";
@@ -179,7 +175,7 @@ uint CUBA::bounded_reachability(const size_t& n, const size_k& k) {
 	vector<antichain> explored(thread_state::S);
 
 	/// step 2.1: this part is used to mark the reachable thread states
-	this->marking_Q = vector<vector<bool>>(thread_state::S,
+	this->reachable_T = vector<vector<bool>>(thread_state::S,
 			vector<bool>(thread_state::L, false));
 	this->marking(initl_TS.get_state(), initl_TS.get_symbol());
 
@@ -209,7 +205,7 @@ uint CUBA::bounded_reachability(const size_t& n, const size_k& k) {
 	int counting = 0;
 	for (auto s = 0; s < thread_state::S; ++s) {
 		for (auto l = 0; l < thread_state::L; ++l) {
-			if (marking_Q[s][l])
+			if (reachable_T[s][l])
 				++counting;
 		}
 	}
@@ -303,10 +299,7 @@ antichain CUBA::step(const global_config& tau) {
  * @return thread state id
  */
 vertex CUBA::retrieve(const control_state& s, const stack_symbol& l) {
-	auto ifind = mapping_Q.find(thread_state(s, l));
-	if (ifind == mapping_Q.end())
-		throw cuba_runtime_error("Thread state does not exist!");
-	return ifind->second;
+	return mapping_Q[s][l];
 }
 
 /**
@@ -315,8 +308,8 @@ vertex CUBA::retrieve(const control_state& s, const stack_symbol& l) {
  * @param l
  */
 void CUBA::marking(const control_state& s, const stack_symbol& l) {
-	if (!marking_Q[s][l])
-		marking_Q[s][l] = true;
+	if (!reachable_T[s][l])
+		reachable_T[s][l] = true;
 }
 
 } /* namespace cuba */
