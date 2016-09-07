@@ -62,18 +62,18 @@ public:
 		worklist.emplace_back(_value);
 	}
 
-	T pop() {
+	bool pop() {
 		if (worklist.empty())
-			throw cuba_runtime_error("Stack is empty!");
-		auto res = worklist.back();
+			return false;
 		worklist.pop_back();
-		return res;
+		return true;
 	}
 
-	void overwrite(const T& _value) {
+	bool overwrite(const T& _value) {
 		if (worklist.empty())
-			throw cuba_runtime_error("Stack is empty!");
+			return false;
 		worklist[worklist.size() - 1] = _value;
+		return true;
 	}
 
 	bool empty() const {

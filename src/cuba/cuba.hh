@@ -49,6 +49,7 @@ private:
 	bool is_reachable(const global_config& tau, antichain& R);
 	vector<vector<bool>> marking_Q;
 	void marking(const control_state& s, const stack_symbol& l);
+	vertex retrieve(const control_state& s, const stack_symbol& l);
 };
 
 /////////////////////////////////////////////////////////////////////////
