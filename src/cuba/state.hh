@@ -13,10 +13,10 @@
  * each i, (Q, L, Di) is a PDS.
  ******************************************************************************/
 
-#ifndef UTIL_STATE_HH_
-#define UTIL_STATE_HH_
+#ifndef CUBA_STATE_HH_
+#define CUBA_STATE_HH_
 
-#include "utilities.hh"
+#include "../utils/utilities.hh"
 
 namespace cuba {
 
@@ -648,4 +648,4 @@ inline ostream& operator<<(ostream& os, const transition<T>& r) {
 }
 /* namespace cuba */
 
-#endif /* UTIL_STATE_HH_ */
+#endif /* CUBA_STATE_HH_ */

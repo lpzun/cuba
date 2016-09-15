@@ -5,7 +5,7 @@
  * @author: lpzun
  */
 
-#include "prop.hh"
+#include "../utils/prop.hh"
 
 namespace cuba {
 

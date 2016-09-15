@@ -6,10 +6,10 @@
  * @author: lpzun
  */
 
-#ifndef UTIL_PROP_HH_
-#define UTIL_PROP_HH_
+#ifndef UTILS_PROP_HH_
+#define UTILS_PROP_HH_
 
-#include "state.hh"
+#include "../utils/heads.hh"
 
 namespace cuba {
 
@@ -27,4 +27,4 @@ public:
 
 } /* namespace cuba */
 
-#endif /* UTIL_PROP_HH_ */
+#endif /* UTILS_PROP_HH_ */

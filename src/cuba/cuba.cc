@@ -54,21 +54,27 @@ void CUBA::parse_PDS(const string& filename) {
 	vector<vector<bool>> visited(thread_state::S,
 			vector<bool>(thread_state::L, false));
 
+	cout << thread_state::S << " == " << thread_state::L << "\n";
 	mapping_Q = vector<vector<vertex>>(thread_state::S,
 			vector<vertex>(thread_state::L, 0));
-
+	for (int i = 0; i < mapping_Q.size(); ++i) {
+		for (int j = 0; j < mapping_Q[i].size(); ++j) {
+			cout << mapping_Q[i][j] << " ";
+		}
+		cout << "\n";
+	}
+	cout << "\n";
 	control_state s1, s2; /// control states
 	stack_symbol l1, l2;  /// stack symbols
 	string sep;
 	vertex src = 0, dst = 0;
 	while (new_in >> s1 >> l1 >> sep >> s2 >> l2) {
-//		cout << s1 << " " << l1 << " " << sep << " " << s2 << " " << l2 << "\n";
-
 		/// step 1: handle (s1, l1)
 		const thread_state src_TS(s1, l1);
 		if (!visited[s1][l1]) {
 			active_Q.emplace_back(src_TS);
 			mapping_Q[s1][l1] = state_id;
+			cout << mapping_Q[s1][l1] << "\n";
 			src = state_id++;
 			visited[s1][l1] = true;
 		} else {
@@ -80,6 +86,7 @@ void CUBA::parse_PDS(const string& filename) {
 		if (!visited[s2][l2]) {
 			active_Q.emplace_back(dst_TS);
 			mapping_Q[s2][l2] = state_id;
+			cout << mapping_Q[s2][l2] << "\n";
 			dst = state_id++;
 			visited[s2][l2] = true;
 		} else {
@@ -98,6 +105,14 @@ void CUBA::parse_PDS(const string& filename) {
 	}
 	new_in.close();
 	active_Q.shrink_to_fit();
+
+	for (int i = 0; i < mapping_Q.size(); ++i) {
+		for (int j = 0; j < mapping_Q[i].size(); ++j) {
+			cout << mapping_Q[i][j] << " ";
+		}
+		cout << "\n";
+	}
+	cout << "\n";
 
 	if (prop::OPT_PRINT_ADJ || prop::OPT_PRINT_ALL) {
 		cout << "The original PDS: " << "\n";

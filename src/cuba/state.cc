@@ -5,7 +5,7 @@
  * @author: Peizun Liu
  */
 
-#include "state.hh"
+#include "../cuba/state.hh"
 
 namespace cuba {
 

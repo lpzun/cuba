@@ -5,7 +5,7 @@
  * @author: lpzun
  */
 
-#include "utilities.hh"
+#include "../utils/utilities.hh"
 
 namespace cuba {
 

@@ -5,10 +5,10 @@
  * @author: lpzun
  */
 
-#ifndef UTIL_UTILITIES_HH_
-#define UTIL_UTILITIES_HH_
+#ifndef UTILS_UTILITIES_HH_
+#define UTILS_UTILITIES_HH_
 
-#include "heads.hh"
+#include "../utils/heads.hh"
 
 namespace cuba {
 class algs {
@@ -60,4 +60,4 @@ int algs::compare(const vector<T>& v1, const vector<T>& v2,
 }
 } /* namespace cuba */
 
-#endif /* UTIL_UTILITIES_HH_ */
+#endif /* UTILS_UTILITIES_HH_ */
