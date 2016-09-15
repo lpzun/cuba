@@ -13,10 +13,10 @@ namespace cuba {
 /**
  * Definition of Pushdown automaton
  */
-class pda {
+class pushdown_automaton {
 public:
-	pda();
-	~pda();
+	pushdown_automaton();
+	~pushdown_automaton();
 };
 
 } /* namespace cuba */

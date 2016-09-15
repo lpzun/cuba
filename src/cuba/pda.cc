@@ -5,15 +5,15 @@
  * @author: lpzun
  */
 
-#include "../cuba/pda.hh"
+#include "pda.hh"
 
 namespace cuba {
 
-pda::pda() {
+pushdown_automaton::pushdown_automaton() {
 
 }
 
-pda::~pda() {
+pushdown_automaton::~pushdown_automaton() {
 
 }
 
