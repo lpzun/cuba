@@ -9,7 +9,7 @@
 #define CUBA_CUBA_HH_
 
 #include "../utils/prop.hh"
-#include "state.hh"
+#include "cpda.hh"
 
 namespace cuba {
 
@@ -34,7 +34,7 @@ private:
 	/// Part 1: parse a pushdown system (PDS)
 	vector<vector<vertex>> mapping_Q; /// mapping a control state to its ID
 	vector<thread_state> active_Q;       /// active control states
-	vector<transition<vertex>> active_R; /// active transitions
+	vector<pda_transition<vertex>> active_R; /// active transitions
 	adj_list PDS;
 
 	void parse_PDS(const string& filename);

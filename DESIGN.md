@@ -35,3 +35,22 @@ the data structures that designs for this project.
 **Lemma 2:** _successors(c3) \subset successors(c1)._
 
 4. Top Configuration: Applying symmetry reduction to top configurations (already done!).
+
+# Reachabilty Automaton
+We implement the reachability automaton by means of post*. We *design* an algorithm as follows:
+
+**INPUT:** The inputs are a PDS P = (Q, \Gamma, \Delta, q0, r0), and an initial configuration c0. 
+
+**OUTPUT:** a finite automaton A represents all reachable configuration of P. 
+
+  1. represent c0 as a finite automaton A
+
+  2. a saturation procedure
+
+We have saturation rules as follows:
+
+  (1) for each push operation (q, r) +-> (q', r'), we add a new state to A;
+
+  (2) Push operation: (q, r) +-> (q', r')
+
+  (3) 
