@@ -9,7 +9,9 @@
 #define CUBA_CUBA_HH_
 
 #include "../utils/prop.hh"
+
 #include "cpda.hh"
+#include "fsa.hh"
 
 namespace cuba {
 
@@ -50,6 +52,11 @@ private:
 	vector<vector<bool>> reachable_T;
 	void marking(const control_state& s, const stack_symbol& l);
 	vertex retrieve(const control_state& s, const stack_symbol& l);
+
+
+	/// build reachability automaton
+	finite_automaton post_reachablity_automaton(const finite_automaton& A);
+	void saturate();
 };
 
 /////////////////////////////////////////////////////////////////////////

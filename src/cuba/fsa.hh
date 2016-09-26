@@ -8,7 +8,7 @@
 #ifndef CUBA_FSA_HH_
 #define CUBA_FSA_HH_
 
-#include "cpda.hh"
+#include "pda.hh"
 
 namespace cuba {
 
