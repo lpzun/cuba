@@ -14,16 +14,16 @@ namespace cuba {
  * @param k     context switch bound
  * @param initl initial thread state
  * @param final final thread state
- * @param mapping_Q
- * @param Q
- * @param R
+ * @param mapping_Q: mapping a control state to its ID
+ * @param Q: active control states
+ * @param R: active transitions
  */
 explore::explore(const ctx_bound& k, const thread_state& initl,
 		const thread_state& final,  ///
 		const vector<vector<vertex>>& mapping_Q, ///
 		const vector<thread_state>& Q, ///
 		const vector<pda_transition<vertex>>& R) :
-		initl_TS(initl), final_TS(final), k_bound(k), mapping_Q(mapping_Q), active_Q(
+		k_bound(k), initl_TS(initl), final_TS(final), mapping_Q(mapping_Q), active_Q(
 				Q), active_R(R) {
 
 }

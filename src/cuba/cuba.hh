@@ -80,6 +80,10 @@ private:
 
 };
 
+/**
+ * The class of explore:
+ *     define a tool like explore in CAV'10 dynamic cutoff tool
+ */
 class explore {
 public:
 	explore(const ctx_bound& k, const thread_state& initl,
@@ -92,15 +96,15 @@ public:
 
 	uint bounded_reachability(const size_t& n, const size_k& k);
 private:
-	/// Part 1: parse a pushdown system (PDS)
+	///  Part 1: parse a pushdown system (PDS)
+	ctx_bound k_bound;
+	thread_state initl_TS;
+	thread_state final_TS;
+
 	vector<vector<vertex>> mapping_Q; /// mapping a control state to its ID
 	vector<thread_state> active_Q;       /// active control states
 	vector<pda_transition<vertex>> active_R; /// active transitions
 	adj_list PDS;
-
-	thread_state initl_TS;
-	thread_state final_TS;
-	ctx_bound k_bound;
 
 	vector<vector<bool>> reachable_T;
 
