@@ -23,11 +23,14 @@ explore::explore(const ctx_bound& k, const thread_state& initl,
 		const vector<vector<vertex>>& mapping_Q, ///
 		const vector<thread_state>& Q, ///
 		const vector<pda_transition<vertex>>& R) :
-		k_bound(k), initl_TS(initl), final_TS(final), mapping_Q(mapping_Q), active_Q(
-				Q), active_R(R) {
+		k_bound(k), initl_TS(initl), final_TS(final), ///
+		mapping_Q(mapping_Q), active_Q(Q), active_R(R) {
 
 }
 
+/**
+ * destructor
+ */
 explore::~explore() {
 
 }
