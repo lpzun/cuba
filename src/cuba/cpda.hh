@@ -30,28 +30,26 @@ using id_thread_state = uint;
 using id_thread = size_t;
 using ctx_bound = size_k;
 
-const int epsilon = -1;
-
 /// the set of stacks in CPDS
 using stack_vec = vector<sstack>;
 
 class global_state {
 public:
-	global_state(const control_state& s, const size_t& n);
-	global_state(const control_state& s, const vector<control_state>& L);
+	global_state(const pda_state& s, const size_t& n);
+	global_state(const pda_state& s, const vector<pda_state>& L);
 	~global_state();
 
-	const vector<stack_symbol>& get_local() const {
+	const vector<pda_alpha>& get_local() const {
 		return L;
 	}
 
-	control_state get_state() const {
+	pda_state get_state() const {
 		return s;
 	}
 
 private:
-	control_state s;
-	vector<stack_symbol> L;
+	pda_state s;
+	vector<pda_alpha> L;
 };
 
 /**
@@ -120,15 +118,15 @@ inline bool operator!=(const global_state& g1, const global_state& g2) {
  */
 class global_config {
 public:
-	global_config(const control_state& s, const size_t& n);
+	global_config(const pda_state& s, const size_t& n);
 	global_config(const id_thread& id, const ctx_bound& k,
-			const control_state& s, const size_t& n);
+			const pda_state& s, const size_t& n);
 	global_config(const id_thread& id, const ctx_bound& k,
-			const control_state& s, const stack_vec& W);
+			const pda_state& s, const stack_vec& W);
 	global_config(const global_config& g);
 	~global_config();
 
-	control_state get_state() const {
+	pda_state get_state() const {
 		return s;
 	}
 
@@ -154,7 +152,7 @@ public:
 private:
 	id_thread id; /// the active thread that reach current configuration
 	ctx_bound k; /// the number of context switches used to reach current configuration
-	control_state s;
+	pda_state s;
 	stack_vec W;
 };
 

@@ -5,7 +5,7 @@
  *  @author: Peizun Liu
  *****************************************************************************/
 
-#include "../utils/cmd.hh"
+#include "cmd.hh"
 
 namespace cmd {
 

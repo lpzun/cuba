@@ -9,12 +9,13 @@
 
 namespace cuba {
 
-pushdown_automaton::pushdown_automaton() {
+int alphabet::EPSILON = -1;
 
+
+pushdown_automaton::pushdown_automaton() {
 }
 
 pushdown_automaton::~pushdown_automaton() {
-
 }
 
 } /* namespace cuba */

@@ -8,14 +8,32 @@
 #ifndef CUBA_PDA_HH_
 #define CUBA_PDA_HH_
 
-#include "../utils/utilities.hh"
+#include "utilities.hh"
 
 namespace cuba {
-/// control state definition
-using control_state = int;
-/// define stack symbol
-using stack_symbol = int;
 
+class alphabet {
+public:
+	alphabet() {
+	}
+	~alphabet() {
+	}
+
+	/**
+	 * REMARK: Epsilon is -1, all other stack symbol, aka pda_alpha
+	 * is a natural number
+	 */
+	static int EPSILON;
+};
+
+/// define the control state of PDSs
+using pda_state = int;
+/// define the stack symbol of PDSs
+using pda_alpha = int;
+
+/**
+ * define the stack of PDSs
+ */
 template<typename T> class pda_stack {
 public:
 	inline pda_stack() :
@@ -155,29 +173,29 @@ template<typename T> inline bool operator!=(const pda_stack<T>& a1,
 class thread_state {
 public:
 	thread_state();
-	thread_state(const control_state& s, const stack_symbol& l);
+	thread_state(const pda_state& s, const pda_alpha& l);
 	~thread_state();
 
-	static control_state S;
-	static stack_symbol L;
+	static pda_state S;
+	static pda_alpha L;
 
 	/**
 	 * @return the stack symbol of current thread state
 	 */
-	stack_symbol get_symbol() const {
+	pda_alpha get_symbol() const {
 		return l;
 	}
 
 	/**
 	 * @return the control state of current thread state
 	 */
-	control_state get_state() const {
+	pda_state get_state() const {
 		return s;
 	}
 
 private:
-	control_state s;
-	stack_symbol l;
+	pda_state s;
+	pda_alpha l;
 };
 
 /**
@@ -235,20 +253,20 @@ inline bool operator!=(const thread_state& t1, const thread_state& t2) {
 }
 
 /// the stack for a single PDS
-using sstack = pda_stack<stack_symbol>;
+using sstack = pda_stack<pda_alpha>;
 /**
  * a configuration (s, w) of a PDS is an element of QxL*.
  */
 class thread_config {
 public:
 	thread_config();
-	thread_config(const control_state& s, const stack_symbol& l);
+	thread_config(const pda_state& s, const pda_alpha& l);
 	thread_config(const thread_state& t);
-	thread_config(const control_state& s, const sstack& w);
+	thread_config(const pda_state& s, const sstack& w);
 	thread_config(const thread_config& c);
 	~thread_config();
 
-	control_state get_state() const {
+	pda_state get_state() const {
 		return s;
 	}
 
@@ -261,7 +279,7 @@ public:
 	}
 
 private:
-	control_state s; /// control state
+	pda_state s; /// control state
 	sstack w; /// stack content
 };
 

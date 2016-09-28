@@ -37,7 +37,7 @@ thread_state pds_parser::create_thread_state_from_str(const string& s_ts,
     if (vs_ts.size() != 2) {
         throw("The format of thread state is wrong.");
     }
-    return thread_state(stoi(vs_ts[0]), stoi(vs_ts[1]));
+    return thread_state(std::stoi(vs_ts[0]), stoi(vs_ts[1]));
 }
 
 /**

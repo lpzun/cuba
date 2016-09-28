@@ -9,8 +9,8 @@
 
 namespace cuba {
 
-control_state thread_state::S = 0;
-stack_symbol thread_state::L = 0;
+pda_state thread_state::S = 0;
+pda_alpha thread_state::L = 0;
 
 /**
  * default constructor
@@ -24,7 +24,7 @@ thread_state::thread_state() :
  * @param s
  * @param l
  */
-thread_state::thread_state(const control_state& s, const stack_symbol& l) :
+thread_state::thread_state(const pda_state& s, const pda_alpha& l) :
 		s(s), l(l) {
 }
 
@@ -46,7 +46,7 @@ thread_config::thread_config() :
  * @param s
  * @param l
  */
-thread_config::thread_config(const control_state& s, const stack_symbol& l) :
+thread_config::thread_config(const pda_state& s, const pda_alpha& l) :
 		s(s), w() {
 	w.push(l);
 }
@@ -64,7 +64,7 @@ thread_config::thread_config(const thread_state& t) :
  * @param s
  * @param w
  */
-thread_config::thread_config(const control_state& s, const sstack& w) :
+thread_config::thread_config(const pda_state& s, const sstack& w) :
 		s(s), w(w) {
 }
 
@@ -88,7 +88,7 @@ thread_config::~thread_config() {
  * @param s
  * @param n
  */
-global_state::global_state(const control_state& s, const size_t& n) :
+global_state::global_state(const pda_state& s, const size_t& n) :
 		s(s), L(n) {
 
 }
@@ -98,8 +98,8 @@ global_state::global_state(const control_state& s, const size_t& n) :
  * @param s
  * @param L
  */
-global_state::global_state(const control_state& s,
-		const vector<stack_symbol>& L) :
+global_state::global_state(const pda_state& s,
+		const vector<pda_alpha>& L) :
 		s(s), L(L) {
 
 }
@@ -117,7 +117,7 @@ global_state::~global_state() {
  * @param s
  * @param n
  */
-global_config::global_config(const control_state& s, const size_t& n) :
+global_config::global_config(const pda_state& s, const size_t& n) :
 		id(0), k(0), s(s), W(n) {
 }
 
@@ -130,7 +130,7 @@ global_config::global_config(const control_state& s, const size_t& n) :
  * @param n
  */
 global_config::global_config(const id_thread& id, const ctx_bound& k,
-		const control_state& s, const size_t& n) :
+		const pda_state& s, const size_t& n) :
 		id(id), k(k), s(s), W(n) {
 
 }
@@ -144,7 +144,7 @@ global_config::global_config(const id_thread& id, const ctx_bound& k,
  * @param W
  */
 global_config::global_config(const id_thread& id, const ctx_bound& k,
-		const control_state& s, const stack_vec& W) :
+		const pda_state& s, const stack_vec& W) :
 		id(id), k(k), s(s), W(W) {
 
 }
@@ -171,7 +171,7 @@ global_config::~global_config() {
  * @return a global state
  */
 global_state global_config::top() const {
-	vector<stack_symbol> L(W.size());
+	vector<pda_alpha> L(W.size());
 	for (auto i = 0; i < W.size(); ++i) {
 		L[i] = W[i].top();
 	}
@@ -183,7 +183,7 @@ global_state global_config::top() const {
  * @return a global state
  */
 global_state global_config::top() {
-	vector<stack_symbol> L(W.size());
+	vector<pda_alpha> L(W.size());
 	for (auto i = 0; i < W.size(); ++i) {
 		L[i] = W[i].top();
 	}

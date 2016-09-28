@@ -46,16 +46,9 @@ private:
 	thread_state final_TS;
 	ctx_bound k_bound;
 
-	uint bounded_reachability(const size_t& n, const size_k& k);
-	antichain step(const global_config& tau);
-	bool is_reachable(const global_config& tau, antichain& R);
-	vector<vector<bool>> reachable_T;
-	void marking(const control_state& s, const stack_symbol& l);
-	vertex retrieve(const control_state& s, const stack_symbol& l);
-
-
 	/// build reachability automaton
-	finite_automaton post_reachablity_automaton(const finite_automaton& A);
+	finite_automaton init_reachability_automaton(const thread_config& c);
+	finite_automaton post_reachability_automaton(const finite_automaton& A);
 	void saturate();
 };
 
@@ -85,6 +78,36 @@ private:
 
 	static deque<string> split(const string &s, const char& delim);
 
+};
+
+class explore {
+public:
+	explore(const ctx_bound& k, const thread_state& initl,
+			const thread_state& final, ///
+			const vector<vector<vertex>>& mapping_Q,
+			const vector<thread_state>& Q,
+			const vector<pda_transition<vertex>>& R);
+
+	~explore();
+
+	uint bounded_reachability(const size_t& n, const size_k& k);
+private:
+	/// Part 1: parse a pushdown system (PDS)
+	vector<vector<vertex>> mapping_Q; /// mapping a control state to its ID
+	vector<thread_state> active_Q;       /// active control states
+	vector<pda_transition<vertex>> active_R; /// active transitions
+	adj_list PDS;
+
+	thread_state initl_TS;
+	thread_state final_TS;
+	ctx_bound k_bound;
+
+	vector<vector<bool>> reachable_T;
+
+	antichain step(const global_config& tau);
+	bool is_reachable(const global_config& tau, antichain& R);
+	void marking(const pda_state& s, const pda_alpha& l);
+	vertex retrieve(const pda_state& s, const pda_alpha& l);
 };
 
 } /* namespace cuba */

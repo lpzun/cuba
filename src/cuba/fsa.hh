@@ -12,8 +12,8 @@
 
 namespace cuba {
 
-using fsa_state = int;
-using fsa_alpha = int;
+using fsa_state = pda_state;
+using fsa_alpha = pda_alpha;
 
 /**
  * Definition of finite automaton transition
@@ -54,6 +54,13 @@ inline ostream& operator<<(ostream& os, const fsa_transition& r) {
 	os << "," << r.get_label();
 	os << "," << r.get_dst() << ")";
 	return os;
+}
+
+inline bool operator<(const fsa_transition& r1, const fsa_transition& r2) {
+	if (r1.get_src() == r2.get_src()) {
+
+	}
+	return r1.get_src() == r2.get_src();
 }
 
 /**
