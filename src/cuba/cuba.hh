@@ -39,12 +39,13 @@ private:
 	vector<pda_transition<vertex>> active_R; /// active transitions
 	adj_list PDS;
 
-	void parse_PDS(const string& filename);
-	thread_state parse_TS(const string& s);
-
 	thread_state initl_TS;
 	thread_state final_TS;
 	ctx_bound k_bound;
+
+
+	void parse_PDS(const string& filename);
+	thread_state parse_TS(const string& s);
 
 	/// build reachability automaton
 	finite_automaton init_reachability_automaton(const thread_config& c);
@@ -80,6 +81,10 @@ private:
 
 };
 
+/////////////////////////////////////////////////////////////////////////
+/// PART 3. The following are the utilities for explore.
+///
+/////////////////////////////////////////////////////////////////////////
 /**
  * The class of explore:
  *     define a tool like explore in CAV'10 dynamic cutoff tool

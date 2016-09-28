@@ -167,177 +167,6 @@ template<typename T> inline bool operator!=(const pda_stack<T>& a1,
 	return !(a1 == a2);
 }
 
-/**
- * the thread state class
- */
-class thread_state {
-public:
-	thread_state();
-	thread_state(const pda_state& s, const pda_alpha& l);
-	~thread_state();
-
-	static pda_state S;
-	static pda_alpha L;
-
-	/**
-	 * @return the stack symbol of current thread state
-	 */
-	pda_alpha get_symbol() const {
-		return l;
-	}
-
-	/**
-	 * @return the control state of current thread state
-	 */
-	pda_state get_state() const {
-		return s;
-	}
-
-private:
-	pda_state s;
-	pda_alpha l;
-};
-
-/**
- * overloading operator <<
- * @param os
- * @param s
- * @return ostream
- */
-inline ostream& operator<<(ostream& os, const thread_state& t) {
-	os << "(" << t.get_state() << "," << t.get_symbol() << ")";
-	return os;
-}
-
-/**
- * overloading operator <
- * @param t1
- * @param t2
- * @return bool
- */
-inline bool operator<(const thread_state& t1, const thread_state& t2) {
-	if (t1.get_state() == t2.get_state())
-		return t1.get_symbol() < t2.get_symbol();
-	return t1.get_state() < t2.get_state();
-}
-
-/**
- * overloading operator >
- * @param t1
- * @param t2
- * @return bool
- */
-inline bool operator>(const thread_state& t1, const thread_state& t2) {
-	return t2 < t1;
-}
-
-/**
- * overloading operator ==
- * @param t1
- * @param t2
- * @return bool
- */
-inline bool operator==(const thread_state& t1, const thread_state& t2) {
-	return (t1.get_state() == t2.get_state())
-			&& (t1.get_symbol() == t2.get_symbol());
-}
-
-/**
- * overloading operator !=
- * @param t1
- * @param t2
- * @return bool
- */
-inline bool operator!=(const thread_state& t1, const thread_state& t2) {
-	return !(t1 == t2);
-}
-
-/// the stack for a single PDS
-using sstack = pda_stack<pda_alpha>;
-/**
- * a configuration (s, w) of a PDS is an element of QxL*.
- */
-class thread_config {
-public:
-	thread_config();
-	thread_config(const pda_state& s, const pda_alpha& l);
-	thread_config(const thread_state& t);
-	thread_config(const pda_state& s, const sstack& w);
-	thread_config(const thread_config& c);
-	~thread_config();
-
-	pda_state get_state() const {
-		return s;
-	}
-
-	const sstack& get_stack() const {
-		return w;
-	}
-
-	thread_state top() const {
-		return thread_state(s, w.top());
-	}
-
-private:
-	pda_state s; /// control state
-	sstack w; /// stack content
-};
-
-/**
- * overloading operator <<: print thread configuration
- *
- * @param out
- * @param c
- * @return ostream
- */
-inline ostream& operator<<(ostream& os, const thread_config& c) {
-	os << "(" << c.get_state() << "," << c.get_stack() << ")";
-	return os;
-}
-
-/**
- * overloading operator <
- * @param c1
- * @param c2
- * @return bool
- */
-inline bool operator<(const thread_config& c1, const thread_config& c2) {
-	if (c1.get_state() == c2.get_state())
-		return c1.get_stack() < c2.get_stack();
-	return c1.get_state() < c2.get_state();
-}
-
-/**
- * overloading operator >
- * @param c1
- * @param c2
- * @return bool
- */
-inline bool operator>(const thread_config& c1, const thread_config& c2) {
-	return c2 < c1;
-}
-
-/**
- * overloading operator ==
- * @param c1
- * @param c2
- * @return bool
- */
-inline bool operator==(const thread_config& c1, const thread_config& c2) {
-	return (c1.get_state() == c2.get_state())
-			&& (c1.get_stack() == c2.get_stack());
-}
-
-/**
- * overloading operator !=
- * @param c1
- * @param c2
- * @return bool
- */
-inline bool operator!=(const thread_config& c1, const thread_config& c2) {
-	return !(c1 == c2);
-}
-
 using id_transition = uint;
 
 /**
@@ -459,6 +288,187 @@ public:
 	pushdown_automaton();
 	~pushdown_automaton();
 };
+
+/////////////////////////////////////////////////////////////////////////
+/// PART 2. Thread state and thread configuration definitions are from
+/// here.
+///
+/// thread state:
+/// thread configuration: a configuration of PDA
+///
+/////////////////////////////////////////////////////////////////////////
+/**
+ * the thread state class
+ */
+class thread_state {
+public:
+	thread_state();
+	thread_state(const pda_state& s, const pda_alpha& l);
+	~thread_state();
+
+	static pda_state S;
+	static pda_alpha L;
+
+	/**
+	 * @return the stack symbol of current thread state
+	 */
+	pda_alpha get_symbol() const {
+		return l;
+	}
+
+	/**
+	 * @return the control state of current thread state
+	 */
+	pda_state get_state() const {
+		return s;
+	}
+
+private:
+	pda_state s;
+	pda_alpha l;
+};
+
+/**
+ * overloading operator <<
+ * @param os
+ * @param s
+ * @return ostream
+ */
+inline ostream& operator<<(ostream& os, const thread_state& t) {
+	os << "(" << t.get_state() << "," << t.get_symbol() << ")";
+	return os;
+}
+
+/**
+ * overloading operator <
+ * @param t1
+ * @param t2
+ * @return bool
+ */
+inline bool operator<(const thread_state& t1, const thread_state& t2) {
+	if (t1.get_state() == t2.get_state())
+		return t1.get_symbol() < t2.get_symbol();
+	return t1.get_state() < t2.get_state();
+}
+
+/**
+ * overloading operator >
+ * @param t1
+ * @param t2
+ * @return bool
+ */
+inline bool operator>(const thread_state& t1, const thread_state& t2) {
+	return t2 < t1;
+}
+
+/**
+ * overloading operator ==
+ * @param t1
+ * @param t2
+ * @return bool
+ */
+inline bool operator==(const thread_state& t1, const thread_state& t2) {
+	return (t1.get_state() == t2.get_state())
+			&& (t1.get_symbol() == t2.get_symbol());
+}
+
+/**
+ * overloading operator !=
+ * @param t1
+ * @param t2
+ * @return bool
+ */
+inline bool operator!=(const thread_state& t1, const thread_state& t2) {
+	return !(t1 == t2);
+}
+
+/// the stack for a single PDS
+using sstack = pda_stack<pda_alpha>;
+/**
+ * a configuration (s, w) of a PDS is an element of QxL*.
+ */
+class thread_config {
+public:
+	thread_config();
+	thread_config(const pda_state& s, const pda_alpha& l);
+	thread_config(const thread_state& t);
+	thread_config(const pda_state& s, const sstack& w);
+	thread_config(const thread_config& c);
+	~thread_config();
+
+	pda_state get_state() const {
+		return s;
+	}
+
+	const sstack& get_stack() const {
+		return w;
+	}
+
+	thread_state top() const {
+		return thread_state(s, w.top());
+	}
+
+private:
+	pda_state s; /// control state
+	sstack w; /// stack content
+};
+
+
+
+/**
+ * overloading operator <<: print thread configuration
+ *
+ * @param out
+ * @param c
+ * @return ostream
+ */
+inline ostream& operator<<(ostream& os, const thread_config& c) {
+	os << "(" << c.get_state() << "," << c.get_stack() << ")";
+	return os;
+}
+
+/**
+ * overloading operator <
+ * @param c1
+ * @param c2
+ * @return bool
+ */
+inline bool operator<(const thread_config& c1, const thread_config& c2) {
+	if (c1.get_state() == c2.get_state())
+		return c1.get_stack() < c2.get_stack();
+	return c1.get_state() < c2.get_state();
+}
+
+/**
+ * overloading operator >
+ * @param c1
+ * @param c2
+ * @return bool
+ */
+inline bool operator>(const thread_config& c1, const thread_config& c2) {
+	return c2 < c1;
+}
+
+/**
+ * overloading operator ==
+ * @param c1
+ * @param c2
+ * @return bool
+ */
+inline bool operator==(const thread_config& c1, const thread_config& c2) {
+	return (c1.get_state() == c2.get_state())
+			&& (c1.get_stack() == c2.get_stack());
+}
+
+/**
+ * overloading operator !=
+ * @param c1
+ * @param c2
+ * @return bool
+ */
+inline bool operator!=(const thread_config& c1, const thread_config& c2) {
+	return !(c1 == c2);
+}
 
 } /* namespace cuba */
 

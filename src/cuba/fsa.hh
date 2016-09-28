@@ -63,15 +63,23 @@ inline bool operator<(const fsa_transition& r1, const fsa_transition& r2) {
 	return r1.get_src() == r2.get_src();
 }
 
+/// the data structure of FSA transitions
+using fsa_delta = vector<vector<fsa_alpha>>;
+
 /**
  * Definition of finite automaton
  */
 class finite_automaton {
 public:
-	finite_automaton();
+	finite_automaton(const fsa_state& state, const fsa_alpha& alpha,
+			const fsa_delta& transitions, const fsa_state& accept);
+
+	finite_automaton(const fsa_state& state, const fsa_alpha& alpha,
+			const fsa_state& accept);
+
 	~finite_automaton();
 
-	const vector<deque<fsa_transition>>& get_transitions() const {
+	const fsa_delta& get_transitions() const {
 		return transitions;
 	}
 
@@ -87,16 +95,13 @@ public:
 		return states;
 	}
 
-	void add_transitions(const fsa_transition& r) {
-		this->transitions[r.get_src()].push_back(r);
-	}
+	void add_transitions(const fsa_transition& r);
 
 private:
-	fsa_state states; // 0...states-1
-	fsa_alpha alphabet; //
-	vector<deque<fsa_transition>> transitions;
+	fsa_state states;        /// 0...states-1
+	fsa_alpha alphabet;      ///
+	fsa_delta transitions;   ///
 	fsa_state accept_state;
-	set<fsa_state> intermediate_states;
 };
 
 } /* namespace cuba */
