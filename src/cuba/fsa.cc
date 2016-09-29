@@ -63,10 +63,7 @@ finite_automaton::finite_automaton(const fsa_state& state,
  */
 finite_automaton::finite_automaton(const fsa_state& state,
 		const fsa_alpha& alpha, const fsa_state& accept) :
-		states(state), alphabet(alpha), ///
-		transitions(fsa_delta(state,    ///
-				vector<fsa_alpha>(state, alphabet::EPSILON))), ///
-		accept_state(accept) {
+		states(state), alphabet(alpha), transitions(), accept_state(accept) {
 
 }
 

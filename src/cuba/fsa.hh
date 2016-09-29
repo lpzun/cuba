@@ -103,7 +103,7 @@ inline bool operator!=(const fsa_transition& r1, const fsa_transition& r2) {
 }
 
 /// the data structure of FSA transitions
-using fsa_delta = vector<vector<fsa_alpha>>;
+using fsa_delta = unordered_map<fsa_state, set<fsa_transition>>;
 
 /**
  * Definition of finite automaton
@@ -144,32 +144,10 @@ private:
 };
 
 inline ostream& operator<<(ostream& os, finite_automaton& fsa) {
-	if (fsa.get_transitions().size() == 0) {
-		return os;
-	}
-
-	auto m = fsa.get_transitions().size();
-	auto n = std::to_string(m).length() + 1;
-	os << algs::widthify("", n);
-	for (int i = 0; i < m; ++i) {
-		os << algs::widthify("q" + std::to_string(i), n, alignment::LEFTJUST);
-		os << " ";
-	}
-	os << "\n";
-	for (int i = 0; i < m; ++i) {
-		os << algs::widthify("q" + std::to_string(i), n, alignment::LEFTJUST);
-		os << " ";
-		for (int j = 0; j < m; ++j) {
-			if (fsa.get_transitions()[i][j] == -2)
-				os << algs::widthify("-", n, alignment::CENTERED) << " ";
-			else if (fsa.get_transitions()[i][j] == -1)
-				os << algs::widthify("e", n, alignment::CENTERED) << " ";
-			else
-				os
-						<< algs::widthify(fsa.get_transitions()[i][j], n,
-								alignment::LEFTJUST) << " ";
+	for (const auto& p : fsa.get_transitions()) {
+		for(const auto& r: p.second) {
+			cout << r << "\n";
 		}
-		os << "\n";
 	}
 	return os;
 }

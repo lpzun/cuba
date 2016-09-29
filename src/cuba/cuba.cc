@@ -188,11 +188,10 @@ finite_automaton CUBA::compute_init_fsa(const thread_config& c) {
 	/// the state of fsa
 	auto state_fsa = state_pda + w.size();
 	/// the transitions
-	fsa_delta delta(state_fsa,
-			vector<fsa_alpha>(state_fsa, alphabet::UNCONNECTED));
+	fsa_delta delta;
 	auto s = state_pda; /// s is an assitant state
 	while (!w.empty()) {
-		delta[q][s] = w.top();
+		delta[q].emplace(q, s, w.top());
 		w.pop();
 		q = s, ++s; /// update the final state
 	}
@@ -209,21 +208,86 @@ finite_automaton CUBA::compute_post_fsa(const finite_automaton& A) {
 	auto state = A.get_states();
 	auto alpha = A.get_alphabet();
 	auto delta = A.get_transitions();
-	auto accept = A.get_accept_state();
-
-	queue<fsa_transition> worklist;
-	deque<fsa_transition> explored;
 
 	unordered_map<int, fsa_state> mapping_r_to_assist_state;
 	for (auto i = 0; i < active_R.size(); ++i) {
 		mapping_r_to_assist_state.emplace(i, state++);
 	}
 
-	return finite_automaton(state, alpha, delta, accept);
+	deque<fsa_transition> worklist;
+	fsa_delta explored;
+	fsa_delta reversed; /// used to deal with ...
+
+	/// initialize the worklist
+	for (const auto& p : delta)
+		worklist.insert(worklist.begin(), p.second.begin(), p.second.end());
+	while (!worklist.empty()) {
+		const auto t = worklist.front(); /// FSA transition (p, a, q)
+		worklist.pop_front();
+
+		/// FSA transition (p, a, q)
+		const auto& p = t.get_src();
+		const auto& q = t.get_dst();
+
+		const auto& ret = explored[p].insert(t);
+		if (!ret.second)
+			continue;
+
+		if (t.get_label() != alphabet::EPSILON) { /// if label != epsilon
+			const auto& pda_transs = PDS[retrieve(p, q)];
+			for (const auto& rid : pda_transs) {
+				/// (p, a) -> (p', a')
+				const auto& r = active_R[rid]; /// PDA transition
+				const auto& _p = active_Q[r.get_dst()].get_state(); /// state
+				const auto& _a = active_Q[r.get_dst()].get_symbol(); /// label
+
+				switch (r.get_oper_type()) {
+				case type_stack_operation::POP: { /// pop operation
+					worklist.emplace_back(_p, q, alphabet::EPSILON);
+				}
+					break;
+				case type_stack_operation::OVERWRITE: { /// overwrite operation
+					worklist.emplace_back(_p, q, _a);
+				}
+					break;
+				default: { /// push operation
+					const auto& q_new = mapping_r_to_assist_state[rid];
+					worklist.emplace_back(_p, q_new, _a);
+					explored[q_new].emplace(q_new, q, alphabet::EPSILON);
+
+					const auto& fsa_transs = reversed[q_new];
+					for (const auto& _t : fsa_transs) {
+						if (_t.get_label() == alphabet::EPSILON)
+							worklist.emplace_back(_t.get_src(), q_new,
+									alphabet::EPSILON);
+					}
+					reversed[q_new].emplace(_p, q_new, _a);
+				}
+					break;
+				}
+			}
+		} else { /// if label == epsilon
+			const auto& fsa_transs = explored[q];
+			for (const auto& _t : fsa_transs)  /// _t = (q, a', q')
+				worklist.emplace_back(p, _t.get_dst(), t.get_label());
+		}
+	}
+
+	return finite_automaton(state, alpha, delta, A.get_accept_state());
 }
 
 void CUBA::saturate(fsa_delta& delta, const pda_rule& r) {
 
+}
+
+/**
+ * This procedure is to retrieve the id of thread state
+ * @param s: control state
+ * @param l: stack symbol
+ * @return thread state id
+ */
+vertex CUBA::retrieve(const pda_state& s, const pda_alpha& l) {
+	return mapping_Q[s][l];
 }
 
 } /* namespace cuba */

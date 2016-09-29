@@ -53,6 +53,7 @@ private:
 	finite_automaton compute_init_fsa(const thread_config& c);
 	finite_automaton compute_post_fsa(const finite_automaton& A);
 	void saturate(fsa_delta& delta, const pda_rule& r);
+	vertex retrieve(const pda_state& s, const pda_alpha& l);
 };
 
 /////////////////////////////////////////////////////////////////////////
