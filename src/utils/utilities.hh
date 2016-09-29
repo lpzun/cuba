@@ -11,11 +11,20 @@
 #include "../utils/heads.hh"
 
 namespace cuba {
+
+enum class alignment {
+	LEFTJUST, RIGHTJUST, CENTERED
+};
+
 class algs {
 public:
 	template<typename T>
 	static int compare(const vector<T>& v1, const vector<T>& v2,
 			const bool& is_symmetry);
+
+	template<class T>
+	static string widthify(const T& x, const ushort& width = 0,
+			const alignment& c = alignment::CENTERED, const char& fill = ' ');
 
 private:
 
@@ -57,6 +66,37 @@ int algs::compare(const vector<T>& v1, const vector<T>& v2,
 		++iv1, ++iv2; /// *iv1 == *iv2
 	}
 	return 0;
+}
+
+template<class T>
+string algs::widthify(const T& x, const ushort& width, const alignment& c,
+		const char& fill) {
+	std::ostringstream os;
+	os << x;
+	string s = os.str();
+
+	ushort n = s.size();
+	if (n >= width)
+		return s;
+	ushort addlength = width - n;
+	string result;
+	switch (c) {
+	case alignment::LEFTJUST:
+		result = s + string(addlength, fill);
+		break;
+	case alignment::RIGHTJUST:
+		result = string(addlength, fill) + s;
+		break;
+	case alignment::CENTERED:
+		result = (
+				addlength % 2 == 0 ?
+						string(addlength / 2, fill) + s
+								+ string(addlength / 2, fill) :
+						string((addlength - 1) / 2, fill) + s
+								+ string((addlength + 1) / 2, fill));
+		break;
+	}
+	return result;
 }
 } /* namespace cuba */
 

@@ -24,6 +24,7 @@ public:
 	 * is a natural number
 	 */
 	static int EPSILON;
+	static int UNCONNECTED;
 };
 
 /// define the control state of PDSs
@@ -59,6 +60,10 @@ public:
 
 	void push(const T& _value) {
 		worklist.emplace_back(_value);
+	}
+
+	size_t size() const {
+		return worklist.size();
 	}
 
 	bool pop() {
@@ -412,8 +417,6 @@ private:
 	pda_state s; /// control state
 	sstack w; /// stack content
 };
-
-
 
 /**
  * overloading operator <<: print thread configuration

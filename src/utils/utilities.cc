@@ -9,5 +9,4 @@
 
 namespace cuba {
 
-
 } /* namespace cuba */

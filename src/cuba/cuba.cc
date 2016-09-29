@@ -161,8 +161,56 @@ thread_state CUBA::parse_TS(const string& s) {
  * @param k: the number of context switches
  */
 void CUBA::context_bounded_analysis(const size_t& n, const size_k& k) {
-	explore expl(k_bound, initl_TS, final_TS, mapping_Q, active_Q, active_R);
-	auto size = expl.bounded_reachability(n, k);
-	cout << "The number of reachable thread states is: " << size << endl;
+	auto fsa = compute_fsa();
+	cout << fsa << endl;
+}
+
+finite_automaton CUBA::compute_fsa() {
+	sstack w;
+	w.push(initl_TS.get_symbol());
+	w.push(initl_TS.get_symbol());
+	thread_config c(initl_TS.get_state(), w);
+	return compute_init_fsa(c);
+}
+
+/**
+ * build the reachability automation for the initial configuration of a PDA
+ * @param c: an initial configuration
+ * @return a finite automaton
+ */
+finite_automaton CUBA::compute_init_fsa(const thread_config& c) {
+	fsa_state state_pda = thread_state::S;
+	fsa_alpha alpha_pda = thread_state::L;
+
+	auto w = c.get_stack();
+	auto q = c.get_state(); /// the final state
+
+	/// the state of fsa
+	auto state_fsa = state_pda + w.size();
+	/// the transitions
+	fsa_delta delta(state_fsa,
+			vector<fsa_alpha>(state_fsa, alphabet::UNCONNECTED));
+	auto s = state_pda; /// s is an assitant state
+	while (!w.empty()) {
+		delta[q][s] = w.top();
+		w.pop();
+		q = s, ++s; /// update the final state
+	}
+
+	return finite_automaton(state_fsa, alpha_pda, delta, q);
+}
+
+/**
+ * build the reachability automaton for a finite automaton
+ * @param A
+ * @return
+ */
+finite_automaton CUBA::compute_post_fsa(const finite_automaton& A) {
+	auto state = A.get_states();
+	auto alpha = A.get_alphabet();
+	auto delta = A.get_transitions();
+	auto accept = A.get_accept_state();
+
+	return finite_automaton(state, alpha, delta, accept);
 }
 } /* namespace cuba */

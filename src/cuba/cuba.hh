@@ -43,13 +43,13 @@ private:
 	thread_state final_TS;
 	ctx_bound k_bound;
 
-
 	void parse_PDS(const string& filename);
 	thread_state parse_TS(const string& s);
 
 	/// build reachability automaton
-	finite_automaton init_reachability_automaton(const thread_config& c);
-	finite_automaton post_reachability_automaton(const finite_automaton& A);
+	finite_automaton compute_fsa();
+	finite_automaton compute_init_fsa(const thread_config& c);
+	finite_automaton compute_post_fsa(const finite_automaton& A);
 	void saturate();
 };
 
@@ -99,7 +99,7 @@ public:
 
 	~explore();
 
-	uint bounded_reachability(const size_t& n, const size_k& k);
+	void context_bounded_analysis(const size_t& n, const size_k& k);
 private:
 	///  Part 1: parse a pushdown system (PDS)
 	ctx_bound k_bound;
@@ -112,6 +112,9 @@ private:
 	adj_list PDS;
 
 	vector<vector<bool>> reachable_T;
+
+
+	uint bounded_reachability(const size_t& n, const size_k& k);
 
 	antichain step(const global_config& tau);
 	bool is_reachable(const global_config& tau, antichain& R);

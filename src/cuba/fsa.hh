@@ -104,6 +104,37 @@ private:
 	fsa_state accept_state;
 };
 
+inline ostream& operator<<(ostream& os, finite_automaton& fsa) {
+	if (fsa.get_transitions().size() == 0) {
+		return os;
+	}
+
+	auto m = fsa.get_transitions().size();
+	auto n = std::to_string(m).length() + 1;
+	os << algs::widthify("", n);
+	for (int i = 0; i < m; ++i) {
+		os << algs::widthify("q" + std::to_string(i), n, alignment::LEFTJUST);
+		os << " ";
+	}
+	os << "\n";
+	for (int i = 0; i < m; ++i) {
+		os << algs::widthify("q" + std::to_string(i), n, alignment::LEFTJUST);
+		os<<" ";
+		for (int j = 0; j < m; ++j) {
+			if (fsa.get_transitions()[i][j] == -2)
+				os << algs::widthify("-", n, alignment::CENTERED) << " ";
+			else if (fsa.get_transitions()[i][j] == -1)
+				os << algs::widthify("e", n, alignment::CENTERED) << " ";
+			else
+				os
+						<< algs::widthify(fsa.get_transitions()[i][j], n,
+								alignment::LEFTJUST) << " ";
+		}
+		os << "\n";
+	}
+	return os;
+}
+
 } /* namespace cuba */
 
 #endif /* CUBA_FSA_HH_ */

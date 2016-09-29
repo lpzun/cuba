@@ -8,7 +8,6 @@
 #include "cuba.hh"
 
 namespace cuba {
-
 /**
  * constructor
  * @param k     context switch bound
@@ -33,6 +32,17 @@ explore::explore(const ctx_bound& k, const thread_state& initl,
  */
 explore::~explore() {
 
+}
+
+
+/**
+ * The procedure of context-bounded analysis
+ * @param n: the number of threads
+ * @param k: the number of context switches
+ */
+void explore::context_bounded_analysis(const size_t& n, const size_k& k) {
+	auto size = bounded_reachability(n, k);
+	cout << "The number of reachable thread states is: " << size << endl;
 }
 
 /**

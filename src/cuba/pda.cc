@@ -10,7 +10,7 @@
 namespace cuba {
 
 int alphabet::EPSILON = -1;
-
+int alphabet::UNCONNECTED = -2;
 
 pushdown_automaton::pushdown_automaton() {
 }
