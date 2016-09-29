@@ -44,10 +44,10 @@ private:
 };
 
 /**
- * overloading
+ * overloading operator <<
  * @param os
  * @param r
- * @return
+ * @return ostream
  */
 inline ostream& operator<<(ostream& os, const fsa_transition& r) {
 	os << "(" << r.get_src();
@@ -56,11 +56,50 @@ inline ostream& operator<<(ostream& os, const fsa_transition& r) {
 	return os;
 }
 
+/**
+ * overloading operator <
+ * @param r1
+ * @param r2
+ * @return bool
+ */
 inline bool operator<(const fsa_transition& r1, const fsa_transition& r2) {
 	if (r1.get_src() == r2.get_src()) {
-
+		if (r1.get_dst() == r2.get_dst())
+			return r1.get_label() < r2.get_label();
+		return r1.get_dst() < r2.get_dst();
 	}
-	return r1.get_src() == r2.get_src();
+	return r1.get_src() < r2.get_src();
+}
+
+/**
+ * overloading operator >
+ * @param r1
+ * @param r2
+ * @return bool
+ */
+inline bool operator>(const fsa_transition& r1, const fsa_transition& r2) {
+	return r2 < r1;
+}
+
+/**
+ * overloading operator ==
+ * @param r1
+ * @param r2
+ * @return bool
+ */
+inline bool operator==(const fsa_transition& r1, const fsa_transition& r2) {
+	return (r1.get_src() == r2.get_src()) && (r1.get_dst() == r2.get_dst())
+			&& (r1.get_label() == r2.get_label());
+}
+
+/**
+ * overloading operator !=
+ * @param r1
+ * @param r2
+ * @return bool
+ */
+inline bool operator!=(const fsa_transition& r1, const fsa_transition& r2) {
+	return !(r1 == r2);
 }
 
 /// the data structure of FSA transitions
@@ -119,7 +158,7 @@ inline ostream& operator<<(ostream& os, finite_automaton& fsa) {
 	os << "\n";
 	for (int i = 0; i < m; ++i) {
 		os << algs::widthify("q" + std::to_string(i), n, alignment::LEFTJUST);
-		os<<" ";
+		os << " ";
 		for (int j = 0; j < m; ++j) {
 			if (fsa.get_transitions()[i][j] == -2)
 				os << algs::widthify("-", n, alignment::CENTERED) << " ";

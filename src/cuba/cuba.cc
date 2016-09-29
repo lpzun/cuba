@@ -211,6 +211,19 @@ finite_automaton CUBA::compute_post_fsa(const finite_automaton& A) {
 	auto delta = A.get_transitions();
 	auto accept = A.get_accept_state();
 
+	queue<fsa_transition> worklist;
+	deque<fsa_transition> explored;
+
+	unordered_map<int, fsa_state> mapping_r_to_assist_state;
+	for (auto i = 0; i < active_R.size(); ++i) {
+		mapping_r_to_assist_state.emplace(i, state++);
+	}
+
 	return finite_automaton(state, alpha, delta, accept);
 }
+
+void CUBA::saturate(fsa_delta& delta, const pda_rule& r) {
+
+}
+
 } /* namespace cuba */

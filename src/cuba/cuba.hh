@@ -21,6 +21,8 @@ using adj_list = map<vertex, deque<edge>>;
 
 using antichain = deque<global_config>;
 
+using pda_rule = pda_transition<vertex>;
+
 /////////////////////////////////////////////////////////////////////////
 /// PART 1. The following are the declarations for context-unbounded
 /// analysis.
@@ -36,7 +38,7 @@ private:
 	/// Part 1: parse a pushdown system (PDS)
 	vector<vector<vertex>> mapping_Q; /// mapping a control state to its ID
 	vector<thread_state> active_Q;       /// active control states
-	vector<pda_transition<vertex>> active_R; /// active transitions
+	vector<pda_rule> active_R; /// active transitions
 	adj_list PDS;
 
 	thread_state initl_TS;
@@ -50,7 +52,7 @@ private:
 	finite_automaton compute_fsa();
 	finite_automaton compute_init_fsa(const thread_config& c);
 	finite_automaton compute_post_fsa(const finite_automaton& A);
-	void saturate();
+	void saturate(fsa_delta& delta, const pda_rule& r);
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -112,7 +114,6 @@ private:
 	adj_list PDS;
 
 	vector<vector<bool>> reachable_T;
-
 
 	uint bounded_reachability(const size_t& n, const size_k& k);
 

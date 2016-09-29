@@ -8,6 +8,8 @@
 #ifndef UTILS_UTILITIES_HH_
 #define UTILS_UTILITIES_HH_
 
+#include <map>
+
 #include "../utils/heads.hh"
 
 namespace cuba {
