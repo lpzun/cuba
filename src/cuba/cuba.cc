@@ -204,10 +204,10 @@ finite_automaton CUBA::compute_post_fsa(const finite_automaton& A) {
 	auto alpha = A.get_alphabet();
 	auto delta = A.get_transitions();
 
-	unordered_map<int, fsa_state> mapping_r_to_assist_state;
+	unordered_map<int, fsa_state> map_r_to_aux_state;
 	for (auto i = 0; i < active_R.size(); ++i) {
 		if (active_R[i].get_oper_type() == type_stack_operation::PUSH)
-			mapping_r_to_assist_state.emplace(i, state++);
+			map_r_to_aux_state.emplace(i, state++);
 	}
 
 	deque<fsa_transition> worklist;
@@ -221,7 +221,6 @@ finite_automaton CUBA::compute_post_fsa(const finite_automaton& A) {
 	while (!worklist.empty()) {
 		const auto t = worklist.front(); /// FSA transition (p, a, q)
 		worklist.pop_front();
-
 //		cout << t << ":\n";
 
 		/// FSA transition (p, a, q)
@@ -255,9 +254,9 @@ finite_automaton CUBA::compute_post_fsa(const finite_automaton& A) {
 				}
 					break;
 				default: { /// push operation
-					const auto& q_new = mapping_r_to_assist_state[rid];
+					const auto& q_new = map_r_to_aux_state[rid];
 					worklist.emplace_back(_p, q_new, _a);
-					cout << " " << worklist.back() << "\n";
+//					cout << " " << worklist.back() << "\n";
 					explored[q_new].emplace(q_new, q, a);
 //					cout << " (" << q_new << "," << q << "," << a << ")"
 //							<< "\n";
@@ -278,12 +277,7 @@ finite_automaton CUBA::compute_post_fsa(const finite_automaton& A) {
 				worklist.emplace_back(p, _t.get_dst(), _t.get_label());
 		}
 	}
-
 	return finite_automaton(state, alpha, explored, A.get_accept_state());
-}
-
-void CUBA::saturate(fsa_delta& delta, const pda_rule& r) {
-
 }
 
 /**
