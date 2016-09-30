@@ -54,16 +54,8 @@ void CUBA::parse_PDS(const string& filename) {
 	vector<vector<bool>> visited(thread_state::S,
 			vector<bool>(thread_state::L, false));
 
-	cout << thread_state::S << " == " << thread_state::L << "\n";
 	mapping_Q = vector<vector<vertex>>(thread_state::S,
 			vector<vertex>(thread_state::L, 0));
-	for (int i = 0; i < mapping_Q.size(); ++i) {
-		for (int j = 0; j < mapping_Q[i].size(); ++j) {
-			cout << mapping_Q[i][j] << " ";
-		}
-		cout << "\n";
-	}
-	cout << "\n";
 	pda_state s1, s2; /// control states
 	pda_alpha l1, l2;  /// stack symbols
 	string sep;
@@ -74,7 +66,6 @@ void CUBA::parse_PDS(const string& filename) {
 		if (!visited[s1][l1]) {
 			active_Q.emplace_back(src_TS);
 			mapping_Q[s1][l1] = state_id;
-			cout << mapping_Q[s1][l1] << "\n";
 			src = state_id++;
 			visited[s1][l1] = true;
 		} else {
@@ -86,7 +77,6 @@ void CUBA::parse_PDS(const string& filename) {
 		if (!visited[s2][l2]) {
 			active_Q.emplace_back(dst_TS);
 			mapping_Q[s2][l2] = state_id;
-			cout << mapping_Q[s2][l2] << "\n";
 			dst = state_id++;
 			visited[s2][l2] = true;
 		} else {
@@ -106,13 +96,13 @@ void CUBA::parse_PDS(const string& filename) {
 	new_in.close();
 	active_Q.shrink_to_fit();
 
-	for (int i = 0; i < mapping_Q.size(); ++i) {
-		for (int j = 0; j < mapping_Q[i].size(); ++j) {
-			cout << mapping_Q[i][j] << " ";
-		}
-		cout << "\n";
-	}
-	cout << "\n";
+//	for (int i = 0; i < mapping_Q.size(); ++i) {
+//		for (int j = 0; j < mapping_Q[i].size(); ++j) {
+//			cout << mapping_Q[i][j] << " ";
+//		}
+//		cout << "\n";
+//	}
+//	cout << "\n";
 
 	if (prop::OPT_PRINT_ADJ || prop::OPT_PRINT_ALL) {
 		cout << "The original PDS: " << "\n";
@@ -162,6 +152,7 @@ thread_state CUBA::parse_TS(const string& s) {
  */
 void CUBA::context_bounded_analysis(const size_t& n, const size_k& k) {
 	auto fsa = compute_fsa();
+	cout << "reachability automaton: \n";
 	cout << fsa << endl;
 }
 
@@ -170,7 +161,10 @@ finite_automaton CUBA::compute_fsa() {
 	w.push(initl_TS.get_symbol());
 	w.push(initl_TS.get_symbol());
 	thread_config c(initl_TS.get_state(), w);
-	return compute_init_fsa(c);
+	auto fsa = compute_init_fsa(c);
+	cout << "initial automaton: \n";
+	cout << fsa << endl;
+	return compute_post_fsa(fsa);
 }
 
 /**
@@ -179,6 +173,7 @@ finite_automaton CUBA::compute_fsa() {
  * @return a finite automaton
  */
 finite_automaton CUBA::compute_init_fsa(const thread_config& c) {
+	cout << c << endl;
 	fsa_state state_pda = thread_state::S;
 	fsa_alpha alpha_pda = thread_state::L;
 
@@ -211,7 +206,8 @@ finite_automaton CUBA::compute_post_fsa(const finite_automaton& A) {
 
 	unordered_map<int, fsa_state> mapping_r_to_assist_state;
 	for (auto i = 0; i < active_R.size(); ++i) {
-		mapping_r_to_assist_state.emplace(i, state++);
+		if (active_R[i].get_oper_type() == type_stack_operation::PUSH)
+			mapping_r_to_assist_state.emplace(i, state++);
 	}
 
 	deque<fsa_transition> worklist;
@@ -221,45 +217,55 @@ finite_automaton CUBA::compute_post_fsa(const finite_automaton& A) {
 	/// initialize the worklist
 	for (const auto& p : delta)
 		worklist.insert(worklist.begin(), p.second.begin(), p.second.end());
+
 	while (!worklist.empty()) {
 		const auto t = worklist.front(); /// FSA transition (p, a, q)
 		worklist.pop_front();
 
+//		cout << t << ":\n";
+
 		/// FSA transition (p, a, q)
 		const auto& p = t.get_src();
+		const auto& a = t.get_label();
 		const auto& q = t.get_dst();
 
 		const auto& ret = explored[p].insert(t);
-		if (!ret.second)
+		if (!ret.second || p >= thread_state::S)
 			continue;
 
-		if (t.get_label() != alphabet::EPSILON) { /// if label != epsilon
-			const auto& pda_transs = PDS[retrieve(p, q)];
+		if (a != alphabet::EPSILON) { /// if label != epsilon
+			const auto& pda_transs = PDS[retrieve(p, a)];
 			for (const auto& rid : pda_transs) {
 				/// (p, a) -> (p', a')
 				const auto& r = active_R[rid]; /// PDA transition
 				const auto& _p = active_Q[r.get_dst()].get_state(); /// state
 				const auto& _a = active_Q[r.get_dst()].get_symbol(); /// label
+//				cout << " " << active_Q[r.get_src()] << r.get_oper_type()
+//						<< "->" << active_Q[r.get_dst()] << "\n";
 
 				switch (r.get_oper_type()) {
 				case type_stack_operation::POP: { /// pop operation
 					worklist.emplace_back(_p, q, alphabet::EPSILON);
+//					cout << " " << worklist.back() << "\n";
 				}
 					break;
 				case type_stack_operation::OVERWRITE: { /// overwrite operation
 					worklist.emplace_back(_p, q, _a);
+//					cout << " " << worklist.back() << "\n";
 				}
 					break;
 				default: { /// push operation
 					const auto& q_new = mapping_r_to_assist_state[rid];
 					worklist.emplace_back(_p, q_new, _a);
-					explored[q_new].emplace(q_new, q, alphabet::EPSILON);
+					cout << " " << worklist.back() << "\n";
+					explored[q_new].emplace(q_new, q, a);
+//					cout << " (" << q_new << "," << q << "," << a << ")"
+//							<< "\n";
 
 					const auto& fsa_transs = reversed[q_new];
 					for (const auto& _t : fsa_transs) {
 						if (_t.get_label() == alphabet::EPSILON)
-							worklist.emplace_back(_t.get_src(), q_new,
-									alphabet::EPSILON);
+							worklist.emplace_back(_t.get_src(), q_new, a);
 					}
 					reversed[q_new].emplace(_p, q_new, _a);
 				}
@@ -269,11 +275,11 @@ finite_automaton CUBA::compute_post_fsa(const finite_automaton& A) {
 		} else { /// if label == epsilon
 			const auto& fsa_transs = explored[q];
 			for (const auto& _t : fsa_transs)  /// _t = (q, a', q')
-				worklist.emplace_back(p, _t.get_dst(), t.get_label());
+				worklist.emplace_back(p, _t.get_dst(), _t.get_label());
 		}
 	}
 
-	return finite_automaton(state, alpha, delta, A.get_accept_state());
+	return finite_automaton(state, alpha, explored, A.get_accept_state());
 }
 
 void CUBA::saturate(fsa_delta& delta, const pda_rule& r) {

@@ -50,8 +50,11 @@ private:
  * @return ostream
  */
 inline ostream& operator<<(ostream& os, const fsa_transition& r) {
-	os << "(" << r.get_src();
-	os << "," << r.get_label();
+	os << "(" << r.get_src() << ",";
+	if (r.get_label() == -1)
+		os << 'e';
+	else
+		os << r.get_label();
 	os << "," << r.get_dst() << ")";
 	return os;
 }
@@ -140,14 +143,13 @@ private:
 	fsa_state states;        /// 0...states-1
 	fsa_alpha alphabet;      ///
 	fsa_delta transitions;   ///
-	fsa_state accept_state;
+	fsa_state accept_state;  /// accept state
 };
 
 inline ostream& operator<<(ostream& os, finite_automaton& fsa) {
 	for (const auto& p : fsa.get_transitions()) {
-		for(const auto& r: p.second) {
+		for (const auto& r : p.second)
 			cout << r << "\n";
-		}
 	}
 	return os;
 }
