@@ -41,12 +41,12 @@ private:
 	vector<pda_rule> active_R; /// active transitions
 	adj_list PDS;
 
-	thread_state initl_TS;
-	thread_state final_TS;
+	thread_config initl_c;
+	thread_config final_c;
 	ctx_bound k_bound;
 
-	void parse_PDS(const string& filename);
-	thread_state parse_TS(const string& s);
+	void parse_input_pda(const string& filename);
+	thread_config parse_input_cfg(const string& s);
 
 	/// build reachability automaton
 	finite_automaton compute_fsa();
@@ -65,6 +65,11 @@ public:
 			const string& comment);
 	static void remove_comments(const string& in, string& out,
 			const string& comment);
+
+	static thread_config create_thread_config_from_str(const string& s_ts,
+			const char& delim = '|');
+	static global_config create_global_config_from_str(const string& s_ts,
+			const char& delim = '|');
 
 	static thread_state create_thread_state_from_str(const string& s_ts,
 			const char& delim = '|');

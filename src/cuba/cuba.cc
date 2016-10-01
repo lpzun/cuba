@@ -10,11 +10,11 @@
 namespace cuba {
 
 CUBA::CUBA(const string& filename, const string& initl, const string& final) :
-		mapping_Q(), active_Q(), active_R(), PDS(), initl_TS(), final_TS(), //
+		mapping_Q(), active_Q(), active_R(), PDS(), initl_c(), final_c(), //
 		k_bound(1) {
-	parse_PDS(filename);
-	initl_TS = parse_TS(initl);
-	final_TS = parse_TS(final);
+	parse_input_pda(filename);
+	initl_c = parse_input_cfg(initl);
+	final_c = parse_input_cfg(final);
 }
 
 CUBA::~CUBA() {
@@ -29,7 +29,7 @@ CUBA::~CUBA() {
  * To parse the input PDS
  * @param filename
  */
-void CUBA::parse_PDS(const string& filename) {
+void CUBA::parse_input_pda(const string& filename) {
 	if (filename == "X")
 		throw cuba_runtime_error("Please assign the input file!");
 
@@ -124,7 +124,7 @@ void CUBA::parse_PDS(const string& filename) {
  * @param s
  * @return thread state
  */
-thread_state CUBA::parse_TS(const string& s) {
+thread_config CUBA::parse_input_cfg(const string& s) {
 	if (s.find('|') == std::string::npos) { /// s is store in a file
 		ifstream in(s.c_str());
 		if (in.good()) {
@@ -137,7 +137,7 @@ thread_state CUBA::parse_TS(const string& s) {
 					"parse_input_SS: input state file is unknown!");
 		}
 	}
-	return pds_parser::create_thread_state_from_str(s);
+	return pds_parser::create_thread_config_from_str(s);
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -157,11 +157,7 @@ void CUBA::context_bounded_analysis(const size_t& n, const size_k& k) {
 }
 
 finite_automaton CUBA::compute_fsa() {
-	sstack w;
-	w.push(initl_TS.get_symbol());
-	w.push(initl_TS.get_symbol());
-	thread_config c(initl_TS.get_state(), w);
-	auto fsa = compute_init_fsa(c);
+	auto fsa = compute_init_fsa(initl_c);
 	cout << "initial automaton: \n";
 	cout << fsa << endl;
 	return compute_post_fsa(fsa);
@@ -197,7 +193,7 @@ finite_automaton CUBA::compute_init_fsa(const thread_config& c) {
 /**
  * build the reachability automaton for a finite automaton
  * @param A
- * @return
+ * @return a finite automaton
  */
 finite_automaton CUBA::compute_post_fsa(const finite_automaton& A) {
 	auto state = A.get_states();

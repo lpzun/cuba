@@ -9,20 +9,18 @@
 
 namespace cuba {
 
-/**
- * @brief split a string into a vector of strings via a delimiter
- * @param s: object string
- * @param delim: a delimiter
- * @return a vector of string
- */
-deque<string> pds_parser::split(const string &s, const char& delim) {
-    deque<string> elems;
-    std::stringstream ss(s);
-    string item;
-    while (std::getline(ss, item, delim)) {
-        elems.emplace_back(item);
-    }
-    return elems;
+thread_config pds_parser::create_thread_config_from_str(const string& s_ts,
+		const char& delim) {
+	const auto& vs_tg = split(s_ts, delim);
+	if (vs_tg.size() != 2) {
+		throw("The format of thread configuration is wrong!");
+	}
+	const auto& symbols = split(vs_tg[1], ',');
+	sstack w;
+	for(const auto& s: symbols) {
+		w.push(std::stoi(s));
+	}
+	return thread_config(std::stoi(vs_tg[0]), w);
 }
 
 /**
@@ -32,12 +30,12 @@ deque<string> pds_parser::split(const string &s, const char& delim) {
  * @return bool
  */
 thread_state pds_parser::create_thread_state_from_str(const string& s_ts,
-        const char& delim) {
-    deque<string> vs_ts = pds_parser::split(s_ts, delim);
-    if (vs_ts.size() != 2) {
-        throw("The format of thread state is wrong.");
-    }
-    return thread_state(std::stoi(vs_ts[0]), stoi(vs_ts[1]));
+		const char& delim) {
+	deque<string> vs_ts = split(s_ts, delim);
+	if (vs_ts.size() != 2) {
+		throw("The format of thread state is wrong.");
+	}
+	return thread_state(std::stoi(vs_ts[0]), stoi(vs_ts[1]));
 }
 
 /**
@@ -47,9 +45,9 @@ thread_state pds_parser::create_thread_state_from_str(const string& s_ts,
  * @param comment
  */
 void pds_parser::remove_comments(istream& in, const string& filename,
-        const string& comment) {
-    ofstream out(filename.c_str());
-    remove_comments(in, out, comment);
+		const string& comment) {
+	ofstream out(filename.c_str());
+	remove_comments(in, out, comment);
 }
 
 /**
@@ -61,16 +59,16 @@ void pds_parser::remove_comments(istream& in, const string& filename,
  * @return type_stack_operation
  */
 type_stack_operation pds_parser::parse_type_stack_operation(const char& c) {
-    switch (c) {
-    case '+':
-        return type_stack_operation::PUSH;
-    case '-':
-        return type_stack_operation::POP;
-    case '!':
-        return type_stack_operation::OVERWRITE;
-    default:
-        throw cuba_runtime_error("illegal transition!");
-    }
+	switch (c) {
+	case '+':
+		return type_stack_operation::PUSH;
+	case '-':
+		return type_stack_operation::POP;
+	case '!':
+		return type_stack_operation::OVERWRITE;
+	default:
+		throw cuba_runtime_error("illegal transition!");
+	}
 }
 
 /**
@@ -82,16 +80,16 @@ type_stack_operation pds_parser::parse_type_stack_operation(const char& c) {
  * @return type_synchronization
  */
 type_synchronization pds_parser::parse_type_synchronization(const char& c) {
-    switch (c) {
-    case '+':
-        return type_synchronization::FORK;
-    case '~':
-        return type_synchronization::BRCT;
-    case '-':
-        return type_synchronization::NORM;
-    default:
-        throw cuba_runtime_error("illegal transition!");
-    }
+	switch (c) {
+	case '+':
+		return type_synchronization::FORK;
+	case '~':
+		return type_synchronization::BRCT;
+	case '-':
+		return type_synchronization::NORM;
+	default:
+		throw cuba_runtime_error("illegal transition!");
+	}
 }
 
 /**
@@ -101,11 +99,11 @@ type_synchronization pds_parser::parse_type_synchronization(const char& c) {
  * @param comment
  */
 void pds_parser::remove_comments(const string& in, string& out,
-        const string& comment) {
-    std::istringstream instream(in);
-    std::ostringstream outstream;
-    remove_comments(instream, outstream, comment);
-    out = outstream.str();
+		const string& comment) {
+	std::istringstream instream(in);
+	std::ostringstream outstream;
+	remove_comments(instream, outstream, comment);
+	out = outstream.str();
 }
 
 /**
@@ -115,14 +113,14 @@ void pds_parser::remove_comments(const string& in, string& out,
  * @param comment
  */
 void pds_parser::remove_comments(istream& in, ostream& out,
-        const string& comment) {
-    string line;
-    while (getline(in, line = "")) {
-        auto comment_start = line.find(comment);
-        out
-                << (comment_start == string::npos ?
-                        line : line.substr(0, comment_start)) << endl;
-    }
+		const string& comment) {
+	string line;
+	while (getline(in, line = "")) {
+		auto comment_start = line.find(comment);
+		out
+				<< (comment_start == string::npos ?
+						line : line.substr(0, comment_start)) << endl;
+	}
 }
 
 /**
@@ -133,10 +131,26 @@ void pds_parser::remove_comments(istream& in, ostream& out,
  * @return bool
  */
 bool pds_parser::getline(istream& in, string& line, const char& eol) {
-    char c = 0;
-    while (in.get(c) ? c != eol : false)
-        line += c;
-    return c != 0;
+	char c = 0;
+	while (in.get(c) ? c != eol : false)
+		line += c;
+	return c != 0;
+}
+
+/**
+ * @brief split a string into a vector of strings via a delimiter
+ * @param s: object string
+ * @param delim: a delimiter
+ * @return a vector of string
+ */
+deque<string> pds_parser::split(const string &s, const char& delim) {
+	deque<string> elems;
+	std::stringstream ss(s);
+	string item;
+	while (std::getline(ss, item, delim)) {
+		elems.emplace_back(item);
+	}
+	return elems;
 }
 
 } /* namespace cuba */

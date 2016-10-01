@@ -144,12 +144,48 @@ private:
 	fsa_alpha alphabet;      ///
 	fsa_delta transitions;   ///
 	fsa_state accept_state;  /// accept state
+  //fsa_state_set initials;
 };
 
+/**
+ * overloading operator <<
+ * @param os
+ * @param fsa
+ * @return ostream
+ */
 inline ostream& operator<<(ostream& os, finite_automaton& fsa) {
+	if (fsa.get_states() == 0)
+		return os;
+
+	/// matrix ...
+	vector<vector<string>> matrix(fsa.get_states(),
+			vector<string>(fsa.get_states(), ""));
 	for (const auto& p : fsa.get_transitions()) {
-		for (const auto& r : p.second)
-			cout << r << "\n";
+		for (const auto& r : p.second) {
+			if (matrix[r.get_src()][r.get_dst()].length() > 0)
+				matrix[r.get_src()][r.get_dst()].push_back(',');
+			if (r.get_label() == -1)
+				matrix[r.get_src()][r.get_dst()] += "e";
+			else
+				matrix[r.get_src()][r.get_dst()] += std::to_string(
+						r.get_label());
+		}
+	}
+
+	auto m = matrix.size();
+	auto n = std::to_string(m).length() + 1;
+	os << algs::widthify("", n);
+	for (int i = 0; i < m; ++i) {
+		os << algs::widthify("q" + std::to_string(i), n, alignment::LEFTJUST);
+		os << "|";
+	}
+	os << "\n";
+	for (int i = 0; i < m; ++i) {
+		os << algs::widthify("q" + std::to_string(i), n, alignment::LEFTJUST);
+		os << "|";
+		for (int j = 0; j < m; ++j)
+			os << algs::widthify(matrix[i][j], n, alignment::CENTERED) << " ";
+		os << "\n";
 	}
 	return os;
 }
