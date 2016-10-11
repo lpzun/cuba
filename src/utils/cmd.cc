@@ -39,6 +39,36 @@ template<class T> string widthify(const T& x, const ushort& width,
 	return result;
 }
 
+string cmd_line::get_opt_types(const opt_type& opt) {
+	switch (opt) {
+	case opt_type::PROB:
+		return "Problem instance:";
+	case opt_type::SEQ:
+		return "Sequential mode:";
+	case opt_type::CON:
+		return "Concurrent mode:";
+	case opt_type::OTHER:
+		return "Other options:";
+	default:
+		return "";
+	}
+}
+
+short cmd_line::get_opt_index(const opt_type& opt) {
+	switch (opt) {
+	case opt_type::PROB:
+		return 1;
+	case opt_type::SEQ:
+		return 2;
+	case opt_type::CON:
+		return 3;
+	case opt_type::OTHER:
+		return 4;
+	default:
+		return 0;
+	}
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 ///////////////////////////////////////////////////////////////////////////////
@@ -248,45 +278,55 @@ void cmd_line::print_usage_info(const string& prog_name, const ushort& indent,
 	}
 }
 
+/**
+ * @brief create argument list
+ */
 void cmd_line::create_argument_list() {
-	vector<string> types(opts_types(), "");
-	types[1] = "Problem instance:";
-	types[2] = "Exploration mode:";
-	types[3] = "Other options:";
+	vector<string> types { ///
+	get_opt_types(opt_type::DEFAULT), ///
+	get_opt_types(opt_type::PROB), ///
+	get_opt_types(opt_type::SEQ),  ///
+	get_opt_types(opt_type::CON),  ///
+	get_opt_types(opt_type::OTHER) };
 
 	v_info = create_version_info();
 
 	this->set_types(types);
-	this->add_switch(default_opts(), SHORT_HELP_OPT, LONG_HELP_OPT,
-			"help information");
+	this->add_switch(get_opt_index(opt_type::OTHER), SHORT_HELP_OPT,
+			LONG_HELP_OPT, "help information");
 
 	/// problem instance
-	this->add_option(prob_inst_opts(), "-f", "--input-file",
-			"a input pushdown system", "X");
+	this->add_option(get_opt_index(opt_type::PROB), "-f", "--input-file",
+			"an input pushdown system", "X");
 
-	this->add_option(prob_inst_opts(), "-a", "--target",
-			"a target thread state", "0|0");
-	this->add_option(prob_inst_opts(), "-i", "--initial",
-			"an initial thread state", "0|0");
+	this->add_option(get_opt_index(opt_type::PROB), "-a", "--target",
+			"a target thread configuration", "0|0,1,2");
+	this->add_option(get_opt_index(opt_type::PROB), "-i", "--initial",
+			"an initial thread configuration", "0|0,1,2");
+	this->add_switch(get_opt_index(opt_type::PROB), "-l", "--pushdown",
+			"show the pushdown system");
 
-	this->add_switch(prob_inst_opts(), "-l", "--adj-list",
-			"show the adjacency list");
+	/// sequential mode
+	this->add_switch(get_opt_index(opt_type::SEQ), "-s", "--sequential",
+			"the sequential mode");
+	this->add_switch(get_opt_index(opt_type::SEQ), "-r", "--reachability",
+			"check the reachability of the target");
 
-	/// exploration mode
-//    this->add_option(exp_mode_opts(), "-m", "--mode",
-//            "\"S\" sequential BSSP; \"S\" concurrent BSSP", "S");
-	this->add_option(exp_mode_opts(), "-n", "--threads",
+	/// concurrent mode
+	this->add_switch(get_opt_index(opt_type::CON), "-c", "--concurrent",
+			"the concurrent mode");
+	this->add_option(get_opt_index(opt_type::CON), "-n", "--threads",
 			"the number of threads", "1");
-	this->add_option(exp_mode_opts(), "-k", "--context-bound",
+	this->add_option(get_opt_index(opt_type::CON), "-k", "--ctx-bound",
 			"the bound of context switches", "1");
 
 	/// other options
-	this->add_switch(other_opts(), "-cmd", "--cmd-line",
+	this->add_switch(get_opt_index(opt_type::OTHER), "-cmd", "--cmd-line",
 			"show the command line");
-	this->add_switch(other_opts(), "-all", "--all",
+	this->add_switch(get_opt_index(opt_type::OTHER), "-all", "--all",
 			"show all of above messages");
-	this->add_switch(other_opts(), SHORT_VERSION_OPT, LONG_VERSION_OPT,
-			"show version information and exit");
+	this->add_switch(get_opt_index(opt_type::OTHER), SHORT_VERSION_OPT,
+			LONG_VERSION_OPT, "show version information and exit");
 }
 
 string cmd_line::create_version_info() {
@@ -296,7 +336,7 @@ string cmd_line::create_version_info() {
 	.append("* *     _/         _/    _/    _/     _/    _/    _/    * *\n") ///
 	.append("* *    _/         _/    _/    _/_/_/_/     _/_/_/_/     * *\n") ///
 	.append("* *    _/        _/    _/    _/     _/    _/    _/      * *\n") ///
-	.append("* *    _/_/_/    _/_/_/     _/_/_/_/     _/    _/  " + VERSION ///
+	.append("* *    _/_/_/    _/_/_/     _/_/_/_/     _/    _/  " + VERSION  ///
 			+ " * *\n") ///
 	.append("-----------------------------------------------------------\n") ///
 	.append("* *           Context-Unbounded Analysis for            * *\n") ///

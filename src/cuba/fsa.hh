@@ -11,9 +11,15 @@
 #include "pda.hh"
 
 namespace cuba {
-
 using fsa_state = pda_state;
+/// a set of fas_state, here we use only one number, say n,
+/// it represents states 0...n
+using fsa_state_set = pda_state;
+
 using fsa_alpha = pda_alpha;
+/// a set of fas_alpha, here we use only one number, say n,
+/// it represents alphas 0...n
+using fsa_alphabet = pda_alpha;
 
 /**
  * Definition of finite automaton transition
@@ -25,16 +31,16 @@ public:
 			const fsa_alpha& label);
 	~fsa_transition();
 
+	fsa_state get_src() const {
+		return src;
+	}
+
 	fsa_state get_dst() const {
 		return dst;
 	}
 
 	fsa_alpha get_label() const {
 		return label;
-	}
-
-	fsa_state get_src() const {
-		return src;
 	}
 
 private:
@@ -113,38 +119,43 @@ using fsa_delta = unordered_map<fsa_state, set<fsa_transition>>;
  */
 class finite_automaton {
 public:
-	finite_automaton(const fsa_state& state, const fsa_alpha& alpha,
-			const fsa_delta& transitions, const fsa_state& accept);
-
-	finite_automaton(const fsa_state& state, const fsa_alpha& alpha,
+	finite_automaton(const fsa_state_set& states, const fsa_alphabet& alphabet,
+			const fsa_delta& transitions, const fsa_state_set& initials,
 			const fsa_state& accept);
+
+	finite_automaton(const fsa_state_set& states, const fsa_alphabet& alphabet,
+			const fsa_state_set& initials, const fsa_state& accept);
 
 	~finite_automaton();
 
+	fsa_state_set get_states() const {
+		return states;
+	}
+
+	fsa_alphabet get_alphabet() const {
+		return alphabet;
+	}
+
 	const fsa_delta& get_transitions() const {
 		return transitions;
+	}
+
+	fsa_state_set get_initials() const {
+		return initials;
 	}
 
 	fsa_state get_accept_state() const {
 		return accept_state;
 	}
 
-	fsa_alpha get_alphabet() const {
-		return alphabet;
-	}
-
-	fsa_state get_states() const {
-		return states;
-	}
-
 	void add_transitions(const fsa_transition& r);
 
 private:
-	fsa_state states;        /// 0...states-1
-	fsa_alpha alphabet;      ///
+	fsa_state_set states;    /// it represents state 0...|states|-1
+	fsa_alphabet alphabet;   ///
 	fsa_delta transitions;   ///
+	fsa_state_set initials;  ///
 	fsa_state accept_state;  /// accept state
-  //fsa_state_set initials;
 };
 
 /**
@@ -159,32 +170,34 @@ inline ostream& operator<<(ostream& os, finite_automaton& fsa) {
 
 	/// matrix ...
 	vector<vector<string>> matrix(fsa.get_states(),
-			vector<string>(fsa.get_states(), ""));
+			vector<string>(fsa.get_states() - fsa.get_initials(), ""));
 	for (const auto& p : fsa.get_transitions()) {
 		for (const auto& r : p.second) {
-			if (matrix[r.get_src()][r.get_dst()].length() > 0)
-				matrix[r.get_src()][r.get_dst()].push_back(',');
+			const int& i = r.get_src();
+			const int& j = r.get_dst() - fsa.get_initials();
+			if (matrix[i][j].length() > 0)
+				matrix[i][j].push_back(',');
 			if (r.get_label() == -1)
-				matrix[r.get_src()][r.get_dst()] += "e";
+				matrix[i][j] += "e";
 			else
-				matrix[r.get_src()][r.get_dst()] += std::to_string(
-						r.get_label());
+				matrix[i][j] += std::to_string(r.get_label());
 		}
 	}
 
 	auto m = matrix.size();
 	auto n = std::to_string(m).length() + 1;
-	os << algs::widthify("", n);
-	for (int i = 0; i < m; ++i) {
+	os << algs::widthify("", n + 2);
+	for (int i = fsa.get_initials(); i < m; ++i) {
 		os << algs::widthify("q" + std::to_string(i), n, alignment::LEFTJUST);
-		os << "|";
+		os << " | ";
 	}
 	os << "\n";
 	for (int i = 0; i < m; ++i) {
 		os << algs::widthify("q" + std::to_string(i), n, alignment::LEFTJUST);
 		os << "|";
-		for (int j = 0; j < m; ++j)
-			os << algs::widthify(matrix[i][j], n, alignment::CENTERED) << " ";
+		for (int j = 0; j < matrix[0].size(); ++j)
+			os << algs::widthify(matrix[i][j], n + 2, alignment::CENTERED)
+					<< " ";
 		os << "\n";
 	}
 	return os;

@@ -10,8 +10,7 @@
 namespace cuba {
 
 CUBA::CUBA(const string& filename, const string& initl, const string& final) :
-		mapping_Q(), active_Q(), active_R(), PDS(), initl_c(), final_c(), //
-		k_bound(1) {
+		mapping_Q(), active_Q(), active_R(), PDS(), initl_c(), final_c() {
 	parse_input_pda(filename);
 	initl_c = parse_input_cfg(initl);
 	final_c = parse_input_cfg(final);
@@ -187,7 +186,7 @@ finite_automaton CUBA::compute_init_fsa(const thread_config& c) {
 		q = s, ++s; /// update the final state
 	}
 
-	return finite_automaton(state_fsa, alpha_pda, delta, q);
+	return finite_automaton(state_fsa, alpha_pda, delta, state_pda, q);
 }
 
 /**
@@ -273,7 +272,8 @@ finite_automaton CUBA::compute_post_fsa(const finite_automaton& A) {
 				worklist.emplace_back(p, _t.get_dst(), _t.get_label());
 		}
 	}
-	return finite_automaton(state, alpha, explored, A.get_accept_state());
+	return finite_automaton(state, alpha, explored, A.get_initials(),
+			A.get_accept_state());
 }
 
 /**

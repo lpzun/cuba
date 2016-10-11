@@ -43,7 +43,6 @@ private:
 
 	thread_config initl_c;
 	thread_config final_c;
-	ctx_bound k_bound;
 
 	void parse_input_pda(const string& filename);
 	thread_config parse_input_cfg(const string& s);

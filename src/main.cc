@@ -24,23 +24,26 @@ int main(const int argc, const char * const * const argv) {
 			return 0;
 		}
 
-		prop::OPT_PRINT_ADJ = cmd.arg_bool(cmd_line::prob_inst_opts(),
-				"--adj-list");
+		prop::OPT_PRINT_ADJ = cmd.arg_bool(
+				cmd_line::get_opt_index(opt_type::PROB), "--pushdown");
 
-		prop::OPT_PRINT_CMD = cmd.arg_bool(cmd_line::other_opts(),
-				"--cmd-line");
-		prop::OPT_PRINT_ALL = cmd.arg_bool(cmd_line::other_opts(), "--all");
+		prop::OPT_PRINT_CMD = cmd.arg_bool(
+				cmd_line::get_opt_index(opt_type::OTHER), "--cmd-line");
+		prop::OPT_PRINT_ALL = cmd.arg_bool(
+				cmd_line::get_opt_index(opt_type::OTHER), "--all");
 
-		const string& filename = cmd.arg_value(cmd_line::prob_inst_opts(),
-				"--input-file");
-		const string& initl = cmd.arg_value(cmd_line::prob_inst_opts(),
-				"--initial");
-		const string& final = cmd.arg_value(cmd_line::prob_inst_opts(),
-				"--target");
+		const string& filename = cmd.arg_value(
+				cmd_line::get_opt_index(opt_type::PROB), "--input-file");
+		const string& initl = cmd.arg_value(
+				cmd_line::get_opt_index(opt_type::PROB), "--initial");
+		const string& final = cmd.arg_value(
+				cmd_line::get_opt_index(opt_type::PROB), "--target");
 
-		const string& n = cmd.arg_value(cmd_line::exp_mode_opts(), "--threads");
-		const string& k = cmd.arg_value(cmd_line::exp_mode_opts(),
-				"--context-bound");
+
+		const string& n = cmd.arg_value(cmd_line::get_opt_index(opt_type::CON),
+				"--threads");
+		const string& k = cmd.arg_value(cmd_line::get_opt_index(opt_type::CON),
+				"--ctx-bound");
 
 		CUBA cuba(filename, initl, final);
 		cuba.context_bounded_analysis(std::stoul(n), std::stoul(k));
