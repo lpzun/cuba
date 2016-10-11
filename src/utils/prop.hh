@@ -15,14 +15,16 @@ namespace cuba {
 
 class prop {
 public:
-    prop();
-    ~prop();
+	prop();
+	~prop();
 
-    static bool OPT_PRINT_ALL;
-    static bool OPT_PRINT_CMD;
-    static bool OPT_PRINT_ADJ;
+	static bool OPT_PRINT_ALL;
+	static bool OPT_PRINT_CMD;
+	static bool OPT_PRINT_ADJ;
 
-    static const string COMMENT;
+	static bool OPT_REACHABILITY;
+
+	static const string COMMENT;
 };
 
 } /* namespace cuba */

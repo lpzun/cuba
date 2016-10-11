@@ -150,16 +150,29 @@ thread_config CUBA::parse_input_cfg(const string& s) {
  * @param k: the number of context switches
  */
 void CUBA::context_bounded_analysis(const size_t& n, const size_k& k) {
-	auto fsa = compute_fsa();
+	auto fsa = create_reachability_automaton();
 	cout << "reachability automaton: \n";
 	cout << fsa << endl;
+	if (prop::OPT_REACHABILITY) {
+		cout << final_c << " ";
+		if (recongize(fsa, final_c))
+			cout << "is reachable";
+		else
+			cout << "is unreachable";
+		cout << "\n";
+	}
+
 }
 
-finite_automaton CUBA::compute_fsa() {
-	auto fsa = compute_init_fsa(initl_c);
+/**
+ * The procedure of building the reachability automaton FSA for a PDA
+ * @return a finite automaton
+ */
+finite_automaton CUBA::create_reachability_automaton() {
+	auto fsa = create_init_fsa(initl_c);
 	cout << "initial automaton: \n";
 	cout << fsa << endl;
-	return compute_post_fsa(fsa);
+	return create_post_kleene_fsa(fsa);
 }
 
 /**
@@ -167,7 +180,7 @@ finite_automaton CUBA::compute_fsa() {
  * @param c: an initial configuration
  * @return a finite automaton
  */
-finite_automaton CUBA::compute_init_fsa(const thread_config& c) {
+finite_automaton CUBA::create_init_fsa(const thread_config& c) {
 	cout << c << endl;
 	fsa_state state_pda = thread_state::S;
 	fsa_alpha alpha_pda = thread_state::L;
@@ -194,7 +207,7 @@ finite_automaton CUBA::compute_init_fsa(const thread_config& c) {
  * @param A
  * @return a finite automaton
  */
-finite_automaton CUBA::compute_post_fsa(const finite_automaton& A) {
+finite_automaton CUBA::create_post_kleene_fsa(const finite_automaton& A) {
 	auto state = A.get_states();
 	auto alpha = A.get_alphabet();
 	auto delta = A.get_transitions();
@@ -234,27 +247,20 @@ finite_automaton CUBA::compute_post_fsa(const finite_automaton& A) {
 				const auto& r = active_R[rid]; /// PDA transition
 				const auto& _p = active_Q[r.get_dst()].get_state(); /// state
 				const auto& _a = active_Q[r.get_dst()].get_symbol(); /// label
-//				cout << " " << active_Q[r.get_src()] << r.get_oper_type()
-//						<< "->" << active_Q[r.get_dst()] << "\n";
 
 				switch (r.get_oper_type()) {
 				case type_stack_operation::POP: { /// pop operation
 					worklist.emplace_back(_p, q, alphabet::EPSILON);
-//					cout << " " << worklist.back() << "\n";
 				}
 					break;
 				case type_stack_operation::OVERWRITE: { /// overwrite operation
 					worklist.emplace_back(_p, q, _a);
-//					cout << " " << worklist.back() << "\n";
 				}
 					break;
 				default: { /// push operation
 					const auto& q_new = map_r_to_aux_state[rid];
 					worklist.emplace_back(_p, q_new, _a);
-//					cout << " " << worklist.back() << "\n";
 					explored[q_new].emplace(q_new, q, a);
-//					cout << " (" << q_new << "," << q << "," << a << ")"
-//							<< "\n";
 
 					const auto& fsa_transs = reversed[q_new];
 					for (const auto& _t : fsa_transs) {
@@ -284,6 +290,58 @@ finite_automaton CUBA::compute_post_fsa(const finite_automaton& A) {
  */
 vertex CUBA::retrieve(const pda_state& s, const pda_alpha& l) {
 	return mapping_Q[s][l];
+}
+
+/**
+ * To determine whether c is reachable in the PDA
+ * @param fsa : a reachability automaton
+ * @param c   : a configuration
+ * @return bool
+ *         true : if c is reachable
+ *         false: otherwise.
+ */
+bool CUBA::recongize(const finite_automaton& fsa, const thread_config& c) {
+	if (c.get_state() >= fsa.get_initials())
+		throw cuba_runtime_error("c's control state is illegal!");
+
+	queue<pair<fsa_state, int>> worklist;
+	worklist.emplace(c.get_state(), 0);
+
+	const auto& w = c.get_stack();
+	while (!worklist.empty()) {
+		const auto u = worklist.front();
+		worklist.pop();
+
+		const auto& state = u.first;
+		const auto& depth = u.second;
+
+		auto ifind = fsa.get_transitions().find(state);
+		if (ifind == fsa.get_transitions().end())
+			continue;
+
+		for (const auto& r : ifind->second)
+			if (r.get_label() == w.get_worklist()[depth]) {
+				if (depth + 1 == w.size()) {
+					if (r.get_dst() == fsa.get_accept_state())
+						return true;
+				} else {
+					worklist.emplace(r.get_dst(), depth + 1);
+				}
+			}
+	}
+	return false;
+}
+
+/**
+ * Determine the equivalence of two finite automatons. This implementation
+ * is based on the Hopcroft-Karp algorithm.
+ * @param fsa1
+ * @param fsa2
+ * @return bool
+ */
+bool CUBA::equivalent(const finite_automaton& fsa1,
+		const finite_automaton& fsa2) {
+	return true;
 }
 
 } /* namespace cuba */

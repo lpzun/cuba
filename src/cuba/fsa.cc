@@ -44,13 +44,14 @@ fsa_transition::~fsa_transition() {
  * @param state
  * @param alpha
  * @param transs
+ * @param initials
  * @param accept
  */
 finite_automaton::finite_automaton(const fsa_state_set& states,
 		const fsa_alphabet& alphabet, const fsa_delta& transitions,
 		const fsa_state_set& initials, const fsa_state& accept) :
-		states(states), alphabet(alphabet), transitions(transitions), initials(
-				initials), accept_state(accept) {
+		states(states), alphabet(alphabet), transitions(transitions), ///
+		initials(initials), accept_state(accept) {
 
 }
 
@@ -59,13 +60,14 @@ finite_automaton::finite_automaton(const fsa_state_set& states,
  * and the accept state
  * @param state
  * @param alpha
+ * @param initials
  * @param accept
  */
 finite_automaton::finite_automaton(const fsa_state_set& states,
 		const fsa_alphabet& alphabet, const fsa_state_set& initials,
 		const fsa_state& accept) :
-		states(states), alphabet(alphabet), transitions(), initials(initials), ///
-		accept_state(accept) {
+		states(states), alphabet(alphabet), transitions(), ///
+		initials(initials), accept_state(accept) {
 
 }
 

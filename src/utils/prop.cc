@@ -10,17 +10,19 @@
 namespace cuba {
 
 prop::prop() {
-    // TODO Auto-generated constructor stub
+	// TODO Auto-generated constructor stub
 
 }
 
 prop::~prop() {
-    // TODO Auto-generated destructor stub
+	// TODO Auto-generated destructor stub
 }
 
 bool prop::OPT_PRINT_ADJ = false;
 bool prop::OPT_PRINT_CMD = false;
 bool prop::OPT_PRINT_ALL = false;
+
+bool prop::OPT_REACHABILITY = false;
 
 const string prop::COMMENT = "#";
 

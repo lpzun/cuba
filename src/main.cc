@@ -39,11 +39,13 @@ int main(const int argc, const char * const * const argv) {
 		const string& final = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--target");
 
-
 		const string& n = cmd.arg_value(cmd_line::get_opt_index(opt_type::CON),
 				"--threads");
 		const string& k = cmd.arg_value(cmd_line::get_opt_index(opt_type::CON),
 				"--ctx-bound");
+
+		prop::OPT_REACHABILITY = cmd.arg_bool(
+				cmd_line::get_opt_index(opt_type::SEQ), "--reachability");
 
 		CUBA cuba(filename, initl, final);
 		cuba.context_bounded_analysis(std::stoul(n), std::stoul(k));

@@ -9,8 +9,17 @@
 
 namespace cmd {
 
-template<class T> string widthify(const T& x, const ushort& width,
-		const alignment& c, const char& fill) {
+/**
+ *
+ * @param x
+ * @param width
+ * @param c
+ * @param fill
+ * @return
+ */
+template<class T>
+string widthify(const T& x, const ushort& width, const alignment& c,
+		const char& fill) {
 	std::ostringstream os;
 	os << x;
 	string s = os.str();
@@ -39,6 +48,11 @@ template<class T> string widthify(const T& x, const ushort& width,
 	return result;
 }
 
+/**
+ *
+ * @param opt
+ * @return
+ */
 string cmd_line::get_opt_types(const opt_type& opt) {
 	switch (opt) {
 	case opt_type::PROB:
@@ -54,6 +68,10 @@ string cmd_line::get_opt_types(const opt_type& opt) {
 	}
 }
 
+/**
+ *
+ * @param opt
+ */
 short cmd_line::get_opt_index(const opt_type& opt) {
 	switch (opt) {
 	case opt_type::PROB:
@@ -329,6 +347,9 @@ void cmd_line::create_argument_list() {
 			LONG_VERSION_OPT, "show version information and exit");
 }
 
+/**
+ * @return version information
+ */
 string cmd_line::create_version_info() {
 	string info = ""; ///
 	info ///

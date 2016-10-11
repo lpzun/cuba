@@ -48,10 +48,12 @@ private:
 	thread_config parse_input_cfg(const string& s);
 
 	/// build reachability automaton
-	finite_automaton compute_fsa();
-	finite_automaton compute_init_fsa(const thread_config& c);
-	finite_automaton compute_post_fsa(const finite_automaton& A);
+	finite_automaton create_reachability_automaton();
+	finite_automaton create_init_fsa(const thread_config& c);
+	finite_automaton create_post_kleene_fsa(const finite_automaton& A);
 	vertex retrieve(const pda_state& s, const pda_alpha& l);
+	bool recongize(const finite_automaton& fsa, const thread_config& c);
+	bool equivalent(const finite_automaton& fsa1, const finite_automaton& fsa2);
 };
 
 /////////////////////////////////////////////////////////////////////////
