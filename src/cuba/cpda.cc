@@ -98,8 +98,7 @@ global_state::global_state(const pda_state& s, const size_t& n) :
  * @param s
  * @param L
  */
-global_state::global_state(const pda_state& s,
-		const vector<pda_alpha>& L) :
+global_state::global_state(const pda_state& s, const vector<pda_alpha>& L) :
 		s(s), L(L) {
 
 }
@@ -189,5 +188,39 @@ global_state global_config::top() {
 	}
 	return global_state(s, L);
 }
+/////////////////////////////////////////////////////////////////////////
+/// PART 2. The data structure for aggregate configuration
+///
+/////////////////////////////////////////////////////////////////////////
 
+/**
+ * constructor with control state g and a list of finite automaton W
+ * @param g
+ * @param W
+ */
+aggregate_config::aggregate_config(const pda_state& g,
+		const vector<finite_automaton>& W) :
+		g(g), W(W) {
+
+}
+
+/**
+ * constructor control state g, the number of finite automation, and a
+ * finite automaton
+ * @param g
+ * @param n
+ * @param A
+ */
+aggregate_config::aggregate_config(const pda_state& g, const size_t&n,
+		const finite_automaton& A) :
+		g(g), W(n, A) {
+
+}
+
+/**
+ * destructor
+ */
+aggregate_config::~aggregate_config() {
+
+}
 } /* namespace bssp */

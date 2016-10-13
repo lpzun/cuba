@@ -17,6 +17,7 @@
 #define CUBA_CPDA_HH_
 
 #include "pda.hh"
+#include "fsa.hh"
 
 namespace cuba {
 
@@ -119,10 +120,10 @@ inline bool operator!=(const global_state& g1, const global_state& g2) {
 class global_config {
 public:
 	global_config(const pda_state& s, const size_t& n);
-	global_config(const id_thread& id, const ctx_bound& k,
-			const pda_state& s, const size_t& n);
-	global_config(const id_thread& id, const ctx_bound& k,
-			const pda_state& s, const stack_vec& W);
+	global_config(const id_thread& id, const ctx_bound& k, const pda_state& s,
+			const size_t& n);
+	global_config(const id_thread& id, const ctx_bound& k, const pda_state& s,
+			const stack_vec& W);
 	global_config(const global_config& g);
 	~global_config();
 
@@ -223,6 +224,22 @@ inline bool operator==(const global_config& g1, const global_config& g2) {
 inline bool operator!=(const global_config& g1, const global_config& g2) {
 	return !(g1 == g2);
 }
+
+/////////////////////////////////////////////////////////////////////////
+/// PART 2. The data structure for aggregate configuration
+///
+/////////////////////////////////////////////////////////////////////////
+class aggregate_config {
+public:
+	aggregate_config(const pda_state& g, const vector<finite_automaton>& W);
+	aggregate_config(const pda_state& g, const size_t&n,
+			const finite_automaton& A);
+	~aggregate_config();
+
+private:
+	pda_state g;
+	vector<finite_automaton> W;
+};
 
 }
 /* namespace cuba */
