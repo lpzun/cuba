@@ -97,15 +97,15 @@ private:
  * The class of explore:
  *     define a tool like explore in CAV'10 dynamic cutoff tool
  */
-class explore {
+class simulator {
 public:
-	explore(const ctx_bound& k, const thread_state& initl,
+	simulator(const ctx_bound& k, const thread_state& initl,
 			const thread_state& final, ///
 			const vector<vector<vertex>>& mapping_Q,
 			const vector<thread_state>& Q,
 			const vector<pda_transition<vertex>>& R);
 
-	~explore();
+	~simulator();
 
 	void context_bounded_analysis(const size_t& n, const size_k& k);
 private:

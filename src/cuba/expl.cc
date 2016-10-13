@@ -17,7 +17,7 @@ namespace cuba {
  * @param Q: active control states
  * @param R: active transitions
  */
-explore::explore(const ctx_bound& k, const thread_state& initl,
+simulator::simulator(const ctx_bound& k, const thread_state& initl,
 		const thread_state& final,  ///
 		const vector<vector<vertex>>& mapping_Q, ///
 		const vector<thread_state>& Q, ///
@@ -30,7 +30,7 @@ explore::explore(const ctx_bound& k, const thread_state& initl,
 /**
  * destructor
  */
-explore::~explore() {
+simulator::~simulator() {
 
 }
 
@@ -40,7 +40,7 @@ explore::~explore() {
  * @param n: the number of threads
  * @param k: the number of context switches
  */
-void explore::context_bounded_analysis(const size_t& n, const size_k& k) {
+void simulator::context_bounded_analysis(const size_t& n, const size_k& k) {
 	auto size = bounded_reachability(n, k);
 	cout << "The number of reachable thread states is: " << size << endl;
 }
@@ -52,7 +52,7 @@ void explore::context_bounded_analysis(const size_t& n, const size_k& k) {
  * @param k: the upper bound of context switches
  * @return the number of reachable thread/global states
  */
-uint explore::bounded_reachability(const size_t& n, const size_k& k) {
+uint simulator::bounded_reachability(const size_t& n, const size_k& k) {
 	/// step 1: build the initial  global configuration
 	///         Here we build the set of initial stacks
 	stack_vec W_0(n, sstack()); /// the set of initial stacks
@@ -122,7 +122,7 @@ uint explore::bounded_reachability(const size_t& n, const size_k& k) {
  * @param R
  * @return bool
  */
-bool explore::is_reachable(const global_config& tau, antichain& R) {
+bool simulator::is_reachable(const global_config& tau, antichain& R) {
 	for (auto& g : R) {
 		if (g == tau) {
 			if (g.get_context_k() > tau.get_context_k()) {
@@ -140,7 +140,7 @@ bool explore::is_reachable(const global_config& tau, antichain& R) {
  * @param tau: a global configuration
  * @return a list of successors, aka. global configurations
  */
-antichain explore::step(const global_config& tau) {
+antichain simulator::step(const global_config& tau) {
 	antichain successors;
 	const auto& q = tau.get_state();     /// the control state of tau
 	const auto& W = tau.get_stacks();    /// the stacks of tau
@@ -193,7 +193,7 @@ antichain explore::step(const global_config& tau) {
  * @param l: stack symbol
  * @return thread state id
  */
-vertex explore::retrieve(const pda_state& s, const pda_alpha& l) {
+vertex simulator::retrieve(const pda_state& s, const pda_alpha& l) {
 	return mapping_Q[s][l];
 }
 
@@ -202,7 +202,7 @@ vertex explore::retrieve(const pda_state& s, const pda_alpha& l) {
  * @param s
  * @param l
  */
-void explore::marking(const pda_state& s, const pda_alpha& l) {
+void simulator::marking(const pda_state& s, const pda_alpha& l) {
 	if (!reachable_T[s][l])
 		reachable_T[s][l] = true;
 }

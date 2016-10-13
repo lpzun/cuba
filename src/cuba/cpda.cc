@@ -188,6 +188,7 @@ global_state global_config::top() {
 	}
 	return global_state(s, L);
 }
+
 /////////////////////////////////////////////////////////////////////////
 /// PART 2. The data structure for aggregate configuration
 ///
@@ -201,7 +202,6 @@ global_state global_config::top() {
 aggregate_config::aggregate_config(const pda_state& g,
 		const vector<finite_automaton>& W) :
 		g(g), W(W) {
-
 }
 
 /**
@@ -214,7 +214,6 @@ aggregate_config::aggregate_config(const pda_state& g,
 aggregate_config::aggregate_config(const pda_state& g, const size_t&n,
 		const finite_automaton& A) :
 		g(g), W(n, A) {
-
 }
 
 /**
