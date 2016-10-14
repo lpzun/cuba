@@ -50,10 +50,23 @@ private:
 	/// build reachability automaton
 	finite_automaton create_reachability_automaton();
 	finite_automaton create_init_fsa(const thread_config& c);
-	finite_automaton create_post_kleene_fsa(const finite_automaton& A);
+	finite_automaton post_kleene(const finite_automaton& A);
 	vertex retrieve(const pda_state& s, const pda_alpha& l);
-	bool recongize(const finite_automaton& fsa, const thread_config& c);
-	bool equivalent(const finite_automaton& fsa1, const finite_automaton& fsa2);
+	bool is_recongnizable(const finite_automaton& fsa, const thread_config& c);
+	bool is_equivalent(const finite_automaton& fsa1,
+			const finite_automaton& fsa2);
+
+	deque<aggregate_config> context_bounded_analysis(const size_t& n,
+			const size_k& k, const pda_state& g_in,
+			const finite_automaton& A_in);
+
+	deque<pda_state> project_G(const finite_automaton& A);
+	void BFS_visit(deque<pda_state>& v);
+	aggregate_config composite(const pda_state& _g,
+			const vector<finite_automaton>& automatons, const int& idx);
+	finite_automaton rename(const finite_automaton& fsa, const pda_state& _g);
+	finite_automaton anonymize(const finite_automaton& fsa,
+			const pda_state& _g);
 };
 
 /////////////////////////////////////////////////////////////////////////

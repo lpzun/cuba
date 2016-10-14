@@ -155,7 +155,7 @@ void CUBA::context_bounded_analysis(const size_t& n, const size_k& k) {
 	cout << fsa << endl;
 	if (prop::OPT_REACHABILITY) {
 		cout << final_c << " ";
-		if (recongize(fsa, final_c))
+		if (is_recongnizable(fsa, final_c))
 			cout << "is reachable";
 		else
 			cout << "is unreachable";
@@ -172,7 +172,7 @@ finite_automaton CUBA::create_reachability_automaton() {
 	auto fsa = create_init_fsa(initl_c);
 	cout << "initial automaton: \n";
 	cout << fsa << endl;
-	return create_post_kleene_fsa(fsa);
+	return post_kleene(fsa);
 }
 
 /**
@@ -207,7 +207,7 @@ finite_automaton CUBA::create_init_fsa(const thread_config& c) {
  * @param A
  * @return a finite automaton
  */
-finite_automaton CUBA::create_post_kleene_fsa(const finite_automaton& A) {
+finite_automaton CUBA::post_kleene(const finite_automaton& A) {
 	auto state = A.get_states();
 	auto alpha = A.get_alphabet();
 	auto delta = A.get_transitions();
@@ -300,7 +300,8 @@ vertex CUBA::retrieve(const pda_state& s, const pda_alpha& l) {
  *         true : if c is reachable
  *         false: otherwise.
  */
-bool CUBA::recongize(const finite_automaton& fsa, const thread_config& c) {
+bool CUBA::is_recongnizable(const finite_automaton& fsa,
+		const thread_config& c) {
 	if (c.get_state() >= fsa.get_initials())
 		throw cuba_runtime_error("c's control state is illegal!");
 
@@ -339,9 +340,124 @@ bool CUBA::recongize(const finite_automaton& fsa, const thread_config& c) {
  * @param fsa2
  * @return bool
  */
-bool CUBA::equivalent(const finite_automaton& fsa1,
+bool CUBA::is_equivalent(const finite_automaton& fsa1,
 		const finite_automaton& fsa2) {
 	return true;
+}
+
+/**
+ * This is the main procedure to do the context-bounded analysis. It implements the
+ * algorithm in QR'05 paper.
+ * @param n   : the number of threads
+ * @param k   : the upper bound of context switches
+ * @param g_in: the initial controcl state
+ * @param A_in
+ * @return
+ */
+deque<aggregate_config> CUBA::context_bounded_analysis(const size_t& n,
+		const size_k& k, const pda_state& g_in, const finite_automaton& A_in) {
+	/// Step 1: declare the data structures used in this procedure:
+	///
+	/// 1.1 <reached> : the set of reachable aggregate configurations
+	///
+	/// Initialization: empty set
+	deque<aggregate_config> reached;
+
+	/// 1.2 <worklist>: the set of aggregate configurations are waiting
+	/// for handling; note its elements are pairs that each of them
+	/// contains an aggregate configuration and the necessary context
+	/// switches to reach it.
+	///
+	/// Initialization: {(<g_in, (A_in, ..., A_in)>, 0)}
+	queue<pair<aggregate_config, size_k>> worklist;
+	aggregate_config cfg_in(g_in, n, A_in);
+	worklist.emplace(cfg_in, 0);
+
+	/// Step 2: operate on the elements, aka, pairs in the worklist one by one.
+	/// This is like a BFS procedure.
+	while (!worklist.empty()) {
+		/// 2.1 remove a aggregate configuration from worklist
+		auto p = worklist.front();
+		worklist.pop();
+		/// 2.2 check whether its context switches already reaches to the upper
+		/// bound; if so, discard the current element.
+		if (p.second < k)
+			continue;
+		/// 2.3 extract the aggregate configuration from the pair.
+		const auto& cfg = p.first;
+		const auto& automatons = cfg.get_automatons();
+		for (int i = 0; i < automatons.size(); ++i) {
+			const auto& _A = post_kleene(automatons[i]);
+			for (const auto& _g : project_G(_A)) {
+				const auto& _cfg = composite(_g, automatons, i);
+				worklist.emplace(_cfg, p.second + 1);
+				reached.push_back(_cfg);
+			}
+		}
+	}
+	return reached;
+}
+
+/**
+ * This procedure projects all states g such that {g| exist w. <g, w> in L(A)}.
+ *
+ * @param A
+ * @return a list of states
+ */
+deque<pda_state> CUBA::project_G(const finite_automaton& A) {
+	deque<pda_state> states;
+	BFS_visit(states);
+	return states;
+}
+
+void CUBA::BFS_visit(deque<pda_state>& v) {
+
+}
+
+/**
+ * This procedure is to composite a aggregate configuration.
+ * @param _g
+ * @param automatons
+ * @param idx
+ * @return aggregate configuration
+ */
+aggregate_config CUBA::composite(const pda_state& _g,
+		const vector<finite_automaton>& automatons, const int& idx) {
+	vector<finite_automaton> W;
+	W.reserve(automatons.size());
+	for (int i = 0; i < automatons.size(); ++i) {
+		if (i == idx)
+			W.push_back(this->anonymize(automatons[i], _g));
+		else
+			W.push_back(this->rename(automatons[i], _g));
+	}
+	return aggregate_config(_g, W);
+}
+
+/**
+ * This is the rename procedure: it rename the state state of A, if any,
+ * to _g.
+ * @param A
+ * @param _g
+ * @return a finite automaton
+ */
+finite_automaton CUBA::rename(const finite_automaton& A,
+		const pda_state& _g) {
+	//TODO
+	return A;
+}
+
+/**
+ * This is the anonymize procedure: it rename all states except _g to
+ * fresh states.
+ * @param A
+ * @param _g
+ * @return
+ */
+finite_automaton CUBA::anonymize(const finite_automaton& A,
+		const pda_state& _g) {
+	//TODO
+	return A;
 }
 
 } /* namespace cuba */

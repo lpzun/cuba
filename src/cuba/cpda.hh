@@ -236,6 +236,14 @@ public:
 			const finite_automaton& A);
 	~aggregate_config();
 
+	pda_state get_state() const {
+		return g;
+	}
+
+	const vector<finite_automaton>& get_automatons() const {
+		return W;
+	}
+
 private:
 	pda_state g;
 	vector<finite_automaton> W;
