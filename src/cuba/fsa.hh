@@ -152,6 +152,10 @@ public:
 		return accept_state;
 	}
 
+	void set_start_state(fsa_state start_state) {
+		this->start_state = start_state;
+	}
+
 	void add_transitions(const fsa_transition& r);
 
 private:

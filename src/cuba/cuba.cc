@@ -479,8 +479,9 @@ aggregate_config CUBA::compose(const pda_state& _g,
  * @return a finite automaton
  */
 finite_automaton CUBA::rename(const finite_automaton& A, const pda_state& _g) {
-
-	return A;
+	finite_automaton _A(A);
+	_A.set_start_state(_g);
+	return _A;
 }
 
 /**
@@ -492,8 +493,14 @@ finite_automaton CUBA::rename(const finite_automaton& A, const pda_state& _g) {
  */
 finite_automaton CUBA::anonymize(const finite_automaton& A,
 		const pda_state& _g) {
-
-	return A;
+	auto transs = A.get_transitions();
+	for (auto g = 0; g < A.get_initials(); ++g) {
+		if (g == _g)
+			continue;
+		transs.erase(g);
+	}
+	return finite_automaton(A.get_states(), A.get_alphabet(), transs,
+			A.get_initials(), A.get_accept_state());
 }
 
 } /* namespace cuba */
