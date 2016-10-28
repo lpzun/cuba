@@ -244,7 +244,7 @@ finite_automaton CUBA::post_kleene(const finite_automaton& A) {
 			for (const auto& rid : pda_transs) {
 				/// (p, a) -> (p', a')
 				const auto& r = active_R[rid]; /// PDA transition
-				const auto& _p = active_Q[r.get_dst()].get_state(); /// state
+				const auto& _p = active_Q[r.get_dst()].get_state();  /// state
 				const auto& _a = active_Q[r.get_dst()].get_symbol(); /// label
 
 				switch (r.get_oper_type()) {
@@ -416,7 +416,10 @@ deque<fsa_state> CUBA::project_G(const finite_automaton& A) {
 
 /**
  * This is to compute all states which has a path to the accept state
- * @param v
+ * @param root: the accept state
+ * @param adj : adjacency list of automaton
+ * @param initials: the set of initial states
+ * @return the set of initial states which can reach the accept state
  */
 deque<fsa_state> CUBA::BFS_visit(const fsa_state& root,
 		const unordered_map<fsa_state, deque<fsa_state>>& adj,
@@ -428,6 +431,7 @@ deque<fsa_state> CUBA::BFS_visit(const fsa_state& root,
 	unordered_set<fsa_state> explored;
 	explored.emplace(root);
 
+	/// the worklist
 	queue<fsa_state> worklist;
 	worklist.push(root);
 	while (!worklist.empty()) {
@@ -485,13 +489,29 @@ finite_automaton CUBA::rename(const finite_automaton& A, const pda_state& _g) {
 }
 
 /**
+ *
+ * This is the anonymize procedure: it rename all states except _g to
+ * fresh states delete all states except _g
+ * @param fsa
+ * @param _g
+ * @param is_rename
+ * @return a finite automaton
+ */
+finite_automaton CUBA::anonymize(const finite_automaton& fsa,
+		const pda_state& _g, const bool& is_rename) {
+	if (is_rename)
+		return anonymize_by_rename(fsa, _g);
+	return anonymize_by_delete(fsa, _g);
+}
+
+/**
  * This is the anonymize procedure: it rename all states except _g to
  * fresh states.
  * @param A
  * @param _g
- * @return
+ * @return a finite automaton
  */
-finite_automaton CUBA::anonymize(const finite_automaton& A,
+finite_automaton CUBA::anonymize_by_delete(const finite_automaton& A,
 		const pda_state& _g) {
 	auto transs = A.get_transitions();
 	for (auto g = 0; g < A.get_initials(); ++g) {
@@ -501,6 +521,26 @@ finite_automaton CUBA::anonymize(const finite_automaton& A,
 	}
 	return finite_automaton(A.get_states(), A.get_alphabet(), transs,
 			A.get_initials(), A.get_accept_state());
+}
+
+/**
+ * This is the anonymize procedure: it rename all states except _g to
+ * fresh states.
+ * @param A
+ * @param _g
+ * @return a finite automaton
+ */
+finite_automaton CUBA::anonymize_by_rename(const finite_automaton& A,
+		const pda_state& _g) {
+	auto states = A.get_states();
+	auto transs = A.get_transitions();
+	for (auto g = 0; g < A.get_initials(); ++g) {
+		if (g == _g)
+			continue;
+		transs.emplace(states++, transs[g]);
+	}
+	return finite_automaton(states, A.get_alphabet(), transs, A.get_initials(),
+			A.get_accept_state());
 }
 
 } /* namespace cuba */

@@ -67,7 +67,11 @@ private:
 	aggregate_config compose(const pda_state& _g,
 			const vector<finite_automaton>& automatons, const int& idx);
 	finite_automaton rename(const finite_automaton& fsa, const pda_state& _g);
-	finite_automaton anonymize(const finite_automaton& fsa,
+	finite_automaton anonymize(const finite_automaton& fsa, const pda_state& _g,
+			const bool& is_rename = false);
+	finite_automaton anonymize_by_delete(const finite_automaton& fsa,
+			const pda_state& _g);
+	finite_automaton anonymize_by_rename(const finite_automaton& fsa,
 			const pda_state& _g);
 };
 
