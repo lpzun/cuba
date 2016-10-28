@@ -144,6 +144,10 @@ public:
 		return initials;
 	}
 
+	fsa_state get_start_state() const {
+		return start_state;
+	}
+
 	fsa_state get_accept_state() const {
 		return accept_state;
 	}
@@ -154,7 +158,8 @@ private:
 	fsa_state_set states;    /// it represents state 0...|states|-1
 	fsa_alphabet alphabet;   ///
 	fsa_delta transitions;   ///
-	fsa_state_set initials;  ///
+	fsa_state_set initials;  /// it represents state 0...|initials|-1
+	fsa_state start_state;
 	fsa_state accept_state;  /// accept state
 };
 

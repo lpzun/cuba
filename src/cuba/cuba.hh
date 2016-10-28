@@ -60,9 +60,11 @@ private:
 			const size_k& k, const pda_state& g_in,
 			const finite_automaton& A_in);
 
-	deque<pda_state> project_G(const finite_automaton& A);
-	void BFS_visit(deque<pda_state>& v);
-	aggregate_config composite(const pda_state& _g,
+	deque<fsa_state> project_G(const finite_automaton& A);
+	deque<fsa_state> BFS_visit(const fsa_state& root,
+			const unordered_map<fsa_state, deque<fsa_state>>& adj,
+			const fsa_state_set& initials);
+	aggregate_config compose(const pda_state& _g,
 			const vector<finite_automaton>& automatons, const int& idx);
 	finite_automaton rename(const finite_automaton& fsa, const pda_state& _g);
 	finite_automaton anonymize(const finite_automaton& fsa,

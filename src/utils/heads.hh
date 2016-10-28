@@ -25,6 +25,7 @@
 #include <vector>
 #include <map>
 #include <deque>
+#include <unordered_set>
 #include <unordered_map>
 #include <queue>
 #include <bitset>
@@ -54,6 +55,7 @@ using std::vector;
 using std::map;
 using std::deque;
 using std::pair;
+using std::unordered_set;
 using std::unordered_map;
 using std::queue;
 using std::multimap;

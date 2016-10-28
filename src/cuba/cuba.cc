@@ -169,6 +169,7 @@ void CUBA::context_bounded_analysis(const size_t& n, const size_k& k) {
  * @return a finite automaton
  */
 finite_automaton CUBA::create_reachability_automaton() {
+	cout << "Initial configuration: " << initl_c << endl;
 	auto fsa = create_init_fsa(initl_c);
 	cout << "initial automaton: \n";
 	cout << fsa << endl;
@@ -181,7 +182,6 @@ finite_automaton CUBA::create_reachability_automaton() {
  * @return a finite automaton
  */
 finite_automaton CUBA::create_init_fsa(const thread_config& c) {
-	cout << c << endl;
 	fsa_state state_pda = thread_state::S;
 	fsa_alpha alpha_pda = thread_state::L;
 
@@ -229,7 +229,6 @@ finite_automaton CUBA::post_kleene(const finite_automaton& A) {
 	while (!worklist.empty()) {
 		const auto t = worklist.front(); /// FSA transition (p, a, q)
 		worklist.pop_front();
-//		cout << t << ":\n";
 
 		/// FSA transition (p, a, q)
 		const auto& p = t.get_src();
@@ -389,7 +388,7 @@ deque<aggregate_config> CUBA::context_bounded_analysis(const size_t& n,
 		for (int i = 0; i < automatons.size(); ++i) {
 			const auto& _A = post_kleene(automatons[i]);
 			for (const auto& _g : project_G(_A)) {
-				const auto& _cfg = composite(_g, automatons, i);
+				const auto& _cfg = compose(_g, automatons, i);
 				worklist.emplace(_cfg, p.second + 1);
 				reached.push_back(_cfg);
 			}
@@ -404,14 +403,52 @@ deque<aggregate_config> CUBA::context_bounded_analysis(const size_t& n,
  * @param A
  * @return a list of states
  */
-deque<pda_state> CUBA::project_G(const finite_automaton& A) {
-	deque<pda_state> states;
-	BFS_visit(states);
-	return states;
+deque<fsa_state> CUBA::project_G(const finite_automaton& A) {
+	deque<fsa_state> states;
+	unordered_map<fsa_state, deque<fsa_state>> transpose;
+	for (const auto& p : A.get_transitions()) {
+		for (const auto& r : p.second) {
+			transpose[r.get_dst()].push_back(p.first);
+		}
+	}
+	return BFS_visit(A.get_accept_state(), transpose, A.get_initials());
 }
 
-void CUBA::BFS_visit(deque<pda_state>& v) {
+/**
+ * This is to compute all states which has a path to the accept state
+ * @param v
+ */
+deque<fsa_state> CUBA::BFS_visit(const fsa_state& root,
+		const unordered_map<fsa_state, deque<fsa_state>>& adj,
+		const fsa_state_set& initials) {
+	deque<fsa_state> G;
 
+	/// Mark whether a state is already visited or not:
+	/// to avoid a cycle
+	unordered_set<fsa_state> explored;
+	explored.emplace(root);
+
+	queue<fsa_state> worklist;
+	worklist.push(root);
+	while (!worklist.empty()) {
+		const auto u = worklist.front();
+		worklist.pop();
+
+		if (u < initials)
+			G.emplace_back(u);
+
+		auto ifind = adj.find(u);
+		if (ifind != adj.end()) {
+			for (const auto& v : ifind->second) {
+				/// if u is already visited, then skip it
+				if (explored.find(u) != explored.end())
+					continue;
+				explored.emplace(v);
+				worklist.push(v);
+			}
+		}
+	}
+	return G;
 }
 
 /**
@@ -421,7 +458,7 @@ void CUBA::BFS_visit(deque<pda_state>& v) {
  * @param idx
  * @return aggregate configuration
  */
-aggregate_config CUBA::composite(const pda_state& _g,
+aggregate_config CUBA::compose(const pda_state& _g,
 		const vector<finite_automaton>& automatons, const int& idx) {
 	vector<finite_automaton> W;
 	W.reserve(automatons.size());
@@ -441,9 +478,8 @@ aggregate_config CUBA::composite(const pda_state& _g,
  * @param _g
  * @return a finite automaton
  */
-finite_automaton CUBA::rename(const finite_automaton& A,
-		const pda_state& _g) {
-	//TODO
+finite_automaton CUBA::rename(const finite_automaton& A, const pda_state& _g) {
+
 	return A;
 }
 
@@ -456,7 +492,7 @@ finite_automaton CUBA::rename(const finite_automaton& A,
  */
 finite_automaton CUBA::anonymize(const finite_automaton& A,
 		const pda_state& _g) {
-	//TODO
+
 	return A;
 }
 
