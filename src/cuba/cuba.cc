@@ -9,6 +9,12 @@
 
 namespace cuba {
 
+/**
+ * constructor of CUBA
+ * @param filename
+ * @param initl
+ * @param final
+ */
 CUBA::CUBA(const string& filename, const string& initl, const string& final) :
 		mapping_Q(), active_Q(), active_R(), PDS(), initl_c(), final_c() {
 	parse_input_pda(filename);
@@ -397,6 +403,7 @@ deque<aggregate_config> CUBA::context_bounded_analysis(const size_t& n,
 	return reached;
 }
 
+
 /**
  * This procedure projects all states g such that {g| exist w. <g, w> in L(A)}.
  *
@@ -505,8 +512,9 @@ finite_automaton CUBA::anonymize(const finite_automaton& fsa,
 }
 
 /**
- * This is the anonymize procedure: it rename all states except _g to
+ * This is the anonymize procedure: it deletes all states except _g to
  * fresh states.
+ * ...
  * @param A
  * @param _g
  * @return a finite automaton

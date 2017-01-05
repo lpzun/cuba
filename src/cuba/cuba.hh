@@ -47,6 +47,14 @@ private:
 	void parse_input_pda(const string& filename);
 	thread_config parse_input_cfg(const string& s);
 
+	/// finite automaton
+	finite_automaton iunion(const finite_automaton& fsa1,
+			const finite_automaton& fsa2);
+	finite_automaton intersect(const finite_automaton& fsa1,
+			const finite_automaton& fsa2);
+	finite_automaton complement(const finite_automaton& fsa);
+	finite_automaton cross_product(const vector<finite_automaton>& W);
+
 	/// build reachability automaton
 	finite_automaton create_reachability_automaton();
 	finite_automaton create_init_fsa(const thread_config& c);
