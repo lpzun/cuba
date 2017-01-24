@@ -1,0 +1,37 @@
+/**
+ * An exmaple from
+ * Summarizing Procedures in Concurrent Programs, 2004
+ *
+ * Nonterminating one when using their approach
+ */
+#define mutex
+
+bool g = 0, x = 0, y = 0;
+mutex m;
+
+void foo(int r) {
+	if (r == 0) {
+		x = 1;
+		y = 1;
+		foo(r);
+	} else {
+		acquire(m);
+		g = !g;
+		release(m);
+	}
+	return;
+}
+
+void thr() {
+	int q = *;
+	foo(q);
+	acquire(m);
+	assert(g);
+	release(m);
+	return;
+}
+
+void main() {
+	create_thread(&thr);
+	create_thread(&thr);
+}

@@ -1,0 +1,21 @@
+bool x;
+
+void foo() {
+	atomic {
+		if (x) {
+			x = 0;
+			foo();
+		}
+	}
+}
+
+void bar() {
+	while (1) {
+		x = 1;
+	}
+}
+
+void main() {
+	create_thread(&foo);
+	create_thread(&bar);
+}

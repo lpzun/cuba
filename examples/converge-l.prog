@@ -1,0 +1,49 @@
+bool s1, s2, s3, s4;
+
+void foo() {
+	bool l1 = *;
+	bool l2 = *;
+	bool l3 = *;
+	if (*)
+		foo();
+	while (s1) {
+	}
+	if (s2)
+		l1 = s2;
+	if (s2 && s3)
+		l2 = s3;
+	if (s2 && s3 && s4)
+		l3 = s4;
+	s1 = true;
+	atomic {
+		s2 = s1;
+		s3 = s1;
+		s4 = !s1;
+	}
+}
+
+void bar() {
+	bool l1 = *;
+	bool l2 = *;
+	if (*)
+		bar();
+	while (!x) {
+	}
+	if (!s2 && !s2)
+		l1 = !s2;
+	if (s2 || s3)
+		l2 = 1;
+	x = false;
+	atomic {
+		s2 = s1;
+		s3 = s1;
+		s4 = !s1;
+	}
+}
+
+void main() {
+	create_thread(&foo);
+	create_thread(&foo);
+	create_thread(&bar);
+	create_thread(&bar);
+}
