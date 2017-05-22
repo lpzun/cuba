@@ -31,8 +31,30 @@ using id_thread_state = uint;
 using id_thread = size_t;
 using ctx_bound = size_k;
 
+/////////////////////////////////////////////////////////////////////////
+/// PART 1. global state and concrete configuration definitions are from
+/// here.
+///
+/// global state:
+/// concrete configuration: a concrete configuration of PDA
+///
+/////////////////////////////////////////////////////////////////////////
+
+/**
+ * concurrent pushdown automaton
+ */
+using concurrent_pushdown_automata = vector<pushdown_automaton>;
+
+/////////////////////////////////////////////////////////////////////////
+/// PART 1. global state and concrete configuration definitions are from
+/// here.
+///
+/// global state:
+/// concrete configuration: a concrete configuration of PDA
+///
+/////////////////////////////////////////////////////////////////////////
 /// the set of stacks in CPDS
-using stack_vec = vector<sstack>;
+using stack_vec = vector<pda_stack>;
 
 class global_state {
 public:
@@ -117,15 +139,15 @@ inline bool operator!=(const global_state& g1, const global_state& g2) {
 /**
  * A configuration (s|w1,...,wn) of a CPDS is an element of Qx(L*)^n
  */
-class global_config {
+class concrete_config {
 public:
-	global_config(const pda_state& s, const size_t& n);
-	global_config(const id_thread& id, const ctx_bound& k, const pda_state& s,
+	concrete_config(const pda_state& s, const size_t& n);
+	concrete_config(const id_thread& id, const ctx_bound& k, const pda_state& s,
 			const size_t& n);
-	global_config(const id_thread& id, const ctx_bound& k, const pda_state& s,
+	concrete_config(const id_thread& id, const ctx_bound& k, const pda_state& s,
 			const stack_vec& W);
-	global_config(const global_config& g);
-	~global_config();
+	concrete_config(const concrete_config& g);
+	~concrete_config();
 
 	pda_state get_state() const {
 		return s;
@@ -161,9 +183,9 @@ private:
  * overloading operator <<: print a configuration of the CPDS
  * @param os
  * @param c
- * @return bool
+ * @return ostream
  */
-inline ostream& operator<<(ostream& os, const global_config& c) {
+inline ostream& operator<<(ostream& os, const concrete_config& c) {
 	os << "(" << c.get_thread_id() << "," << c.get_context_k() << ",";
 	os << c.get_state() << "|";
 	if (c.get_stacks().size() > 0)
@@ -180,7 +202,7 @@ inline ostream& operator<<(ostream& os, const global_config& c) {
  * @param g2
  * @return bool
  */
-inline bool operator<(const global_config& g1, const global_config& g2) {
+inline bool operator<(const concrete_config& g1, const concrete_config& g2) {
 	return g1.top() < g2.top();
 }
 
@@ -190,7 +212,7 @@ inline bool operator<(const global_config& g1, const global_config& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator>(const global_config& g1, const global_config& g2) {
+inline bool operator>(const concrete_config& g1, const concrete_config& g2) {
 	return g2 < g1;
 }
 
@@ -200,7 +222,7 @@ inline bool operator>(const global_config& g1, const global_config& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator==(const global_config& g1, const global_config& g2) {
+inline bool operator==(const concrete_config& g1, const concrete_config& g2) {
 	if (g1.get_thread_id() == g2.get_thread_id()
 			&& g1.get_state() == g2.get_state()) {
 		auto iw1 = g1.get_stacks().cbegin();
@@ -221,20 +243,20 @@ inline bool operator==(const global_config& g1, const global_config& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator!=(const global_config& g1, const global_config& g2) {
+inline bool operator!=(const concrete_config& g1, const concrete_config& g2) {
 	return !(g1 == g2);
 }
 
 /////////////////////////////////////////////////////////////////////////
-/// PART 2. The data structure for aggregate configuration
+/// PART 2. The data structure for symbolic configuration
 ///
 /////////////////////////////////////////////////////////////////////////
-class aggregate_config {
+class symbolic_config {
 public:
-	aggregate_config(const pda_state& g, const vector<finite_automaton>& W);
-	aggregate_config(const pda_state& g, const size_t&n,
+	symbolic_config(const pda_state& g, const vector<finite_automaton>& W);
+	symbolic_config(const pda_state& g, const size_t&n,
 			const finite_automaton& A);
-	~aggregate_config();
+	~symbolic_config();
 
 	pda_state get_state() const {
 		return g;
@@ -248,6 +270,8 @@ private:
 	pda_state g;
 	vector<finite_automaton> W;
 };
+
+using top_of_config = global_state;
 
 }
 /* namespace cuba */

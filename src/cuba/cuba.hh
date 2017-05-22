@@ -15,13 +15,7 @@
 
 namespace cuba {
 
-using vertex = id_thread_state;
-using edge = id_transition;
-using adj_list = map<vertex, deque<edge>>;
-
-using antichain = deque<global_config>;
-
-using pda_rule = pda_transition<vertex>;
+using antichain = deque<concrete_config>;
 
 /////////////////////////////////////////////////////////////////////////
 /// PART 1. The following are the declarations for context-unbounded
@@ -29,42 +23,23 @@ using pda_rule = pda_transition<vertex>;
 /////////////////////////////////////////////////////////////////////////
 class CUBA {
 public:
-	CUBA(const string& filename, const string& initl, const string& final);
+	CUBA(const string& initl, const string& final, const string& filename);
 	~CUBA();
 
 	void context_bounded_analysis(const size_t& n, const size_k& k);
 
 private:
-	/// Part 1: parse a pushdown system (PDS)
-	vector<vector<vertex>> mapping_Q; /// mapping a control state to its ID
-	vector<thread_state> active_Q;       /// active control states
-	vector<pda_rule> active_R; /// active transitions
-	adj_list PDS;
-
 	thread_config initl_c;
 	thread_config final_c;
-
-	void parse_input_pda(const string& filename);
-	thread_config parse_input_cfg(const string& s);
-
-	/// finite automaton
-	finite_automaton iunion(const finite_automaton& fsa1,
-			const finite_automaton& fsa2);
-	finite_automaton intersect(const finite_automaton& fsa1,
-			const finite_automaton& fsa2);
-	finite_automaton complement(const finite_automaton& fsa);
-	finite_automaton cross_product(const vector<finite_automaton>& W);
+	concurrent_pushdown_automata CPDA;
 
 	/// build reachability automaton
 	finite_automaton create_reachability_automaton();
 	finite_automaton create_init_fsa(const thread_config& c);
 	finite_automaton post_kleene(const finite_automaton& A);
 	vertex retrieve(const pda_state& s, const pda_alpha& l);
-	bool is_recongnizable(const finite_automaton& fsa, const thread_config& c);
-	bool is_equivalent(const finite_automaton& fsa1,
-			const finite_automaton& fsa2);
 
-	deque<aggregate_config> context_bounded_analysis(const size_t& n,
+	deque<symbolic_config> context_bounded_analysis(const size_t& n,
 			const size_k& k, const pda_state& g_in,
 			const finite_automaton& A_in);
 
@@ -72,7 +47,7 @@ private:
 	deque<fsa_state> BFS_visit(const fsa_state& root,
 			const unordered_map<fsa_state, deque<fsa_state>>& adj,
 			const fsa_state_set& initials);
-	aggregate_config compose(const pda_state& _g,
+	symbolic_config compose(const pda_state& _g,
 			const vector<finite_automaton>& automatons, const int& idx);
 	finite_automaton rename(const finite_automaton& fsa, const pda_state& _g);
 	finite_automaton anonymize(const finite_automaton& fsa, const pda_state& _g,
@@ -81,14 +56,33 @@ private:
 			const pda_state& _g);
 	finite_automaton anonymize_by_rename(const finite_automaton& fsa,
 			const pda_state& _g);
+
+	bool is_recongnizable(const finite_automaton& fsa, const thread_config& c);
+	bool is_equivalent(const finite_automaton& fsa1,
+			const finite_automaton& fsa2);
+
+	finite_automaton iunion(const finite_automaton& fsa1,
+			const finite_automaton& fsa2);
+	finite_automaton intersect(const finite_automaton& fsa1,
+			const finite_automaton& fsa2);
+	finite_automaton complement(const finite_automaton& fsa);
+	finite_automaton cross_product(const vector<finite_automaton>& W);
 };
 
 /////////////////////////////////////////////////////////////////////////
 /// PART 2. The following are the utilities for PDS file parser.
 ///
 /////////////////////////////////////////////////////////////////////////
-class pds_parser {
+class parser {
 public:
+	static concurrent_pushdown_automata parse_input_cpds(
+			const string& filename);
+	static pushdown_automaton parse_input_pda(const set<pda_state>& states,
+			const vector<string>& sPDA);
+	static void parse_transition(const string& r);
+
+	static thread_config parse_input_cfg(const string& s);
+
 	static void remove_comments(istream& in, const string& filename,
 			const string& comment);
 	static void remove_comments(const string& in, string& out,
@@ -96,7 +90,7 @@ public:
 
 	static thread_config create_thread_config_from_str(const string& s_ts,
 			const char& delim = '|');
-	static global_config create_global_config_from_str(const string& s_ts,
+	static concrete_config create_global_config_from_str(const string& s_ts,
 			const char& delim = '|');
 
 	static thread_state create_thread_state_from_str(const string& s_ts,
@@ -127,10 +121,10 @@ private:
 class simulator {
 public:
 	simulator(const ctx_bound& k, const thread_state& initl,
-			const thread_state& final, ///
-			const vector<vector<vertex>>& mapping_Q,
-			const vector<thread_state>& Q,
-			const vector<pda_transition<vertex>>& R);
+			const thread_state& final,  ///
+			const vector<vector<vertex>>& mapping_Q, ///
+			const vector<thread_state>& Q, ///
+			const vector<pda_trans>& R);
 
 	~simulator();
 
@@ -140,18 +134,17 @@ private:
 	ctx_bound k_bound;
 	thread_state initl_TS;
 	thread_state final_TS;
-
 	vector<vector<vertex>> mapping_Q; /// mapping a control state to its ID
 	vector<thread_state> active_Q;       /// active control states
-	vector<pda_transition<vertex>> active_R; /// active transitions
+	vector<pda_trans> active_R; /// active transitions
 	adj_list PDS;
 
 	vector<vector<bool>> reachable_T;
 
 	uint bounded_reachability(const size_t& n, const size_k& k);
 
-	antichain step(const global_config& tau);
-	bool is_reachable(const global_config& tau, antichain& R);
+	antichain step(const concrete_config& tau);
+	bool is_reachable(const concrete_config& tau, antichain& R);
 	void marking(const pda_state& s, const pda_alpha& l);
 	vertex retrieve(const pda_state& s, const pda_alpha& l);
 };

@@ -12,6 +12,19 @@
 
 namespace cuba {
 
+/// define the control state of PDSs
+using pda_state = int;
+/// define the stack symbol of PDSs
+using pda_alpha = int;
+
+/////////////////////////////////////////////////////////////////////////
+/// PART 1. alphabet and PDA stack's definitions are from here.
+///
+/// alphabet:
+/// PDA stack: PDA stack
+///
+/////////////////////////////////////////////////////////////////////////
+/// Definition of alphabet
 class alphabet {
 public:
 	alphabet() {
@@ -19,166 +32,15 @@ public:
 	~alphabet() {
 	}
 
-	/**
-	 * REMARK: Epsilon is -1, all other stack symbol, aka pda_alpha
-	 * is a natural number
-	 */
-	static int EPSILON;
-	static int UNCONNECTED;
+	static pda_alpha EPSILON;
+	static char OPT_EPSILON;
 };
-
-/// define the control state of PDSs
-using pda_state = int;
-/// define the stack symbol of PDSs
-using pda_alpha = int;
-
-/**
- * define the stack of PDSs
- */
-template<typename T> class pda_stack {
-public:
-	inline pda_stack() :
-			worklist() {
-	}
-
-	inline pda_stack(const deque<T>& worklist) :
-			worklist(worklist) {
-	}
-
-	inline ~pda_stack() {
-	}
-
-	T top() {
-		return worklist.back();
-	}
-
-	T top() const {
-		if (worklist.empty())
-			throw cuba_runtime_error("Stack is empty!");
-		return worklist.back();
-	}
-
-	void push(const T& _value) {
-		worklist.emplace_back(_value);
-	}
-
-	size_t size() const {
-		return worklist.size();
-	}
-
-	bool pop() {
-		if (worklist.empty())
-			return false;
-		worklist.pop_back();
-		return true;
-	}
-
-	bool overwrite(const T& _value) {
-		if (worklist.empty())
-			return false;
-		worklist[worklist.size() - 1] = _value;
-		return true;
-	}
-
-	bool empty() const {
-		return worklist.empty();
-	}
-
-	const deque<T>& get_worklist() const {
-		return worklist;
-	}
-
-private:
-	deque<T> worklist;
-};
-
-/**
- * overloading operator <<: ostream
- * @param os
- * @param a
- * @return ostream
- */
-template<typename T> inline ostream& operator<<(ostream& os,
-		const pda_stack<T>& a) {
-	for (const T& s : a.get_worklist())
-		os << s;
-	return os;
-}
-
-/**
- * overloading operator <
- * @param a1
- * @param a2
- * @return bool
- */
-template<typename T> inline bool operator<(const pda_stack<T>& a1,
-		const pda_stack<T>& a2) {
-	if (a1.get_worklist().size() == a2.get_worklist().size()) {
-		auto ia1 = a1.get_worklist().cbegin();
-		auto ia2 = a2.get_worklist().cbegin();
-		while (ia1 != a1.get_worklist().cend()) {
-			if (*ia1 < *ia2) {
-				return true;
-			} else if (*ia1 > *ia2) {
-				return false;
-			} else {
-				++ia1, ++ia2;
-			}
-		}
-		return false;
-	}
-	return a1.get_worklist().size() < a2.get_worklist().size();
-}
-
-/**
- * overloading operator >
- * @param a1
- * @param a2
- * @return bool
- */
-template<typename T> inline bool operator>(const pda_stack<T>& a1,
-		const pda_stack<T>& a2) {
-	return a2 < a1;
-}
-
-/**
- * overloading operator ==
- * @param a1
- * @param a2
- * @return bool
- */
-template<typename T> inline bool operator==(const pda_stack<T>& a1,
-		const pda_stack<T>& a2) {
-	if (a1.get_worklist().size() != a2.get_worklist().size())
-		return false;
-	auto ia1 = a1.get_worklist().cbegin();
-	auto ia2 = a2.get_worklist().cbegin();
-	while (ia1 != a1.get_worklist().cend()) {
-		if (*ia1 != *ia2)
-			return false;
-		++ia1, ++ia2;
-	}
-	return true;
-}
-
-/**
- * overloading operator !=
- * @param a1
- * @param a2
- * @return bool
- */
-template<typename T> inline bool operator!=(const pda_stack<T>& a1,
-		const pda_stack<T>& a2) {
-	return !(a1 == a2);
-}
-
-using id_transition = uint;
 
 /**
  * define the type of stack operations:
  * PUSH  : push an element to the stack
  * POP   : pop an element from the stack
- * UPDATE: overwrite the top element in the stack
+ * OVERWRITE: overwrite the top element of the stack
  */
 enum class type_stack_operation {
 	PUSH, POP, OVERWRITE
@@ -193,13 +55,13 @@ enum class type_stack_operation {
 inline ostream& operator<<(ostream& os, const type_stack_operation& t) {
 	switch (t) {
 	case type_stack_operation::PUSH:
-		os << '+';
+		os << '-';
 		break;
 	case type_stack_operation::POP:
 		os << '-';
 		break;
 	default:
-		os << '!';
+		os << '-';
 		break;
 	}
 	return os;
@@ -237,38 +99,32 @@ inline ostream& operator<<(ostream& os, const type_synchronization& t) {
 }
 
 /**
- * transition class
+ * PDA transition class
  */
-template<typename T> class pda_transition {
+template<typename T1, typename T2> class transition {
 public:
-	pda_transition(const T& src, const T& dst, const type_stack_operation& oper,
-			const type_synchronization& sync) :
-			src(src), dst(dst), oper(oper), sync(sync) {
+	transition(const T1& src, const T2& dst, const type_stack_operation& op) :
+			src(src), dst(dst), op(op) {
 	}
-	~pda_transition() {
+	~transition() {
 	}
 
-	T get_dst() const {
+	T1 get_src() const {
+		return src;
+	}
+
+	T2 get_dst() const {
 		return dst;
 	}
 
 	type_stack_operation get_oper_type() const {
-		return oper;
-	}
-
-	T get_src() const {
-		return src;
-	}
-
-	type_synchronization get_sync_type() const {
-		return sync;
+		return op;
 	}
 
 private:
-	T src;
-	T dst;
-	type_stack_operation oper;
-	type_synchronization sync;
+	T1 src;
+	T2 dst;
+	type_stack_operation op;
 };
 
 /**
@@ -277,22 +133,13 @@ private:
  * @param r
  * @return ostream
  */
-template<typename T>
-inline ostream& operator<<(ostream& os, const pda_transition<T>& r) {
+template<typename T1, typename T2> inline ostream& operator<<(ostream& os,
+		const transition<T1, T2>& r) {
 	os << r.get_src() << " ";
-	os << r.get_oper_type() << r.get_sync_type() << ">";
+	os << "->";
 	os << " " << r.get_dst();
 	return os;
 }
-
-/**
- * Definition of Pushdown automaton
- */
-class pushdown_automaton {
-public:
-	pushdown_automaton();
-	~pushdown_automaton();
-};
 
 /////////////////////////////////////////////////////////////////////////
 /// PART 2. Thread state and thread configuration definitions are from
@@ -302,6 +149,7 @@ public:
 /// thread configuration: a configuration of PDA
 ///
 /////////////////////////////////////////////////////////////////////////
+
 /**
  * the thread state class
  */
@@ -387,17 +235,164 @@ inline bool operator!=(const thread_state& t1, const thread_state& t2) {
 	return !(t1 == t2);
 }
 
-/// the stack for a single PDS
-using sstack = pda_stack<pda_alpha>;
 /**
- * a configuration (s, w) of a PDS is an element of QxL*.
+ * Definition of the stack of PDA
+ */
+template<typename T> class sstack {
+public:
+	inline sstack() :
+			worklist() {
+	}
+
+	inline sstack(const deque<T>& worklist) :
+			worklist(worklist) {
+	}
+
+	inline ~sstack() {
+	}
+
+	T top() {
+		return worklist.back();
+	}
+
+	T top() const {
+		if (worklist.empty())
+			throw cuba_runtime_error("Stack is empty!");
+		return worklist.back();
+	}
+
+	void push(const T& _value) {
+		worklist.emplace_back(_value);
+	}
+
+	size_t size() const {
+		return worklist.size();
+	}
+
+	bool pop() {
+		if (worklist.empty())
+			return false;
+		worklist.pop_back();
+		return true;
+	}
+
+	bool overwrite(const T& _value) {
+		if (worklist.empty())
+			return false;
+		worklist[worklist.size() - 1] = _value;
+		return true;
+	}
+
+	bool empty() const {
+		return worklist.empty();
+	}
+
+	const deque<T>& get_worklist() const {
+		return worklist;
+	}
+
+private:
+	deque<T> worklist;
+};
+
+/**
+ * overloading operator <<: ostream
+ * @param os
+ * @param a
+ * @return ostream
+ */
+template<typename T> inline ostream& operator<<(ostream& os,
+		const sstack<T>& a) {
+	if (a.size() == 0) {
+		os << alphabet::OPT_EPSILON;
+	} else {
+		for (const T& s : a.get_worklist())
+			os << s;
+	}
+	return os;
+}
+
+/**
+ * overloading operator <
+ * @param a1
+ * @param a2
+ * @return bool
+ */
+template<typename T> inline bool operator<(const sstack<T>& a1,
+		const sstack<T>& a2) {
+	if (a1.get_worklist().size() == a2.get_worklist().size()) {
+		auto ia1 = a1.get_worklist().cbegin();
+		auto ia2 = a2.get_worklist().cbegin();
+		while (ia1 != a1.get_worklist().cend()) {
+			if (*ia1 < *ia2) {
+				return true;
+			} else if (*ia1 > *ia2) {
+				return false;
+			} else {
+				++ia1, ++ia2;
+			}
+		}
+		return false;
+	}
+	return a1.get_worklist().size() < a2.get_worklist().size();
+}
+
+/**
+ * overloading operator >
+ * @param a1
+ * @param a2
+ * @return bool
+ */
+template<typename T> inline bool operator>(const sstack<T>& a1,
+		const sstack<T>& a2) {
+	return a2 < a1;
+}
+
+/**
+ * overloading operator ==
+ * @param a1
+ * @param a2
+ * @return bool
+ */
+template<typename T> inline bool operator==(const sstack<T>& a1,
+		const sstack<T>& a2) {
+	if (a1.get_worklist().size() != a2.get_worklist().size())
+		return false;
+	auto ia1 = a1.get_worklist().cbegin();
+	auto ia2 = a2.get_worklist().cbegin();
+	while (ia1 != a1.get_worklist().cend()) {
+		if (*ia1 != *ia2)
+			return false;
+		++ia1, ++ia2;
+	}
+	return true;
+}
+
+/**
+ * overloading operator !=
+ * @param a1
+ * @param a2
+ * @return bool
+ */
+template<typename T> inline bool operator!=(const sstack<T>& a1,
+		const sstack<T>& a2) {
+	return !(a1 == a2);
+}
+
+/**
+ * Definition of the stack for a PDA
+ */
+using pda_stack = sstack<pda_alpha>;
+
+/**
+ * a configuration (s, w) of a PDS is an element of Q x L*.
  */
 class thread_config {
 public:
 	thread_config();
 	thread_config(const pda_state& s, const pda_alpha& l);
 	thread_config(const thread_state& t);
-	thread_config(const pda_state& s, const sstack& w);
+	thread_config(const pda_state& s, const pda_stack& w);
 	thread_config(const thread_config& c);
 	~thread_config();
 
@@ -405,7 +400,7 @@ public:
 		return s;
 	}
 
-	const sstack& get_stack() const {
+	const pda_stack& get_stack() const {
 		return w;
 	}
 
@@ -415,7 +410,7 @@ public:
 
 private:
 	pda_state s; /// control state
-	sstack w; /// stack content
+	pda_stack w; /// stack content
 };
 
 /**
@@ -471,6 +466,74 @@ inline bool operator==(const thread_config& c1, const thread_config& c2) {
  */
 inline bool operator!=(const thread_config& c1, const thread_config& c2) {
 	return !(c1 == c2);
+}
+
+/////////////////////////////////////////////////////////////////////////
+/// PART 3. The definition of a sequential pushdown automaton
+///
+/////////////////////////////////////////////////////////////////////////
+/// define the transition ID
+using id_transition = uint;
+using vertex = thread_state;
+using edge = id_transition;
+using adj_list = map<vertex, deque<edge>>;
+using pda_trans = transition<vertex, thread_config>;
+
+/**
+ * Definition of Pushdown automaton
+ */
+class pushdown_automaton {
+public:
+	pushdown_automaton();
+	pushdown_automaton(const set<pda_state>& states,
+			const set<pda_alpha>& alphas, ///
+			const vector<pda_trans>& actions, ///
+			const adj_list& PDA);
+	~pushdown_automaton();
+
+	const set<pda_state>& get_states() const {
+		return states;
+	}
+
+	const set<pda_alpha>& get_alphas() const {
+		return alphas;
+	}
+
+	const vector<pda_trans>& get_actions() const {
+		return actions;
+	}
+
+	const adj_list& get_pda() const {
+		return PDA;
+	}
+
+private:
+	/// the set of control states
+	set<pda_state> states;
+	/// the set of stack symbols
+	set<pda_alpha> alphas;
+	/// the set of actions
+	vector<pda_trans> actions;
+	/// store PDA in adjacency list
+	adj_list PDA;
+};
+
+/**
+ * overloading operator <<: print a PDA
+ * @param os
+ * @param PDA
+ * @return ostream
+ */
+inline ostream& operator<<(ostream& os, const pushdown_automaton& PDA) {
+	for (auto s : PDA.get_states()) {
+		os << s << " ";
+	}
+	os << "\n";
+	for (auto r : PDA.get_actions()) {
+		os << r << "\n";
+	}
+	os << "\n";
+	return os;
 }
 
 } /* namespace cuba */

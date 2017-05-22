@@ -64,7 +64,7 @@ thread_config::thread_config(const thread_state& t) :
  * @param s
  * @param w
  */
-thread_config::thread_config(const pda_state& s, const sstack& w) :
+thread_config::thread_config(const pda_state& s, const pda_stack& w) :
 		s(s), w(w) {
 }
 
@@ -116,7 +116,7 @@ global_state::~global_state() {
  * @param s
  * @param n
  */
-global_config::global_config(const pda_state& s, const size_t& n) :
+concrete_config::concrete_config(const pda_state& s, const size_t& n) :
 		id(0), k(0), s(s), W(n) {
 }
 
@@ -128,7 +128,7 @@ global_config::global_config(const pda_state& s, const size_t& n) :
  * @param s
  * @param n
  */
-global_config::global_config(const id_thread& id, const ctx_bound& k,
+concrete_config::concrete_config(const id_thread& id, const ctx_bound& k,
 		const pda_state& s, const size_t& n) :
 		id(id), k(k), s(s), W(n) {
 
@@ -142,7 +142,7 @@ global_config::global_config(const id_thread& id, const ctx_bound& k,
  * @param s
  * @param W
  */
-global_config::global_config(const id_thread& id, const ctx_bound& k,
+concrete_config::concrete_config(const id_thread& id, const ctx_bound& k,
 		const pda_state& s, const stack_vec& W) :
 		id(id), k(k), s(s), W(W) {
 
@@ -152,7 +152,7 @@ global_config::global_config(const id_thread& id, const ctx_bound& k,
  * A constructor with a global configuration
  * @param g
  */
-global_config::global_config(const global_config& g) :
+concrete_config::concrete_config(const concrete_config& g) :
 		id(g.get_thread_id()), k(g.get_context_k()), s(g.get_state()), ///
 		W(g.get_stacks()) {
 
@@ -161,7 +161,7 @@ global_config::global_config(const global_config& g) :
 /**
  * destructor
  */
-global_config::~global_config() {
+concrete_config::~concrete_config() {
 
 }
 
@@ -169,7 +169,7 @@ global_config::~global_config() {
  * return a top configuration
  * @return a global state
  */
-global_state global_config::top() const {
+global_state concrete_config::top() const {
 	vector<pda_alpha> L(W.size());
 	for (auto i = 0; i < W.size(); ++i) {
 		L[i] = W[i].top();
@@ -181,7 +181,7 @@ global_state global_config::top() const {
  * return a top configuration
  * @return a global state
  */
-global_state global_config::top() {
+global_state concrete_config::top() {
 	vector<pda_alpha> L(W.size());
 	for (auto i = 0; i < W.size(); ++i) {
 		L[i] = W[i].top();
@@ -199,7 +199,7 @@ global_state global_config::top() {
  * @param g
  * @param W
  */
-aggregate_config::aggregate_config(const pda_state& g,
+symbolic_config::symbolic_config(const pda_state& g,
 		const vector<finite_automaton>& W) :
 		g(g), W(W) {
 }
@@ -211,7 +211,7 @@ aggregate_config::aggregate_config(const pda_state& g,
  * @param n
  * @param A
  */
-aggregate_config::aggregate_config(const pda_state& g, const size_t&n,
+symbolic_config::symbolic_config(const pda_state& g, const size_t&n,
 		const finite_automaton& A) :
 		g(g), W(n, A) {
 }
@@ -219,7 +219,7 @@ aggregate_config::aggregate_config(const pda_state& g, const size_t&n,
 /**
  * destructor
  */
-aggregate_config::~aggregate_config() {
+symbolic_config::~symbolic_config() {
 
 }
 } /* namespace bssp */

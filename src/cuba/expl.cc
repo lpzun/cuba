@@ -21,9 +21,9 @@ simulator::simulator(const ctx_bound& k, const thread_state& initl,
 		const thread_state& final,  ///
 		const vector<vector<vertex>>& mapping_Q, ///
 		const vector<thread_state>& Q, ///
-		const vector<pda_transition<vertex>>& R) :
+		const vector<pda_trans>& R) :
 		k_bound(k), initl_TS(initl), final_TS(final), ///
-		mapping_Q(mapping_Q), active_Q(Q), active_R(R) {
+		mapping_Q(), active_Q(), active_R(R) {
 
 }
 
@@ -33,7 +33,6 @@ simulator::simulator(const ctx_bound& k, const thread_state& initl,
 simulator::~simulator() {
 
 }
-
 
 /**
  * The procedure of context-bounded analysis
@@ -55,7 +54,7 @@ void simulator::context_bounded_analysis(const size_t& n, const size_k& k) {
 uint simulator::bounded_reachability(const size_t& n, const size_k& k) {
 	/// step 1: build the initial  global configuration
 	///         Here we build the set of initial stacks
-	stack_vec W_0(n, sstack()); /// the set of initial stacks
+	stack_vec W_0(n, pda_stack()); /// the set of initial stacks
 	for (auto tid = 0; tid < n; ++tid) {
 		W_0[tid].push(initl_TS.get_symbol());
 	}
@@ -122,7 +121,7 @@ uint simulator::bounded_reachability(const size_t& n, const size_k& k) {
  * @param R
  * @return bool
  */
-bool simulator::is_reachable(const global_config& tau, antichain& R) {
+bool simulator::is_reachable(const concrete_config& tau, antichain& R) {
 	for (auto& g : R) {
 		if (g == tau) {
 			if (g.get_context_k() > tau.get_context_k()) {
@@ -140,7 +139,7 @@ bool simulator::is_reachable(const global_config& tau, antichain& R) {
  * @param tau: a global configuration
  * @return a list of successors, aka. global configurations
  */
-antichain simulator::step(const global_config& tau) {
+antichain simulator::step(const concrete_config& tau) {
 	antichain successors;
 	const auto& q = tau.get_state();     /// the control state of tau
 	const auto& W = tau.get_stacks();    /// the stacks of tau
@@ -150,40 +149,41 @@ antichain simulator::step(const global_config& tau) {
 	/// step 1: if context switches already reach to the uppper bound
 	if (k == k_bound)
 		return successors;
+	/*
+	 /// step 2: iterate over all threads
+	 for (auto tid = 0; tid < W.size(); ++tid) {
+	 /// step 2.1: set context switches
+	 ///           if context switch occurs, then k = k + 1;
+	 auto _k = tid == t ? k : k + 1;
+	 /// step 2.2: iterator over all successor of current thread state
+	 const auto& transs = PDS[retrieve(q, W[tid].top())];
+	 for (const auto& rid : transs) { /// rid: transition id
+	 const auto& r = active_R[rid];
+	 const auto& dst = active_Q[r.get_dst()];
+	 auto _W = W; /// duplicate the stacks in current global conf.
+	 switch (r.get_oper_type()) {
+	 case type_stack_operation::PUSH: { /// push operation
+	 _W[tid].push(dst.get_symbol());
+	 successors.emplace_back(tid, _k, dst.get_state(), _W);
+	 }
+	 break;
+	 case type_stack_operation::POP: { /// pop operation
+	 if (_W[tid].pop())
+	 successors.emplace_back(tid, _k, dst.get_state(), _W);
+	 }
+	 break;
+	 default: { /// overwrite operation
+	 if (_W[tid].overwrite(dst.get_symbol()))
+	 successors.emplace_back(tid, _k, dst.get_state(), _W);
+	 }
+	 break;
+	 }
+	 /// marking thread state dst is reachable
+	 this->marking(dst.get_state(), dst.get_symbol());
+	 }
 
-	/// step 2: iterate over all threads
-	for (auto tid = 0; tid < W.size(); ++tid) {
-		/// step 2.1: set context switches
-		///           if context switch occurs, then k = k + 1;
-		auto _k = tid == t ? k : k + 1;
-		/// step 2.2: iterator over all successor of current thread state
-		const auto& transs = PDS[retrieve(q, W[tid].top())];
-		for (const auto& rid : transs) { /// rid: transition id
-			const auto& r = active_R[rid];
-			const auto& dst = active_Q[r.get_dst()];
-			auto _W = W; /// duplicate the stacks in current global conf.
-			switch (r.get_oper_type()) {
-			case type_stack_operation::PUSH: { /// push operation
-				_W[tid].push(dst.get_symbol());
-				successors.emplace_back(tid, _k, dst.get_state(), _W);
-			}
-				break;
-			case type_stack_operation::POP: { /// pop operation
-				if (_W[tid].pop())
-					successors.emplace_back(tid, _k, dst.get_state(), _W);
-			}
-				break;
-			default: { /// overwrite operation
-				if (_W[tid].overwrite(dst.get_symbol()))
-					successors.emplace_back(tid, _k, dst.get_state(), _W);
-			}
-				break;
-			}
-			/// marking thread state dst is reachable
-			this->marking(dst.get_state(), dst.get_symbol());
-		}
-
-	}
+	 }
+	 */
 	return successors; /// the set of successors of tau
 }
 

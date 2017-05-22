@@ -10,11 +10,33 @@
 namespace cuba {
 
 int alphabet::EPSILON = -1;
-int alphabet::UNCONNECTED = -2;
+char alphabet::OPT_EPSILON = 'e';
 
-pushdown_automaton::pushdown_automaton() {
+/**
+ * constructor with default parameters
+ */
+pushdown_automaton::pushdown_automaton() :
+		states(), alphas(), actions(), PDA() {
+
 }
 
+/**
+ * constructor
+ *
+ * @param states
+ * @param alphas
+ * @param actions
+ * @param PDA
+ */
+pushdown_automaton::pushdown_automaton(const set<pda_state>& states,
+		const set<pda_alpha>& alphas, const vector<pda_trans>& actions,
+		const adj_list& PDA) :
+		states(states), alphas(alphas), actions(actions), PDA(PDA) {
+}
+
+/**
+ * destructor
+ */
 pushdown_automaton::~pushdown_automaton() {
 }
 

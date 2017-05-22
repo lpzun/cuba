@@ -47,6 +47,7 @@ using std::istream;
 using std::ostream;
 using std::ifstream;
 using std::ofstream;
+using std::istringstream;
 
 using std::list;
 using std::set;

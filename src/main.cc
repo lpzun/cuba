@@ -15,6 +15,13 @@ using namespace std;
 using namespace cmd;
 using namespace cuba;
 
+/**
+ *
+ * @param argc
+ * @param argv
+ * @return int
+ *
+ */
 int main(const int argc, const char * const * const argv) {
 	try {
 		cmd_line cmd;
@@ -26,7 +33,6 @@ int main(const int argc, const char * const * const argv) {
 
 		prop::OPT_PRINT_ADJ = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::PROB), "--pushdown");
-
 		prop::OPT_PRINT_CMD = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--cmd-line");
 		prop::OPT_PRINT_ALL = cmd.arg_bool(
@@ -47,8 +53,8 @@ int main(const int argc, const char * const * const argv) {
 		prop::OPT_REACHABILITY = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::SEQ), "--reachability");
 
-		CUBA cuba(filename, initl, final);
-		cuba.context_bounded_analysis(std::stoul(n), std::stoul(k));
+		CUBA cuba(initl, final, filename);
+		//cuba.context_bounded_analysis(std::stoul(n), std::stoul(k));
 
 	} catch (const cmd::cmd_runtime_error& e) {
 		e.what();
