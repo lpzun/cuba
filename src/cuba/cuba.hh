@@ -48,25 +48,24 @@ private:
 	deque<fsa_state> BFS_visit(const fsa_state& root,
 			const unordered_map<fsa_state, deque<fsa_state>>& adj,
 			const fsa_state_set& initials);
-	symbolic_config compose(const pda_state& _g,
+	symbolic_config compose(const pda_state& _q,
 			const vector<store_automaton>& automatons, const int& idx);
-	store_automaton rename(const store_automaton& fsa, const pda_state& _g);
-	store_automaton anonymize(const store_automaton& fsa, const pda_state& _g,
+	store_automaton rename(const store_automaton& A, const pda_state& q_I);
+	store_automaton anonymize(const store_automaton& A, const pda_state& q_I,
 			const bool& is_rename = false);
-	store_automaton anonymize_by_split(const store_automaton& fsa,
-			const pda_state& _g);
-	store_automaton anonymize_by_rename(const store_automaton& fsa,
-			const pda_state& _g);
+	store_automaton anonymize_by_split(const store_automaton& A,
+			const pda_state& q_I);
+	store_automaton anonymize_by_rename(const store_automaton& A,
+			const pda_state& q_I);
 
 	/// determine R_k = R_{k+1}
-	bool is_recongnizable(const store_automaton& fsa, const thread_config& c);
-	bool is_equivalent(const store_automaton& fsa1,
-			const store_automaton& fsa2);
-	store_automaton iunion(const store_automaton& fsa1,
-			const store_automaton& fsa2);
-	store_automaton intersect(const store_automaton& fsa1,
-			const store_automaton& fsa2);
-	store_automaton complement(const store_automaton& fsa);
+	bool is_recongnizable(const store_automaton& A, const thread_config& c);
+	bool is_equivalent(const store_automaton& A1, const store_automaton& A2);
+	store_automaton iunion(const store_automaton& A1,
+			const store_automaton& A2);
+	store_automaton intersect(const store_automaton& A1,
+			const store_automaton& A2);
+	store_automaton complement(const store_automaton& A);
 	store_automaton cross_product(const vector<store_automaton>& W);
 
 	/// determine bar(R_k) = bar(R_{k+1})

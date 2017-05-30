@@ -276,10 +276,9 @@ deque<symbolic_config> CUBA::context_bounded_analysis(const size_k k,
 		const symbolic_config& cfg_I) {
 	/// Step 1: declare the data structures used in this procedure:
 	///
-	/// 1.1 <explored> : the set of reachable aggregate configurations
-	///
+	/// 1.1 <explored>: the set of reachable aggregate configurations
 	/// Initialization: empty set
-	deque<symbolic_config> explored;
+	deque<symbolic_config> global_R;
 
 	/// 1.2 <worklist>: the set of aggregate configurations are waiting
 	/// for handling; note its elements are pairs that each of them
@@ -290,6 +289,10 @@ deque<symbolic_config> CUBA::context_bounded_analysis(const size_k k,
 	queue<tau, deque<tau>> worklist;
 	worklist.emplace(cfg_I, 0);
 
+	/// 1.3 <topped_R>: the set of reachable tops of configurations.
+	/// We obtain this by computing the symbolic configurations.
+	vector<deque<config_top>> topped_R(thread_state::S);
+
 	/// Step 2: operate on the elements, aka, pairs in the worklist
 	/// one by one. This is like a BFS procedure.
 	while (!worklist.empty()) {
@@ -299,22 +302,21 @@ deque<symbolic_config> CUBA::context_bounded_analysis(const size_k k,
 
 		/// 2.2 check whether its context switches already reaches
 		/// to the upper bound; if so, discard the current element.
-		if (p.second < k)
+		if (p.second >= k)
 			continue;
 
 		/// 2.3 extract the aggregate configuration from the pair.
-		const auto& cfg = p.first;
-		const auto& automata = cfg.get_automatons();
+		const auto& automata = p.first.get_automatons();
 		for (int i = 0; i < automata.size(); ++i) {
 			const auto& _A = post_kleene(automata[i], CPDA[i]);
 			for (const auto& _q : project_G(_A)) {
 				const auto& _cfg = compose(_q, automata, i);
 				worklist.emplace(_cfg, p.second + 1);
-				explored.push_back(_cfg);
+				global_R.push_back(_cfg);
 			}
 		}
 	}
-	return explored;
+	return global_R;
 }
 
 /**
@@ -376,88 +378,90 @@ deque<fsa_state> CUBA::BFS_visit(const fsa_state& root,
 }
 
 /**
- * This procedure is to composite a aggregate configuration.
- * @param _g
- * @param automatons
+ * This procedure is to composite a symbolic configuration.
+ * Please keep in mind that a symbolic configuration represents
+ * a set of concrete configurations.
+ * @param q_I: an initial state
+ * @param automata: a list of automata
  * @param idx
- * @return aggregate configuration
+ * @return symbolic configuration
  */
-symbolic_config CUBA::compose(const pda_state& _g,
-		const vector<store_automaton>& automatons, const int& idx) {
+symbolic_config CUBA::compose(const pda_state& q_I,
+		const vector<store_automaton>& automata, const int& idx) {
 	vector<store_automaton> W;
-	W.reserve(automatons.size());
-	for (int i = 0; i < automatons.size(); ++i) {
+	W.reserve(automata.size());
+	for (int i = 0; i < automata.size(); ++i) {
 		if (i == idx)
-			W.push_back(this->anonymize(automatons[i], _g));
+			W.push_back(this->anonymize(automata[i], q_I));
 		else
-			W.push_back(this->rename(automatons[i], _g));
+			W.push_back(this->rename(automata[i], q_I));
 	}
-	return symbolic_config(_g, W);
+	return symbolic_config(q_I, W);
 }
 
 /**
  * This is the rename procedure: it rename the state state of A, if any,
- * to q.
+ * to q_I.
  * @param A
  * @param q
- * @return a finite automaton
+ * @return a store automaton
  */
-store_automaton CUBA::rename(const store_automaton& A, const pda_state& q) {
-	store_automaton _A(A);
-	_A.set_initials( { q });
-	return _A;
+store_automaton CUBA::rename(const store_automaton& A, const pda_state& q_I) {
+	return store_automaton(A.get_states(), A.get_alphas(), A.get_transitions(),
+			{ q_I }, A.get_accept());
 }
 
 /**
  *
  * This is the anonymize procedure: it rename all states except q to
  * fresh states delete all states except q
- * @param fsa
- * @param q
+ * @param A
+ * @param q_I
  * @param is_rename
- * @return a finite automaton
+ * @return a store automaton
  */
-store_automaton CUBA::anonymize(const store_automaton& fsa, const pda_state& q,
+store_automaton CUBA::anonymize(const store_automaton& A, const pda_state& q,
 		const bool& is_rename) {
 	if (is_rename)
-		return anonymize_by_rename(fsa, q);
-	return anonymize_by_split(fsa, q);
+		return anonymize_by_rename(A, q);
+	return anonymize_by_split(A, q);
 }
 
 /**
- * This is the anonymize procedure: it deletes all states except _g to
+ * This is the anonymize procedure: it deletes all states except q_I to
  * fresh states.
- * ...
+ *
+ * The procedure is an onion-peel approach.
+ *
  * @param A
- * @param _g
- * @return a finite automaton
- * TODO: need to rewrite........
+ * @param q_I
+ * @return a store automaton
  */
 store_automaton CUBA::anonymize_by_split(const store_automaton& A,
-		const pda_state& q) {
-	auto transs = A.get_transitions();
-	for (auto g : A.get_initials()) {
-		if (g == q)
+		const pda_state& q_I) {
+	auto deltas = A.get_transitions();
+	for (auto q : A.get_initials()) {
+		if (q == q_I)
 			continue;
-		transs.erase(g);
+		deltas.erase(q);
 	}
-	return store_automaton(A.get_states(), A.get_alphas(), transs,
-			A.get_initials(), A.get_accept());
+	return store_automaton(A.get_states(), A.get_alphas(), deltas, { q_I },
+			A.get_accept());
 }
 
 /**
  * This is the anonymize procedure: it rename all states except q to
  * fresh states.
  * @param A
- * @param q
+ * @param q_I
  * @return a finite automaton
  */
 store_automaton CUBA::anonymize_by_rename(const store_automaton& A,
-		const pda_state& q) {
+		const pda_state& q_I) {
 	auto states = A.get_states();
 	auto transs = A.get_transitions();
-	for (auto g : A.get_initials()) {
-		if (g == q)
+	for (auto q : A.get_initials()) {
+		if (q == q_I)
 			continue;
 		//transs.emplace(states++, transs[g]);
 	}
@@ -465,6 +469,11 @@ store_automaton CUBA::anonymize_by_rename(const store_automaton& A,
 			A.get_accept());
 }
 
+/////////////////////////////////////////////////////////////////////////
+/// Extract all tops of configurations from a symbolic configuration tau
+///
+/////////////////////////////////////////////////////////////////////////
+///
 /**
  * Extract all configuration tops of symbolic configuration tau
  * @param tau
@@ -516,9 +525,9 @@ set<pda_alpha> CUBA::extract_top_symbols(const store_automaton& A,
 }
 
 /**
- *
+ * Compute the cross product of all tops
  * @param tops
- * @return
+ * @return the cross product of tops
  */
 vector<vector<pda_alpha>> CUBA::cross_product(
 		const vector<set<pda_alpha>>& tops) {

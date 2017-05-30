@@ -36,8 +36,8 @@ the data structures that designs for this project.
 
 4. Top Configuration: Applying symmetry reduction to top configurations (already done!).
 
-# Reachabilty Automaton
-We implement the reachability automaton by means of post*. We *design* an algorithm as follows:
+# Pushdown Store Automaton
+We implement the pushdown store automaton by means of post*. We *design* an algorithm as follows:
 
 **INPUT:** The inputs are a PDS P = (Q, \Gamma, \Delta, q0, r0), and an initial configuration c0. 
 
@@ -54,3 +54,17 @@ We have saturation rules as follows:
   (2) Push operation: (q, r) +-> (q', r')
 
   (3) 
+  
+***Intermediate state*** Generating an intermediate state is implemented via a static variable, shown as follows
+
+static fsa_state INTERM_STATE
+
+and a static function, shown as follows
+
+static fsa_state create_interm_state() {
+	return ++INTERM_STATE;
+}
+  
+# Anonymize
+## Anonymize-by-split
+This is 
