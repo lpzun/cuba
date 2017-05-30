@@ -123,32 +123,48 @@ pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
 }
 
 /**
- * Parse the input transitions
- * @param r
- */
-void parser::parse_transition(const string& r) {
-
-}
-
-/**
  * To parse the input initial/final thread state
  * @param s
  * @return thread state
  */
-thread_config parser::parse_input_cfg(const string& s) {
+concrete_config parser::parse_input_cfg(const string& s) {
 	if (s.find('|') == std::string::npos) { /// s is store in a file
 		ifstream in(s.c_str());
 		if (in.good()) {
 			string content;
 			std::getline(in, content);
 			in.close();
-			return parser::create_thread_state_from_str(content);
+			return parser::create_global_config_from_str(content);
 		} else {
 			throw cuba_runtime_error(
 					"parse_input_SS: input state file is unknown!");
 		}
 	}
-	return parser::create_thread_config_from_str(s);
+	return parser::create_global_config_from_str(s);
+}
+
+/**
+ * To parse the input initial/final thread state
+ * @param s_ts
+ * @param delim
+ * @return concrete configuration
+ */
+concrete_config parser::create_global_config_from_str(const string& s_ts,
+		const char& delim) {
+	const auto& vs_cfg = split(s_ts, delim);
+	if (vs_cfg.size() != 2) {
+		throw("The format of concrete configuration is wrong!");
+	}
+
+	const auto& stacks = split(vs_cfg[1], ';');
+	stack_vec W(stacks.size());
+	for (auto i = 0; i < stacks.size(); ++i) {
+		const auto& symbols = split(stacks[i], ',');
+		for (const auto& s : symbols) {
+			W[i].push(std::stoi(s));
+		}
+	}
+	return concrete_config(0, 0, std::stoi(vs_cfg[0]), W);
 }
 
 /**

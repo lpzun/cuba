@@ -251,27 +251,39 @@ inline bool operator!=(const concrete_config& g1, const concrete_config& g2) {
 /// PART 2. The data structure for symbolic configuration
 ///
 /////////////////////////////////////////////////////////////////////////
+
+/**
+ * Define a pushdown store automaton. A pushdown store automaton is a
+ * finite automaton, with the following specific features:
+ *  - states: this contains only intermediate states and final states,
+ *    no initial states;
+ *  - initials: this contains only initial states;
+ *  - accept: the accept state is a state defined between initial states
+ *    and intermediate states, e.g., initial 0..5, accept 6, states 7..9
+ */
+using store_automaton = finite_automaton;
+
 class symbolic_config {
 public:
-	symbolic_config(const pda_state& g, const vector<finite_automaton>& W);
-	symbolic_config(const pda_state& g, const size_t&n,
-			const finite_automaton& A);
+	symbolic_config(const pda_state& q, const vector<store_automaton>& W);
+	symbolic_config(const pda_state& q, const size_t&n,
+			const store_automaton& A);
 	~symbolic_config();
 
 	pda_state get_state() const {
-		return g;
+		return q;
 	}
 
-	const vector<finite_automaton>& get_automatons() const {
+	const vector<store_automaton>& get_automatons() const {
 		return W;
 	}
 
 private:
-	pda_state g;
-	vector<finite_automaton> W;
+	pda_state q;
+	vector<store_automaton> W;
 };
 
-using top_of_config = global_state;
+using config_top = global_state;
 
 }
 /* namespace cuba */

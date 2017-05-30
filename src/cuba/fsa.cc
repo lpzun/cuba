@@ -50,8 +50,8 @@ fsa_transition::~fsa_transition() {
 finite_automaton::finite_automaton(const fsa_state_set& states,
 		const fsa_alphabet& alphabet, const fsa_delta& transitions,
 		const fsa_state_set& initials, const fsa_state& accept) :
-		states(states), alphabet(alphabet), transitions(transitions), ///
-		initials(initials), start_state(), accept_state(accept) {
+		states(states), alphas(alphabet), transitions(transitions), ///
+		initials(initials), accept(accept) {
 
 }
 
@@ -66,8 +66,8 @@ finite_automaton::finite_automaton(const fsa_state_set& states,
 finite_automaton::finite_automaton(const fsa_state_set& states,
 		const fsa_alphabet& alphabet, const fsa_state_set& initials,
 		const fsa_state& accept) :
-		states(states), alphabet(alphabet), transitions(), ///
-		initials(initials), start_state(), accept_state(accept) {
+		states(states), alphas(alphabet), transitions(), ///
+		initials(initials), accept(accept) {
 
 }
 

@@ -16,7 +16,7 @@ namespace cuba {
  * @param final
  */
 CUBA::CUBA(const string& initl, const string& final, const string& filename) :
-		initl_c(), final_c(), CPDA() {
+		initl_c(0, 1), final_c(0, 1), CPDA() {
 	initl_c = parser::parse_input_cfg(initl);
 	final_c = parser::parse_input_cfg(final);
 	CPDA = parser::parse_input_cpds(filename);
@@ -38,56 +38,91 @@ CUBA::~CUBA() {
  * @param n: the number of threads
  * @param k: the number of context switches
  */
-void CUBA::context_bounded_analysis(const size_t& n, const size_k& k) {
-	auto fsa = create_reachability_automaton();
-	cout << "reachability automaton: \n";
-	cout << fsa << endl;
-	if (prop::OPT_REACHABILITY) {
-		cout << final_c << " ";
-		if (is_recongnizable(fsa, final_c))
-			cout << "is reachable";
-		else
-			cout << "is unreachable";
-		cout << "\n";
+void CUBA::context_bounded_analysis(const size_k& k, const size_t& n) {
+	vector<store_automaton> W;
+	for (auto i = 0; i < CPDA.size(); ++i) {
+		auto fsa = create_init_automaton(i);
+		cout << "pushdown store automaton " << i << "\n";
+		cout << fsa << endl;
+		W.push_back(fsa);
 	}
+	symbolic_config cfg_I(initl_c.get_state(), W);
+	auto R = context_bounded_analysis(k, cfg_I);
 }
 
 /**
  * The procedure of building the reachability automaton FSA for a PDA
  * @return a finite automaton
  */
-finite_automaton CUBA::create_reachability_automaton() {
+store_automaton CUBA::create_store_automaton(const size_t i) {
 	cout << "Initial configuration: " << initl_c << "\n";
-	auto fsa = create_init_fsa(initl_c);
-	cout << "initial automaton: \n";
+	auto fsa = create_init_automaton(i);
+	cout << "Initial automaton: \n";
 	cout << fsa << endl;
-	return post_kleene(fsa);
+	return post_kleene(fsa, CPDA[i]);
 }
 
 /**
- * build the reachability automation for the initial configuration of a PDA
+ *
+ * build the reachability automation for an initial configuration of a PDA
  * @param c: an initial configuration
- * @return a finite automaton
+ * @param PDA
+ * @return
  */
-finite_automaton CUBA::create_init_fsa(const thread_config& c) {
-	fsa_state state_pda = thread_state::S;
-	fsa_alpha alpha_pda = thread_state::L;
+store_automaton CUBA::create_init_automaton(const size_t i) {
+	/// step 0: set up the accept state
+	const auto& P = CPDA[i];
+	const auto& q_I = initl_c.get_state();
+	auto w = initl_c.get_stacks()[i];
+	auto q_F = create_accept_state(CPDA[i].get_states());
+	/// step 1: set up the set of states
+	fsa_state_set states { q_F };
 
-	auto w = c.get_stack();
-	auto q = c.get_state(); /// the final state
+	/// step 2: set up the set of alphas
+	auto alphas = P.get_alphas();
 
-/// the state of fsa
-	auto state_fsa = state_pda + w.size();
-/// the transitions
+	/// step 3: set up the set of initial states
+	fsa_state_set initials { q_I };
+
+	/// step 4: set up the set of transitions
 	fsa_delta delta;
-	auto s = state_pda; /// s is an assitant state
+	auto q = q_I;
+	auto _q = create_interm_state(states);
 	while (!w.empty()) {
-		delta[q].emplace(q, s, w.top());
+		const auto a = w.top();
 		w.pop();
-		q = s, ++s; /// update the final state
-	}
+		if (w.empty())
+			_q = q_F;
 
-	return finite_automaton(state_fsa, alpha_pda, delta, state_pda, q);
+		states.emplace(_q); /// add the intermediate state
+		delta[q].emplace(q, _q, a); /// add a new transition
+
+		q = _q++; /// set up new source & destination states
+	}
+	return store_automaton(states, alphas, delta, initials, q_F);
+}
+
+/**
+ *
+ * @param states
+ * @return
+ */
+fsa_state CUBA::create_accept_state(const fsa_state_set& states) {
+	if (states.size() == 0)
+		throw cuba_runtime_error("no control state!");
+	auto s = *(states.rbegin()); /// s is an intermediate state
+	return ++s;
+}
+/**
+ *
+ * @param states
+ * @return
+ */
+fsa_state CUBA::create_interm_state(const fsa_state_set& states) {
+	if (states.size() == 0)
+		throw cuba_runtime_error("no control state!");
+	auto s = *(states.rbegin()); /// s is an intermediate state
+	return ++s;
 }
 
 /**
@@ -95,80 +130,86 @@ finite_automaton CUBA::create_init_fsa(const thread_config& c) {
  * @param A
  * @return a finite automaton
  */
-finite_automaton CUBA::post_kleene(const finite_automaton& A) {
-	auto state = A.get_states();
-	auto alpha = A.get_alphabet();
-	auto delta = A.get_transitions();
-	fsa_delta explored;
-	/*
-	 unordered_map<int, fsa_state> map_r_to_aux_state;
-	 for (auto i = 0; i < P.active_R.size(); ++i) {
-	 if (active_R[i].get_oper_type() == type_stack_operation::PUSH)
-	 map_r_to_aux_state.emplace(i, state++);
-	 }
+store_automaton CUBA::post_kleene(const store_automaton& A,
+		const pushdown_automaton& P) {
+	auto states = A.get_states();
+	auto alphas = A.get_alphas();
+	fsa_delta deltas; /// the transitions of Post*(A)
 
-	 deque<fsa_transition> worklist;
-	 fsa_delta explored;
-	 fsa_delta reversed; /// used to deal with ...
+	unordered_map<int, fsa_state> map_r_to_aux_state;
+	auto s = create_interm_state(states);
+	for (auto i = 0; i < P.get_actions().size(); ++i) {
+		if (P.get_actions()[i].get_oper_type() == type_stack_operation::PUSH)
+			map_r_to_aux_state.emplace(i, s++);
+	}
 
-	 /// initialize the worklist
-	 for (const auto& p : delta)
-	 worklist.insert(worklist.begin(), p.second.begin(), p.second.end());
+	deque<fsa_transition> worklist;
+	fsa_delta epsilon_R; /// used to deal with ...
 
-	 while (!worklist.empty()) {
-	 const auto t = worklist.front(); /// FSA transition (p, a, q)
-	 worklist.pop_front();
+	/// initialize the worklist
+	for (const auto& p : A.get_transitions()) {
+		worklist.insert(worklist.begin(), p.second.begin(), p.second.end());
+	}
 
-	 /// FSA transition (p, a, q)
-	 const auto& p = t.get_src();
-	 const auto& a = t.get_label();
-	 const auto& q = t.get_dst();
+	while (!worklist.empty()) {
+		const auto t = worklist.front(); /// FSA transition (p, a, q)
+		worklist.pop_front();
 
-	 const auto& ret = explored[p].insert(t);
-	 if (!ret.second || p >= thread_state::S)
-	 continue;
+		/// FSA transition (p, a, q)
+		const auto& p = t.get_src();
+		const auto& a = t.get_label();
+		const auto& q = t.get_dst();
 
-	 if (a != alphabet::EPSILON) { /// if label != epsilon
-	 const auto& pda_transs = PDS[retrieve(p, a)];
-	 for (const auto& rid : pda_transs) {
-	 /// (p, a) -> (p', a')
-	 const auto& r = active_R[rid]; /// PDA transition
-	 const auto& _p = active_Q[r.get_dst()].get_state();  /// state
-	 const auto& _a = active_Q[r.get_dst()].get_symbol(); /// label
+		const auto& ret = deltas[p].insert(t);
+		if (!ret.second || p >= thread_state::S)
+			continue;
 
-	 switch (r.get_oper_type()) {
-	 case type_stack_operation::POP: { /// pop operation
-	 worklist.emplace_back(_p, q, alphabet::EPSILON);
-	 }
-	 break;
-	 case type_stack_operation::OVERWRITE: { /// overwrite operation
-	 worklist.emplace_back(_p, q, _a);
-	 }
-	 break;
-	 default: { /// push operation
-	 const auto& q_new = map_r_to_aux_state[rid];
-	 worklist.emplace_back(_p, q_new, _a);
-	 explored[q_new].emplace(q_new, q, a);
+		if (a != alphabet::EPSILON) { /// if label != epsilon
+			auto ifind = P.get_pda().find(thread_state(p, a));
+			if (ifind != P.get_pda().end()) {
+				for (const auto& rid : ifind->second) {
 
-	 const auto& fsa_transs = reversed[q_new];
-	 for (const auto& _t : fsa_transs) {
-	 if (_t.get_label() == alphabet::EPSILON)
-	 worklist.emplace_back(_t.get_src(), q_new, a);
-	 }
-	 reversed[q_new].emplace(_p, q_new, _a);
-	 }
-	 break;
-	 }
-	 }
-	 } else { /// if label == epsilon
-	 const auto& fsa_transs = explored[q];
-	 for (const auto& _t : fsa_transs)  /// _t = (q, a', q')
-	 worklist.emplace_back(p, _t.get_dst(), _t.get_label());
-	 }
-	 }
-	 */
-	return finite_automaton(state, alpha, explored, A.get_initials(),
-			A.get_accept_state());
+					const auto& r = P.get_actions()[rid]; /// PDA transition
+					const auto& _p = r.get_dst().get_state(); /// state
+					auto _W = r.get_dst().get_stack(); /// stack: maintain a copy
+
+					switch (r.get_oper_type()) {
+					case type_stack_operation::POP: { /// pop
+						worklist.emplace_back(_p, q, alphabet::EPSILON);
+						epsilon_R[_p].emplace(_p, q, alphabet::EPSILON); /// epsilon transitions
+					}
+						break;
+					case type_stack_operation::OVERWRITE: { /// overwrite
+						worklist.emplace_back(_p, q, _W.top());
+					}
+						break;
+					default: { /// push
+						const auto& q_in = map_r_to_aux_state[rid];
+						const auto& a1 = _W.top();
+						_W.pop();
+						const auto& a2 = _W.top();
+						_W.pop();
+
+						worklist.emplace_back(_p, q_in, a1);
+						deltas[q_in].emplace(q_in, q, a2);
+
+						for (const auto& _t : epsilon_R[q_in]) {
+							if (_t.get_label() == alphabet::EPSILON)
+								worklist.emplace_back(_t.get_src(), q_in, a2);
+						}
+					}
+						break;
+					}
+				}
+			}
+		} else { /// if label == epsilon
+			for (const auto& _t : deltas[q])  /// _t = (q, a', q')
+				worklist.emplace_back(p, _t.get_dst(), _t.get_label()); /// (p, a', q')
+		}
+	}
+
+	return store_automaton(states, alphas, deltas, P.get_states(),
+			A.get_accept());
 }
 
 /**
@@ -179,10 +220,8 @@ finite_automaton CUBA::post_kleene(const finite_automaton& A) {
  *         true : if c is reachable
  *         false: otherwise.
  */
-bool CUBA::is_recongnizable(const finite_automaton& fsa,
+bool CUBA::is_recongnizable(const store_automaton& fsa,
 		const thread_config& c) {
-	if (c.get_state() >= fsa.get_initials())
-		throw cuba_runtime_error("c's control state is illegal!");
 
 	queue<pair<fsa_state, int>> worklist;
 	worklist.emplace(c.get_state(), 0);
@@ -202,7 +241,7 @@ bool CUBA::is_recongnizable(const finite_automaton& fsa,
 		for (const auto& r : ifind->second)
 			if (r.get_label() == w.get_worklist()[depth]) {
 				if (depth + 1 == w.size()) {
-					if (r.get_dst() == fsa.get_accept_state())
+					if (r.get_dst() == fsa.get_accept())
 						return true;
 				} else {
 					worklist.emplace(r.get_dst(), depth + 1);
@@ -219,62 +258,63 @@ bool CUBA::is_recongnizable(const finite_automaton& fsa,
  * @param fsa2
  * @return bool
  */
-bool CUBA::is_equivalent(const finite_automaton& fsa1,
-		const finite_automaton& fsa2) {
+bool CUBA::is_equivalent(const store_automaton& fsa1,
+		const store_automaton& fsa2) {
 	return true;
 }
 
+/// a pair of configuration used in QR algorithm
+using tau = pair<symbolic_config, size_k>;
 /**
  * This is the main procedure to do the context-bounded analysis. It implements the
  * algorithm in QR'05 paper.
- * @param n   : the number of threads
  * @param k   : the upper bound of context switches
- * @param g_in: the initial controcl state
- * @param A_in
- * @return
+ * @param cfg_I: the initial symbolic configuration
+ * @return a set of reachable symbolic configuration
  */
-deque<symbolic_config> CUBA::context_bounded_analysis(const size_t& n,
-		const size_k& k, const pda_state& g_in, const finite_automaton& A_in) {
-/// Step 1: declare the data structures used in this procedure:
-///
-/// 1.1 <reached> : the set of reachable aggregate configurations
-///
-/// Initialization: empty set
-	deque<symbolic_config> reached;
+deque<symbolic_config> CUBA::context_bounded_analysis(const size_k k,
+		const symbolic_config& cfg_I) {
+	/// Step 1: declare the data structures used in this procedure:
+	///
+	/// 1.1 <explored> : the set of reachable aggregate configurations
+	///
+	/// Initialization: empty set
+	deque<symbolic_config> explored;
 
-/// 1.2 <worklist>: the set of aggregate configurations are waiting
-/// for handling; note its elements are pairs that each of them
-/// contains an aggregate configuration and the necessary context
-/// switches to reach it.
-///
-/// Initialization: {(<g_in, (A_in, ..., A_in)>, 0)}
-	queue<pair<symbolic_config, size_k>> worklist;
-	symbolic_config cfg_in(g_in, n, A_in);
-	worklist.emplace(cfg_in, 0);
+	/// 1.2 <worklist>: the set of aggregate configurations are waiting
+	/// for handling; note its elements are pairs that each of them
+	/// contains an aggregate configuration and the necessary context
+	/// switches to reach it.
+	///
+	/// Initialization: {(<q_I, (A1_I, ..., An_I)>, 0)}
+	queue<tau, deque<tau>> worklist;
+	worklist.emplace(cfg_I, 0);
 
-/// Step 2: operate on the elements, aka, pairs in the worklist one by one.
-/// This is like a BFS procedure.
+	/// Step 2: operate on the elements, aka, pairs in the worklist
+	/// one by one. This is like a BFS procedure.
 	while (!worklist.empty()) {
 		/// 2.1 remove a aggregate configuration from worklist
 		auto p = worklist.front();
 		worklist.pop();
-		/// 2.2 check whether its context switches already reaches to the upper
-		/// bound; if so, discard the current element.
+
+		/// 2.2 check whether its context switches already reaches
+		/// to the upper bound; if so, discard the current element.
 		if (p.second < k)
 			continue;
+
 		/// 2.3 extract the aggregate configuration from the pair.
 		const auto& cfg = p.first;
-		const auto& automatons = cfg.get_automatons();
-		for (int i = 0; i < automatons.size(); ++i) {
-			const auto& _A = post_kleene(automatons[i]);
-			for (const auto& _g : project_G(_A)) {
-				const auto& _cfg = compose(_g, automatons, i);
+		const auto& automata = cfg.get_automatons();
+		for (int i = 0; i < automata.size(); ++i) {
+			const auto& _A = post_kleene(automata[i], CPDA[i]);
+			for (const auto& _q : project_G(_A)) {
+				const auto& _cfg = compose(_q, automata, i);
 				worklist.emplace(_cfg, p.second + 1);
-				reached.push_back(_cfg);
+				explored.push_back(_cfg);
 			}
 		}
 	}
-	return reached;
+	return explored;
 }
 
 /**
@@ -283,7 +323,7 @@ deque<symbolic_config> CUBA::context_bounded_analysis(const size_t& n,
  * @param A
  * @return a list of states
  */
-deque<fsa_state> CUBA::project_G(const finite_automaton& A) {
+deque<fsa_state> CUBA::project_G(const store_automaton& A) {
 	deque<fsa_state> states;
 	unordered_map<fsa_state, deque<fsa_state>> transpose;
 	for (const auto& p : A.get_transitions()) {
@@ -291,7 +331,7 @@ deque<fsa_state> CUBA::project_G(const finite_automaton& A) {
 			transpose[r.get_dst()].push_back(p.first);
 		}
 	}
-	return BFS_visit(A.get_accept_state(), transpose, A.get_initials());
+	return BFS_visit(A.get_accept(), transpose, A.get_initials());
 }
 
 /**
@@ -306,19 +346,19 @@ deque<fsa_state> CUBA::BFS_visit(const fsa_state& root,
 		const fsa_state_set& initials) {
 	deque<fsa_state> G;
 
-/// Mark whether a state is already visited or not:
-/// to avoid a cycle
+	/// Mark whether a state is already visited or not:
+	/// to avoid a cycle
 	unordered_set<fsa_state> explored;
 	explored.emplace(root);
 
-/// the worklist
+	/// the worklist
 	queue<fsa_state> worklist;
 	worklist.push(root);
 	while (!worklist.empty()) {
 		const auto u = worklist.front();
 		worklist.pop();
 
-		if (u < initials)
+		if (initials.find(u) != initials.end())
 			G.emplace_back(u);
 
 		auto ifind = adj.find(u);
@@ -343,8 +383,8 @@ deque<fsa_state> CUBA::BFS_visit(const fsa_state& root,
  * @return aggregate configuration
  */
 symbolic_config CUBA::compose(const pda_state& _g,
-		const vector<finite_automaton>& automatons, const int& idx) {
-	vector<finite_automaton> W;
+		const vector<store_automaton>& automatons, const int& idx) {
+	vector<store_automaton> W;
 	W.reserve(automatons.size());
 	for (int i = 0; i < automatons.size(); ++i) {
 		if (i == idx)
@@ -357,31 +397,31 @@ symbolic_config CUBA::compose(const pda_state& _g,
 
 /**
  * This is the rename procedure: it rename the state state of A, if any,
- * to _g.
+ * to q.
  * @param A
- * @param _g
+ * @param q
  * @return a finite automaton
  */
-finite_automaton CUBA::rename(const finite_automaton& A, const pda_state& _g) {
-	finite_automaton _A(A);
-	_A.set_start_state(_g);
+store_automaton CUBA::rename(const store_automaton& A, const pda_state& q) {
+	store_automaton _A(A);
+	_A.set_initials( { q });
 	return _A;
 }
 
 /**
  *
- * This is the anonymize procedure: it rename all states except _g to
- * fresh states delete all states except _g
+ * This is the anonymize procedure: it rename all states except q to
+ * fresh states delete all states except q
  * @param fsa
- * @param _g
+ * @param q
  * @param is_rename
  * @return a finite automaton
  */
-finite_automaton CUBA::anonymize(const finite_automaton& fsa,
-		const pda_state& _g, const bool& is_rename) {
+store_automaton CUBA::anonymize(const store_automaton& fsa, const pda_state& q,
+		const bool& is_rename) {
 	if (is_rename)
-		return anonymize_by_rename(fsa, _g);
-	return anonymize_by_delete(fsa, _g);
+		return anonymize_by_rename(fsa, q);
+	return anonymize_by_split(fsa, q);
 }
 
 /**
@@ -391,37 +431,110 @@ finite_automaton CUBA::anonymize(const finite_automaton& fsa,
  * @param A
  * @param _g
  * @return a finite automaton
+ * TODO: need to rewrite........
  */
-finite_automaton CUBA::anonymize_by_delete(const finite_automaton& A,
-		const pda_state& _g) {
+store_automaton CUBA::anonymize_by_split(const store_automaton& A,
+		const pda_state& q) {
 	auto transs = A.get_transitions();
-	for (auto g = 0; g < A.get_initials(); ++g) {
-		if (g == _g)
+	for (auto g : A.get_initials()) {
+		if (g == q)
 			continue;
 		transs.erase(g);
 	}
-	return finite_automaton(A.get_states(), A.get_alphabet(), transs,
-			A.get_initials(), A.get_accept_state());
+	return store_automaton(A.get_states(), A.get_alphas(), transs,
+			A.get_initials(), A.get_accept());
 }
 
 /**
- * This is the anonymize procedure: it rename all states except _g to
+ * This is the anonymize procedure: it rename all states except q to
  * fresh states.
  * @param A
- * @param _g
+ * @param q
  * @return a finite automaton
  */
-finite_automaton CUBA::anonymize_by_rename(const finite_automaton& A,
-		const pda_state& _g) {
+store_automaton CUBA::anonymize_by_rename(const store_automaton& A,
+		const pda_state& q) {
 	auto states = A.get_states();
 	auto transs = A.get_transitions();
-	for (auto g = 0; g < A.get_initials(); ++g) {
-		if (g == _g)
+	for (auto g : A.get_initials()) {
+		if (g == q)
 			continue;
-		transs.emplace(states++, transs[g]);
+		//transs.emplace(states++, transs[g]);
 	}
-	return finite_automaton(states, A.get_alphabet(), transs, A.get_initials(),
-			A.get_accept_state());
+	return store_automaton(states, A.get_alphas(), transs, A.get_initials(),
+			A.get_accept());
+}
+
+/**
+ * Extract all configuration tops of symbolic configuration tau
+ * @param tau
+ * @return a set of configuration tops
+ */
+vector<config_top> CUBA::extract_config_tops(const symbolic_config& tau) {
+	const auto q = tau.get_state();
+	vector<set<pda_alpha>> toppings(tau.get_automatons().size());
+	for (auto i = 0; i < tau.get_automatons().size(); ++i) {
+		toppings[i] = extract_top_symbols(tau.get_automatons()[i], q);
+	}
+	const auto& worklist = cross_product(toppings);
+	vector<config_top> tops;
+	tops.reserve(worklist.size());
+	for (const auto& W : worklist) {
+		tops.emplace_back(q, W);
+	}
+	return tops;
+}
+
+/**
+ * Extract all top symbols of a store automaton
+ * @param A
+ * @param q
+ * @return a set of top symbols
+ */
+set<pda_alpha> CUBA::extract_top_symbols(const store_automaton& A,
+		const pda_state q) {
+	set<pda_alpha> tops; /// the set of top symbols
+	queue<pda_state> worklist; ///
+	worklist.emplace(q);
+	while (!worklist.empty()) {
+		const auto p = worklist.front();
+		worklist.pop();
+
+		auto ifind = A.get_transitions().find(p);
+		if (ifind == A.get_transitions().end()) {
+			continue;
+		}
+		/// iterate all out-going edges
+		for (const auto& r : ifind->second) {
+			if (r.get_label() == alphabet::EPSILON) /// epsilon label
+				worklist.push(r.get_dst());
+			else
+				tops.insert(r.get_label());
+		}
+	}
+	return tops;
+}
+
+/**
+ *
+ * @param tops
+ * @return
+ */
+vector<vector<pda_alpha>> CUBA::cross_product(
+		const vector<set<pda_alpha>>& tops) {
+	vector<vector<pda_alpha>> worklist;
+	worklist.emplace_back(vector<pda_alpha>());
+	for (const auto& ts : tops) {
+		vector<vector<pda_alpha>> templist;
+		for (const auto s : ts) {
+			for (auto v : worklist) {
+				v.emplace_back(s);
+				templist.emplace_back(v);
+			}
+		}
+		worklist.swap(templist);
+	}
+	return worklist;
 }
 
 } /* namespace cuba */

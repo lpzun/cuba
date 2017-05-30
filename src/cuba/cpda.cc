@@ -201,7 +201,7 @@ global_state concrete_config::top() {
  */
 symbolic_config::symbolic_config(const pda_state& g,
 		const vector<finite_automaton>& W) :
-		g(g), W(W) {
+		q(g), W(W) {
 }
 
 /**
@@ -213,7 +213,7 @@ symbolic_config::symbolic_config(const pda_state& g,
  */
 symbolic_config::symbolic_config(const pda_state& g, const size_t&n,
 		const finite_automaton& A) :
-		g(g), W(n, A) {
+		q(g), W(n, A) {
 }
 
 /**

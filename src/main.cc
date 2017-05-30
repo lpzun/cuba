@@ -54,7 +54,7 @@ int main(const int argc, const char * const * const argv) {
 				cmd_line::get_opt_index(opt_type::SEQ), "--reachability");
 
 		CUBA cuba(initl, final, filename);
-		//cuba.context_bounded_analysis(std::stoul(n), std::stoul(k));
+		cuba.context_bounded_analysis(std::stoul(n), std::stoul(k));
 
 	} catch (const cmd::cmd_runtime_error& e) {
 		e.what();

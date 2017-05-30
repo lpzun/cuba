@@ -12,14 +12,12 @@
 
 namespace cuba {
 using fsa_state = pda_state;
-/// a set of fas_state, here we use only one number, say n,
-/// it represents states 0...n
-using fsa_state_set = pda_state;
+/// a set of fsa_state
+using fsa_state_set = set<fsa_state>;
 
 using fsa_alpha = pda_alpha;
-/// a set of fas_alpha, here we use only one number, say n,
-/// it represents alphas 0...n
-using fsa_alphabet = pda_alpha;
+/// a set of fsa_alpha
+using fsa_alphabet = set<fsa_alpha>;
 
 /**
  * Definition of finite automaton transition
@@ -128,12 +126,12 @@ public:
 
 	~finite_automaton();
 
-	fsa_state_set get_states() const {
+	const fsa_state_set& get_states() const {
 		return states;
 	}
 
-	fsa_alphabet get_alphabet() const {
-		return alphabet;
+	const fsa_alphabet& get_alphas() const {
+		return alphas;
 	}
 
 	const fsa_delta& get_transitions() const {
@@ -144,27 +142,21 @@ public:
 		return initials;
 	}
 
-	fsa_state get_start_state() const {
-		return start_state;
+	void set_initials(const fsa_state_set& initials) {
+		this->initials = initials;
 	}
 
-	fsa_state get_accept_state() const {
-		return accept_state;
+	fsa_state get_accept() const {
+		return accept;
 	}
-
-	void set_start_state(fsa_state start_state) {
-		this->start_state = start_state;
-	}
-
-	void add_transitions(const fsa_transition& r);
 
 private:
 	fsa_state_set states;    /// it represents state 0...|states|-1
-	fsa_alphabet alphabet;   ///
+	fsa_alphabet alphas;   ///
 	fsa_delta transitions;   ///
+
 	fsa_state_set initials;  /// it represents state 0...|initials|-1
-	fsa_state start_state;
-	fsa_state accept_state;  /// accept state
+	fsa_state accept;  /// accept state
 };
 
 /**
@@ -174,40 +166,54 @@ private:
  * @return ostream
  */
 inline ostream& operator<<(ostream& os, finite_automaton& fsa) {
-	if (fsa.get_states() == 0)
+	if (fsa.get_states().size() == 0)
 		return os;
 
-	/// matrix ...
-	vector<vector<string>> matrix(fsa.get_states(),
-			vector<string>(fsa.get_states() - fsa.get_initials(), ""));
-	for (const auto& p : fsa.get_transitions()) {
-		for (const auto& r : p.second) {
-			const int& i = r.get_src();
-			const int& j = r.get_dst() - fsa.get_initials();
-			if (matrix[i][j].length() > 0)
-				matrix[i][j].push_back(',');
-			if (r.get_label() == -1)
-				matrix[i][j] += "e";
-			else
-				matrix[i][j] += std::to_string(r.get_label());
-		}
-	}
+	/*
+	 /// matrix ...
+	 vector<vector<string>> matrix(
+	 fsa.get_states().size() + fsa.get_initials().size(),
+	 vector<string>(fsa.get_states().size(), ""));
+	 for (const auto& p : fsa.get_transitions()) {
+	 for (const auto& r : p.second) {
+	 const int& i = r.get_src();
+	 const int& j = r.get_dst() - fsa.get_initials().size();
+	 if (matrix[i][j].length() > 0)
+	 matrix[i][j].push_back(',');
+	 if (r.get_label() == -1)
+	 matrix[i][j] += "e";
+	 else
+	 matrix[i][j] += std::to_string(r.get_label());
+	 }
+	 }
 
-	auto m = matrix.size();
-	auto n = std::to_string(m).length() + 1;
-	os << algs::widthify("", n + 2);
-	for (int i = fsa.get_initials(); i < m; ++i) {
-		os << algs::widthify("q" + std::to_string(i), n, alignment::LEFTJUST);
-		os << " | ";
-	}
+	 auto m = matrix.size();
+	 auto n = std::to_string(m).length() + 1;
+	 os << algs::widthify("", n + 2);
+	 for (int i = fsa.get_initials().size(); i < m; ++i) {
+	 os << algs::widthify("q" + std::to_string(i), n, alignment::LEFTJUST);
+	 os << " | ";
+	 }
+	 os << "\n";
+	 for (int i = 0; i < m; ++i) {
+	 os << algs::widthify("q" + std::to_string(i), n, alignment::LEFTJUST);
+	 os << "|";
+	 for (int j = 0; j < matrix[0].size(); ++j)
+	 os << algs::widthify(matrix[i][j], n + 2, alignment::CENTERED)
+	 << " ";
+	 os << "\n";
+	 }
+	 */
+	os << "states: ";
+	for (auto q : fsa.get_initials())
+		os << "q" << q << " ";
+	for (auto s : fsa.get_states())
+		os << "s" << s << " ";
 	os << "\n";
-	for (int i = 0; i < m; ++i) {
-		os << algs::widthify("q" + std::to_string(i), n, alignment::LEFTJUST);
-		os << "|";
-		for (int j = 0; j < matrix[0].size(); ++j)
-			os << algs::widthify(matrix[i][j], n + 2, alignment::CENTERED)
-					<< " ";
-		os << "\n";
+	os << "accept: " << fsa.get_accept() << "\n";
+	for (auto p : fsa.get_transitions()) {
+		for (auto r : p.second)
+			os << r << "\n";
 	}
 	return os;
 }
