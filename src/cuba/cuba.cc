@@ -214,14 +214,13 @@ store_automaton CUBA::post_kleene(const store_automaton& A,
 
 /**
  * To determine whether c is reachable in the PDA
- * @param fsa : a reachability automaton
- * @param c   : a configuration
+ * @param A: a reachability automaton
+ * @param c: a configuration
  * @return bool
  *         true : if c is reachable
  *         false: otherwise.
  */
-bool CUBA::is_recongnizable(const store_automaton& fsa,
-		const thread_config& c) {
+bool CUBA::is_recongnizable(const store_automaton& A, const thread_config& c) {
 
 	queue<pair<fsa_state, int>> worklist;
 	worklist.emplace(c.get_state(), 0);
@@ -234,14 +233,14 @@ bool CUBA::is_recongnizable(const store_automaton& fsa,
 		const auto& state = u.first;
 		const auto& depth = u.second;
 
-		auto ifind = fsa.get_transitions().find(state);
-		if (ifind == fsa.get_transitions().end())
+		auto ifind = A.get_transitions().find(state);
+		if (ifind == A.get_transitions().end())
 			continue;
 
 		for (const auto& r : ifind->second)
 			if (r.get_label() == w.get_worklist()[depth]) {
 				if (depth + 1 == w.size()) {
-					if (r.get_dst() == fsa.get_accept())
+					if (r.get_dst() == A.get_accept())
 						return true;
 				} else {
 					worklist.emplace(r.get_dst(), depth + 1);
@@ -254,12 +253,11 @@ bool CUBA::is_recongnizable(const store_automaton& fsa,
 /**
  * Determine the equivalence of two finite automatons. This implementation
  * is based on the Hopcroft-Karp algorithm.
- * @param fsa1
- * @param fsa2
+ * @param A1
+ * @param A2
  * @return bool
  */
-bool CUBA::is_equivalent(const store_automaton& fsa1,
-		const store_automaton& fsa2) {
+bool CUBA::is_equivalent(const store_automaton& A1, const store_automaton& A2) {
 	return true;
 }
 
@@ -420,18 +418,19 @@ store_automaton CUBA::rename(const store_automaton& A, const pda_state& q_I) {
  * @param is_rename
  * @return a store automaton
  */
-store_automaton CUBA::anonymize(const store_automaton& A, const pda_state& q,
+store_automaton CUBA::anonymize(const store_automaton& A, const pda_state& q_I,
 		const bool& is_rename) {
 	if (is_rename)
-		return anonymize_by_rename(A, q);
-	return anonymize_by_split(A, q);
+		return anonymize_by_rename(A, q_I);
+	return anonymize_by_split(A, q_I);
 }
 
 /**
  * This is the anonymize procedure: it deletes all states except q_I to
  * fresh states.
  *
- * The procedure is an onion-peel approach.
+ * The procedure is an onion-peel approach:
+ *   1. we remove the all related states
  *
  * @param A
  * @param q_I
@@ -439,19 +438,39 @@ store_automaton CUBA::anonymize(const store_automaton& A, const pda_state& q,
  */
 store_automaton CUBA::anonymize_by_split(const store_automaton& A,
 		const pda_state& q_I) {
-	auto deltas = A.get_transitions();
-	for (auto q : A.get_initials()) {
-		if (q == q_I)
-			continue;
-		deltas.erase(q);
+	fsa_state_set states;
+	fsa_delta deltas;
+
+	queue<fsa_state> worklist;
+	worklist.emplace(q_I);
+	while (!worklist.empty()) {
+		const auto q = worklist.front();
+		worklist.pop();
+
+		/// insert q into the states of anonymized automaton
+		auto ret = states.emplace(q);
+		if (!ret.second)
+			continue; /// skip q if q has been processed
+
+		/// find q's successors, if applicable
+		auto ifind = A.get_transitions().find(q);
+		if (ifind == A.get_transitions().end())
+			continue; /// skip q if q has no successor
+
+		/// processed q and its successors
+		for (const auto& r : ifind->second) {
+			deltas[q].emplace(r);
+			worklist.emplace(r.get_dst());
+		}
 	}
-	return store_automaton(A.get_states(), A.get_alphas(), deltas, { q_I },
+
+	return store_automaton(states, A.get_alphas(), deltas, { q_I },
 			A.get_accept());
 }
 
 /**
- * This is the anonymize procedure: it rename all states except q to
- * fresh states.
+ * This is the anonymize procedure: it rename all states except q
+ * to fresh states.
  * @param A
  * @param q_I
  * @return a finite automaton

@@ -55,6 +55,7 @@ private:
 			const bool& is_rename = false);
 	store_automaton anonymize_by_split(const store_automaton& A,
 			const pda_state& q_I);
+	vector<store_automaton> anonymize_by_split(const store_automaton& A);
 	store_automaton anonymize_by_rename(const store_automaton& A,
 			const pda_state& q_I);
 
