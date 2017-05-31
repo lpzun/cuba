@@ -40,7 +40,7 @@ private:
 			const pushdown_automaton& P);
 
 	/// QR algorithm: context-bounded analysis
-	deque<symbolic_config> context_bounded_analysis(const size_k k,
+	vector<deque<symbolic_config>> context_bounded_analysis(const size_k k,
 			const symbolic_config& cfg_I);
 	deque<fsa_state> project_Q(const store_automaton& A);
 	deque<fsa_state> BFS_visit(const fsa_state& root,
@@ -66,10 +66,11 @@ private:
 	store_automaton complement(const store_automaton& A);
 	store_automaton cross_product(const vector<store_automaton>& W);
 
-	/// determine bar(R_k) = bar(R_{k+1})
-	vector<config_top> extract_config_tops(const symbolic_config& tau);
-	set<pda_alpha> extract_top_symbols(const store_automaton& A,
-			const pda_state q);
+	/// determine bar(R_k) = bar(R_{k+1})s
+	int top_mapping(const deque<symbolic_config>& global_R,
+			vector<set<config_top>>& topped_R);
+	vector<config_top> top_mapping(const symbolic_config& tau);
+	set<pda_alpha> top_mapping(const store_automaton& A, const pda_state q);
 	vector<vector<pda_alpha>> cross_product(const vector<set<pda_alpha>>& tops);
 };
 

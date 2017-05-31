@@ -87,6 +87,7 @@ inline ostream& operator<<(ostream& os, const global_state& g) {
 		os << g.get_local()[0];
 	for (auto i = 1; i < g.get_local().size(); ++i)
 		cout << "," << g.get_local()[i];
+	cout << ")";
 	return os;
 }
 
@@ -353,7 +354,7 @@ public:
 		return q;
 	}
 
-	const vector<store_automaton>& get_automatons() const {
+	const vector<store_automaton>& get_automata() const {
 		return W;
 	}
 

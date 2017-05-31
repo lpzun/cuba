@@ -38,84 +38,91 @@ CUBA::~CUBA() {
  * @param n: the number of threads
  * @param k: the number of context switches
  */
-void CUBA::context_bounded_analysis(const size_k& k, const size_t& n) {
+void CUBA::context_bounded_analysis(const size_k& k_bound, const size_t& n) {
 	vector<store_automaton> W;
 	for (auto i = 0; i < CPDA.size(); ++i) {
 		auto fsa = create_init_automaton(i);
 		W.push_back(fsa);
 
-		cout << "pushdown store automaton " << i << "\n";
-		cout << fsa << endl;
-
-		auto fsa2 = post_kleene(fsa, CPDA[i]);
-		cout << fsa2 << endl;
-
-		auto Q = project_Q(fsa2);
-		cout << Q.size() << endl;
-		for (const auto q : Q) {
-			cout << "q" << q << endl;
-			auto fsa3 = anonymize_by_split(fsa2, q);
-			cout << fsa3 << endl;
-		}
+//		cout << "pushdown store automaton " << i << "\n";
+//		cout << fsa << endl;
+//
+//		auto fsa2 = post_kleene(fsa, CPDA[i]);
+//		cout << fsa2 << endl;
+//
+//		auto Q = project_Q(fsa2);
+//		cout << Q.size() << endl;
+//		for (const auto q : Q) {
+//			cout << "q" << q << endl;
+//			auto fsa3 = anonymize_by_split(fsa2, q);
+//			cout << fsa3 << endl;
+//		}
 	}
-//	symbolic_config cfg_I(initl_c.get_state(), W);
-//	auto R = context_bounded_analysis(k, cfg_I);
+	symbolic_config cfg_I(initl_c.get_state(), W);
+	auto R = context_bounded_analysis(k_bound, cfg_I);
 }
 
-
-
 /// a pair of configuration used in QR algorithm
-using tau = pair<symbolic_config, size_k>;
 /**
  * This is the main procedure to do the context-bounded analysis. It implements the
  * algorithm in QR'05 paper.
- * @param k   : the upper bound of context switches
- * @param cfg_I: the initial symbolic configuration
+ * @param k  : the upper bound of context switches
+ * @param c_I: the initial symbolic configuration
  * @return a set of reachable symbolic configuration
  */
-deque<symbolic_config> CUBA::context_bounded_analysis(const size_k k,
-		const symbolic_config& cfg_I) {
+vector<deque<symbolic_config>> CUBA::context_bounded_analysis(
+		const size_k k_bound, const symbolic_config& c_I) {
+	cout << k_bound << "=======================\n";
 	/// Step 1: declare the data structures used in this procedure:
 	///
-	/// 1.1 <explored>: the set of reachable aggregate configurations
-	/// Initialization: empty set
-	deque<symbolic_config> global_R;
-
-	/// 1.2 <worklist>: the set of aggregate configurations are waiting
-	/// for handling; note its elements are pairs that each of them
-	/// contains an aggregate configuration and the necessary context
-	/// switches to reach it.
+	/// 1.1 <currLevel> = S_{k} \ S_{k-1}: the set of symbolic configurations
+	/// which are reached in the kth context for processing. It's initialized
+	/// as { <q_I, (A1_I, ..., An_I)> }.
 	///
-	/// Initialization: {(<q_I, (A1_I, ..., An_I)>, 0)}
-	queue<tau, deque<tau>> worklist;
-	worklist.emplace(cfg_I, 0);
+	///     <nextLevel> = S_{k+1} \ S_{k}: the set of symbolic configurations
+	/// which are reached in the (k+1)st context. It's initialized as empty.
+	deque<symbolic_config> currLevel;
+	currLevel.emplace_back(c_I);
+	size_k k = 0; /// k = 0 represents the initial configuration c_I
 
+	/// 1.2 <explored>: the set of reachable aggregate configurations
+	/// Initialization: empty set
 	/// 1.3 <topped_R>: the set of reachable tops of configurations.
 	/// We obtain this by computing the symbolic configurations.
-	vector<deque<config_top>> topped_R(thread_state::S);
+	vector<deque<symbolic_config>> global_R(k_bound + 1);
+	global_R[k] = {c_I};
+	vector<set<config_top>> topped_R(thread_state::S);
+	top_mapping(global_R[k], topped_R);
 
-	/// Step 2: operate on the elements, aka, pairs in the worklist
-	/// one by one. This is like a BFS procedure.
-	while (!worklist.empty()) {
-		/// 2.1 remove a aggregate configuration from worklist
-		auto p = worklist.front();
-		worklist.pop();
+	/// Step 2: compute all reachable configurations with up to k_bound
+	/// contexts.
+	while (k < k_bound) {
+		deque<symbolic_config> nextLevel;
+		/// 2.1 compute nextLevel, or R_{k+1}: iterate over all elements
+		/// in the currLevel. This is a BFS-like procedure.
+		while (!currLevel.empty()) {
+			/// 2.1.1 remove a aggregate configuration from currLevel.
+			const auto c = currLevel.front();
+			currLevel.pop_front();
 
-		/// 2.2 check whether its context switches already reaches
-		/// to the upper bound; if so, discard the current element.
-		if (p.second >= k)
-			continue;
-
-		/// 2.3 extract the aggregate configuration from the pair.
-		const auto& automata = p.first.get_automatons();
-		for (int i = 0; i < automata.size(); ++i) {
-			const auto& _A = post_kleene(automata[i], CPDA[i]);
-			for (const auto& _q : project_Q(_A)) {
-				const auto& _cfg = compose(_q, automata, i);
-				worklist.emplace(_cfg, p.second + 1);
-				global_R.push_back(_cfg);
+			/// 2.1.2 extract the aggregate configuration from the pair.
+			const auto& automata = c.get_automata();
+			for (auto i = 0; i < automata.size(); ++i) {
+				const auto& _A = post_kleene(automata[i], CPDA[i]);
+				for (const auto& _q : project_Q(_A)) {
+					const auto& _c = compose(_q, automata, i);
+					nextLevel.emplace_back(_c);
+				}
 			}
 		}
+
+		/// 2.2 check if all elements in currLevel has been processed.
+		currLevel.swap(nextLevel), ++k;
+
+		cout << "In context " << k << ":" << endl;
+		/// store R_{k+1} and the tops of configurations
+		global_R[k] = currLevel;
+		top_mapping(global_R[k], topped_R);
 	}
 	return global_R;
 }
@@ -482,7 +489,7 @@ store_automaton CUBA::anonymize_by_split(const store_automaton& A,
 		}
 	}
 	states.erase(q_I); /// remove the initial state q_I from states,
-	                   /// as states only have intermediate states
+					   /// as states only have intermediate states
 	return store_automaton(states, A.get_alphas(), deltas, { q_I },
 			A.get_accept());
 }
@@ -511,19 +518,42 @@ store_automaton CUBA::anonymize_by_rename(const store_automaton& A,
 /// Extract all tops of configurations from a symbolic configuration tau
 ///
 /////////////////////////////////////////////////////////////////////////
-///
+
+/**
+ *
+ * @param S_k
+ * @param topped_R
+ */
+int CUBA::top_mapping(const deque<symbolic_config>& global_R,
+		vector<set<config_top>>& topped_R) {
+	int num_new_cbar = 0;
+	for (const auto& c : global_R) {
+		for (const auto& cbar : top_mapping(c)) {
+			auto ret = topped_R[cbar.get_state()].emplace(cbar);
+			if (ret.second) {
+				cout << " " << cbar << "\n";
+				++num_new_cbar;
+			}
+		}
+	}
+	return num_new_cbar;
+}
+
 /**
  * Extract all configuration tops of symbolic configuration tau
  * @param tau
  * @return a set of configuration tops
  */
-vector<config_top> CUBA::extract_config_tops(const symbolic_config& tau) {
+vector<config_top> CUBA::top_mapping(const symbolic_config& tau) {
 	const auto q = tau.get_state();
-	vector<set<pda_alpha>> toppings(tau.get_automatons().size());
-	for (auto i = 0; i < tau.get_automatons().size(); ++i) {
-		toppings[i] = extract_top_symbols(tau.get_automatons()[i], q);
+	vector<set<pda_alpha>> toppings(tau.get_automata().size());
+
+	for (auto i = 0; i < tau.get_automata().size(); ++i) {
+		toppings[i] = top_mapping(tau.get_automata()[i], q);
 	}
+
 	const auto& worklist = cross_product(toppings);
+
 	vector<config_top> tops;
 	tops.reserve(worklist.size());
 	for (const auto& W : worklist) {
@@ -538,8 +568,7 @@ vector<config_top> CUBA::extract_config_tops(const symbolic_config& tau) {
  * @param q
  * @return a set of top symbols
  */
-set<pda_alpha> CUBA::extract_top_symbols(const store_automaton& A,
-		const pda_state q) {
+set<pda_alpha> CUBA::top_mapping(const store_automaton& A, const pda_state q) {
 	set<pda_alpha> tops; /// the set of top symbols
 	queue<pda_state> worklist; ///
 	worklist.emplace(q);
