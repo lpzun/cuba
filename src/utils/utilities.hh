@@ -10,7 +10,7 @@
 
 #include <map>
 
-#include "../utils/heads.hh"
+#include "heads.hh"
 
 namespace cuba {
 

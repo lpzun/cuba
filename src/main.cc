@@ -8,8 +8,8 @@
 
 #include <iostream>
 
-#include "cuba/cuba.hh"
-#include "utils/cmd.hh"
+#include "cuba.hh"
+#include "cmd.hh"
 
 using namespace std;
 using namespace cmd;

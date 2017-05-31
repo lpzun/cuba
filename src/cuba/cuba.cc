@@ -44,10 +44,22 @@ void CUBA::context_bounded_analysis(const size_k& k, const size_t& n) {
 		auto fsa = create_init_automaton(i);
 		cout << "pushdown store automaton " << i << "\n";
 		cout << fsa << endl;
+
+		auto fsa2 = post_kleene(fsa, CPDA[i]);
+		cout << fsa2 << endl;
+
+		auto Q = project_Q(fsa2);
+		cout << Q.size() << endl;
+		for (const auto q : Q) {
+			cout << "q" << q << endl;
+			auto fsa3 = anonymize_by_split(fsa2, q);
+			cout << fsa3 << endl;
+		}
+
 		W.push_back(fsa);
 	}
-	symbolic_config cfg_I(initl_c.get_state(), W);
-	auto R = context_bounded_analysis(k, cfg_I);
+//	symbolic_config cfg_I(initl_c.get_state(), W);
+//	auto R = context_bounded_analysis(k, cfg_I);
 }
 
 /**
@@ -55,7 +67,6 @@ void CUBA::context_bounded_analysis(const size_k& k, const size_t& n) {
  * @return a finite automaton
  */
 store_automaton CUBA::create_store_automaton(const size_t i) {
-	cout << "Initial configuration: " << initl_c << "\n";
 	auto fsa = create_init_automaton(i);
 	cout << "Initial automaton: \n";
 	cout << fsa << endl;
@@ -307,7 +318,7 @@ deque<symbolic_config> CUBA::context_bounded_analysis(const size_k k,
 		const auto& automata = p.first.get_automatons();
 		for (int i = 0; i < automata.size(); ++i) {
 			const auto& _A = post_kleene(automata[i], CPDA[i]);
-			for (const auto& _q : project_G(_A)) {
+			for (const auto& _q : project_Q(_A)) {
 				const auto& _cfg = compose(_q, automata, i);
 				worklist.emplace(_cfg, p.second + 1);
 				global_R.push_back(_cfg);
@@ -323,8 +334,7 @@ deque<symbolic_config> CUBA::context_bounded_analysis(const size_k k,
  * @param A
  * @return a list of states
  */
-deque<fsa_state> CUBA::project_G(const store_automaton& A) {
-	deque<fsa_state> states;
+deque<fsa_state> CUBA::project_Q(const store_automaton& A) {
 	unordered_map<fsa_state, deque<fsa_state>> transpose;
 	for (const auto& p : A.get_transitions()) {
 		for (const auto& r : p.second) {
@@ -344,12 +354,15 @@ deque<fsa_state> CUBA::project_G(const store_automaton& A) {
 deque<fsa_state> CUBA::BFS_visit(const fsa_state& root,
 		const unordered_map<fsa_state, deque<fsa_state>>& adj,
 		const fsa_state_set& initials) {
-	deque<fsa_state> G;
+//	cout << "accept s" << root << endl;
+//	for (const auto q : initials) {
+//		cout << "initial q" << q << endl;
+//	}
+	deque<fsa_state> Q;
 
 	/// Mark whether a state is already visited or not:
 	/// to avoid a cycle
 	unordered_set<fsa_state> explored;
-	explored.emplace(root);
 
 	/// the worklist
 	queue<fsa_state> worklist;
@@ -358,21 +371,24 @@ deque<fsa_state> CUBA::BFS_visit(const fsa_state& root,
 		const auto u = worklist.front();
 		worklist.pop();
 
+		/// if u is already visited, then skip it
+		auto ret = explored.emplace(u);
+		if (!ret.second)
+			continue;
+
+		/// store u if u is an initial state
 		if (initials.find(u) != initials.end())
-			G.emplace_back(u);
+			Q.emplace_back(u);
 
 		auto ifind = adj.find(u);
-		if (ifind != adj.end()) {
-			for (const auto& v : ifind->second) {
-				/// if u is already visited, then skip it
-				if (explored.find(u) != explored.end())
-					continue;
-				explored.emplace(v);
-				worklist.push(v);
-			}
-		}
+		if (ifind == adj.end())
+			continue;
+
+		for (const auto v : ifind->second)
+			worklist.emplace(v);
+		explored.emplace(u);
 	}
-	return G;
+	return Q;
 }
 
 /**
@@ -463,7 +479,8 @@ store_automaton CUBA::anonymize_by_split(const store_automaton& A,
 			worklist.emplace(r.get_dst());
 		}
 	}
-
+	states.erase(q_I); /// remove the initial state q_I from states,
+	                   /// as states only have intermediate states
 	return store_automaton(states, A.get_alphas(), deltas, { q_I },
 			A.get_accept());
 }

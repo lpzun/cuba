@@ -9,7 +9,7 @@
 #ifndef UTILS_PROP_HH_
 #define UTILS_PROP_HH_
 
-#include "../utils/heads.hh"
+#include "heads.hh"
 
 namespace cuba {
 

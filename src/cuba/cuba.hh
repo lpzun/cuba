@@ -8,7 +8,7 @@
 #ifndef CUBA_CUBA_HH_
 #define CUBA_CUBA_HH_
 
-#include "../utils/prop.hh"
+#include "prop.hh"
 
 #include "cpda.hh"
 #include "fsa.hh"
@@ -44,7 +44,7 @@ private:
 	/// QR algorithm: context-bounded analysis
 	deque<symbolic_config> context_bounded_analysis(const size_k k,
 			const symbolic_config& cfg_I);
-	deque<fsa_state> project_G(const store_automaton& A);
+	deque<fsa_state> project_Q(const store_automaton& A);
 	deque<fsa_state> BFS_visit(const fsa_state& root,
 			const unordered_map<fsa_state, deque<fsa_state>>& adj,
 			const fsa_state_set& initials);
@@ -55,7 +55,6 @@ private:
 			const bool& is_rename = false);
 	store_automaton anonymize_by_split(const store_automaton& A,
 			const pda_state& q_I);
-	vector<store_automaton> anonymize_by_split(const store_automaton& A);
 	store_automaton anonymize_by_rename(const store_automaton& A,
 			const pda_state& q_I);
 

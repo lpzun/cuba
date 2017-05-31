@@ -34,8 +34,8 @@
 #include <algorithm>
 #include <memory>
 
-#include "../utils/debug.hh"
-#include "../utils/excep.hh"
+#include "debug.hh"
+#include "excep.hh"
 
 using std::string;
 
