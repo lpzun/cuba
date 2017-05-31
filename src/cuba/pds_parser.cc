@@ -164,7 +164,7 @@ concrete_config parser::create_global_config_from_str(const string& s_ts,
 			W[i].push(std::stoi(s));
 		}
 	}
-	return concrete_config(0, 0, std::stoi(vs_cfg[0]), W);
+	return concrete_config(std::stoi(vs_cfg[0]), W);
 }
 
 /**

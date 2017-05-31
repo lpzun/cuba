@@ -8,6 +8,7 @@
 #include "cuba.hh"
 
 namespace cuba {
+
 /**
  * constructor
  * @param k     context switch bound
@@ -121,7 +122,7 @@ uint simulator::bounded_reachability(const size_t& n, const size_k& k) {
  * @param R
  * @return bool
  */
-bool simulator::is_reachable(const concrete_config& tau, antichain& R) {
+bool simulator::is_reachable(const global_config& tau, antichain& R) {
 	for (auto& g : R) {
 		if (g == tau) {
 			if (g.get_context_k() > tau.get_context_k()) {
@@ -139,7 +140,7 @@ bool simulator::is_reachable(const concrete_config& tau, antichain& R) {
  * @param tau: a global configuration
  * @return a list of successors, aka. global configurations
  */
-antichain simulator::step(const concrete_config& tau) {
+antichain simulator::step(const global_config& tau) {
 	antichain successors;
 	const auto& q = tau.get_state();     /// the control state of tau
 	const auto& W = tau.get_stacks();    /// the stacks of tau

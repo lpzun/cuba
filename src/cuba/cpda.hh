@@ -142,11 +142,8 @@ inline bool operator!=(const global_state& g1, const global_state& g2) {
 class concrete_config {
 public:
 	concrete_config(const pda_state& s, const size_t& n);
-	concrete_config(const id_thread& id, const ctx_bound& k, const pda_state& s,
-			const size_t& n);
-	concrete_config(const id_thread& id, const ctx_bound& k, const pda_state& s,
-			const stack_vec& W);
-	concrete_config(const concrete_config& g);
+	concrete_config(const pda_state& s, const stack_vec& W);
+	concrete_config(const concrete_config& c);
 	~concrete_config();
 
 	pda_state get_state() const {
@@ -157,24 +154,10 @@ public:
 		return W;
 	}
 
-	ctx_bound get_context_k() const {
-		return k;
-	}
-
-	void set_context_k(const ctx_bound& k) {
-		this->k = k;
-	}
-
-	id_thread get_thread_id() const {
-		return id;
-	}
-
 	global_state top();
 	global_state top() const;
 
 private:
-	id_thread id; /// the active thread that reach current configuration
-	ctx_bound k; /// the number of context switches used to reach current configuration
 	pda_state s;
 	stack_vec W;
 };
@@ -186,8 +169,7 @@ private:
  * @return ostream
  */
 inline ostream& operator<<(ostream& os, const concrete_config& c) {
-	os << "(" << c.get_thread_id() << "," << c.get_context_k() << ",";
-	os << c.get_state() << "|";
+	os << "(" << c.get_state() << "|";
 	if (c.get_stacks().size() > 0)
 		os << c.get_stacks()[0];
 	for (int i = 1; i < c.get_stacks().size(); ++i)
@@ -223,6 +205,103 @@ inline bool operator>(const concrete_config& g1, const concrete_config& g2) {
  * @return bool
  */
 inline bool operator==(const concrete_config& g1, const concrete_config& g2) {
+	if (g1.get_state() == g2.get_state()) {
+		auto iw1 = g1.get_stacks().cbegin();
+		auto iw2 = g2.get_stacks().cbegin();
+		while (iw1 != g1.get_stacks().cend()) {
+			if (*iw1 != *iw2)
+				return false;
+			++iw1, ++iw2;
+		}
+		return true;
+	}
+	return false;
+}
+
+/**
+ * overloading the operator !=
+ * @param g1
+ * @param g2
+ * @return bool
+ */
+inline bool operator!=(const concrete_config& g1, const concrete_config& g2) {
+	return !(g1 == g2);
+}
+
+/**
+ *
+ */
+class global_config: public concrete_config {
+public:
+	global_config(const pda_state& s, const size_t& n);
+	global_config(const id_thread& id, const ctx_bound& k, const pda_state& s,
+			const size_t& n);
+	global_config(const id_thread& id, const ctx_bound& k, const pda_state& s,
+			const stack_vec& W);
+	global_config(const global_config& c);
+	~global_config();
+
+	ctx_bound get_context_k() const {
+		return k;
+	}
+
+	void set_context_k(const ctx_bound& k) {
+		this->k = k;
+	}
+
+	id_thread get_thread_id() const {
+		return id;
+	}
+
+private:
+	id_thread id; /// the active thread that reach current configuration
+	ctx_bound k; /// the number of context switches used to reach current configuration
+};
+
+/**
+ * overloading operator <<: print a configuration of the CPDS
+ * @param os
+ * @param c
+ * @return ostream
+ */
+inline ostream& operator<<(ostream& os, const global_config& c) {
+	os << "(" << c.get_thread_id() << "," << c.get_context_k() << ",";
+	os << c.get_state() << "|";
+	if (c.get_stacks().size() > 0)
+		os << c.get_stacks()[0];
+	for (int i = 1; i < c.get_stacks().size(); ++i)
+		os << "," << c.get_stacks()[i];
+	os << ")";
+	return os;
+}
+
+/**
+ * overloading the operator <
+ * @param g1
+ * @param g2
+ * @return bool
+ */
+inline bool operator<(const global_config& g1, const global_config& g2) {
+	return g1.top() < g2.top();
+}
+
+/**
+ * overloading the operator >
+ * @param g1
+ * @param g2
+ * @return bool
+ */
+inline bool operator>(const global_config& g1, const global_config& g2) {
+	return g2 < g1;
+}
+
+/**
+ * overloading the operator ==
+ * @param g1
+ * @param g2
+ * @return bool
+ */
+inline bool operator==(const global_config& g1, const global_config& g2) {
 	if (g1.get_thread_id() == g2.get_thread_id()
 			&& g1.get_state() == g2.get_state()) {
 		auto iw1 = g1.get_stacks().cbegin();
@@ -243,7 +322,7 @@ inline bool operator==(const concrete_config& g1, const concrete_config& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator!=(const concrete_config& g1, const concrete_config& g2) {
+inline bool operator!=(const global_config& g1, const global_config& g2) {
 	return !(g1 == g2);
 }
 
@@ -283,6 +362,9 @@ private:
 	vector<store_automaton> W;
 };
 
+/**
+ * Defining the top of configuration, which is a global state
+ */
 using config_top = global_state;
 
 }

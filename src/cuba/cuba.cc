@@ -42,6 +42,8 @@ void CUBA::context_bounded_analysis(const size_k& k, const size_t& n) {
 	vector<store_automaton> W;
 	for (auto i = 0; i < CPDA.size(); ++i) {
 		auto fsa = create_init_automaton(i);
+		W.push_back(fsa);
+
 		cout << "pushdown store automaton " << i << "\n";
 		cout << fsa << endl;
 
@@ -55,11 +57,67 @@ void CUBA::context_bounded_analysis(const size_k& k, const size_t& n) {
 			auto fsa3 = anonymize_by_split(fsa2, q);
 			cout << fsa3 << endl;
 		}
-
-		W.push_back(fsa);
 	}
 //	symbolic_config cfg_I(initl_c.get_state(), W);
 //	auto R = context_bounded_analysis(k, cfg_I);
+}
+
+
+
+/// a pair of configuration used in QR algorithm
+using tau = pair<symbolic_config, size_k>;
+/**
+ * This is the main procedure to do the context-bounded analysis. It implements the
+ * algorithm in QR'05 paper.
+ * @param k   : the upper bound of context switches
+ * @param cfg_I: the initial symbolic configuration
+ * @return a set of reachable symbolic configuration
+ */
+deque<symbolic_config> CUBA::context_bounded_analysis(const size_k k,
+		const symbolic_config& cfg_I) {
+	/// Step 1: declare the data structures used in this procedure:
+	///
+	/// 1.1 <explored>: the set of reachable aggregate configurations
+	/// Initialization: empty set
+	deque<symbolic_config> global_R;
+
+	/// 1.2 <worklist>: the set of aggregate configurations are waiting
+	/// for handling; note its elements are pairs that each of them
+	/// contains an aggregate configuration and the necessary context
+	/// switches to reach it.
+	///
+	/// Initialization: {(<q_I, (A1_I, ..., An_I)>, 0)}
+	queue<tau, deque<tau>> worklist;
+	worklist.emplace(cfg_I, 0);
+
+	/// 1.3 <topped_R>: the set of reachable tops of configurations.
+	/// We obtain this by computing the symbolic configurations.
+	vector<deque<config_top>> topped_R(thread_state::S);
+
+	/// Step 2: operate on the elements, aka, pairs in the worklist
+	/// one by one. This is like a BFS procedure.
+	while (!worklist.empty()) {
+		/// 2.1 remove a aggregate configuration from worklist
+		auto p = worklist.front();
+		worklist.pop();
+
+		/// 2.2 check whether its context switches already reaches
+		/// to the upper bound; if so, discard the current element.
+		if (p.second >= k)
+			continue;
+
+		/// 2.3 extract the aggregate configuration from the pair.
+		const auto& automata = p.first.get_automatons();
+		for (int i = 0; i < automata.size(); ++i) {
+			const auto& _A = post_kleene(automata[i], CPDA[i]);
+			for (const auto& _q : project_Q(_A)) {
+				const auto& _cfg = compose(_q, automata, i);
+				worklist.emplace(_cfg, p.second + 1);
+				global_R.push_back(_cfg);
+			}
+		}
+	}
+	return global_R;
 }
 
 /**
@@ -270,62 +328,6 @@ bool CUBA::is_recongnizable(const store_automaton& A, const thread_config& c) {
  */
 bool CUBA::is_equivalent(const store_automaton& A1, const store_automaton& A2) {
 	return true;
-}
-
-/// a pair of configuration used in QR algorithm
-using tau = pair<symbolic_config, size_k>;
-/**
- * This is the main procedure to do the context-bounded analysis. It implements the
- * algorithm in QR'05 paper.
- * @param k   : the upper bound of context switches
- * @param cfg_I: the initial symbolic configuration
- * @return a set of reachable symbolic configuration
- */
-deque<symbolic_config> CUBA::context_bounded_analysis(const size_k k,
-		const symbolic_config& cfg_I) {
-	/// Step 1: declare the data structures used in this procedure:
-	///
-	/// 1.1 <explored>: the set of reachable aggregate configurations
-	/// Initialization: empty set
-	deque<symbolic_config> global_R;
-
-	/// 1.2 <worklist>: the set of aggregate configurations are waiting
-	/// for handling; note its elements are pairs that each of them
-	/// contains an aggregate configuration and the necessary context
-	/// switches to reach it.
-	///
-	/// Initialization: {(<q_I, (A1_I, ..., An_I)>, 0)}
-	queue<tau, deque<tau>> worklist;
-	worklist.emplace(cfg_I, 0);
-
-	/// 1.3 <topped_R>: the set of reachable tops of configurations.
-	/// We obtain this by computing the symbolic configurations.
-	vector<deque<config_top>> topped_R(thread_state::S);
-
-	/// Step 2: operate on the elements, aka, pairs in the worklist
-	/// one by one. This is like a BFS procedure.
-	while (!worklist.empty()) {
-		/// 2.1 remove a aggregate configuration from worklist
-		auto p = worklist.front();
-		worklist.pop();
-
-		/// 2.2 check whether its context switches already reaches
-		/// to the upper bound; if so, discard the current element.
-		if (p.second >= k)
-			continue;
-
-		/// 2.3 extract the aggregate configuration from the pair.
-		const auto& automata = p.first.get_automatons();
-		for (int i = 0; i < automata.size(); ++i) {
-			const auto& _A = post_kleene(automata[i], CPDA[i]);
-			for (const auto& _q : project_Q(_A)) {
-				const auto& _cfg = compose(_q, automata, i);
-				worklist.emplace(_cfg, p.second + 1);
-				global_R.push_back(_cfg);
-			}
-		}
-	}
-	return global_R;
 }
 
 /**

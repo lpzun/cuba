@@ -117,21 +117,7 @@ global_state::~global_state() {
  * @param n
  */
 concrete_config::concrete_config(const pda_state& s, const size_t& n) :
-		id(0), k(0), s(s), W(n) {
-}
-
-/**
- * A constructor with a thread id,a  context bound k, a control state
- * and the number of concurrent
- * @param id
- * @param k
- * @param s
- * @param n
- */
-concrete_config::concrete_config(const id_thread& id, const ctx_bound& k,
-		const pda_state& s, const size_t& n) :
-		id(id), k(k), s(s), W(n) {
-
+		s(s), W(n) {
 }
 
 /**
@@ -142,9 +128,8 @@ concrete_config::concrete_config(const id_thread& id, const ctx_bound& k,
  * @param s
  * @param W
  */
-concrete_config::concrete_config(const id_thread& id, const ctx_bound& k,
-		const pda_state& s, const stack_vec& W) :
-		id(id), k(k), s(s), W(W) {
+concrete_config::concrete_config(const pda_state& s, const stack_vec& W) :
+		s(s), W(W) {
 
 }
 
@@ -152,10 +137,8 @@ concrete_config::concrete_config(const id_thread& id, const ctx_bound& k,
  * A constructor with a global configuration
  * @param g
  */
-concrete_config::concrete_config(const concrete_config& g) :
-		id(g.get_thread_id()), k(g.get_context_k()), s(g.get_state()), ///
-		W(g.get_stacks()) {
-
+concrete_config::concrete_config(const concrete_config& c) :
+		s(c.get_state()), W(c.get_stacks()) {
 }
 
 /**
@@ -187,6 +170,33 @@ global_state concrete_config::top() {
 		L[i] = W[i].top();
 	}
 	return global_state(s, L);
+}
+
+global_config::global_config(const pda_state& s, const size_t& n) :
+		concrete_config(s, n), id(0), k(0) {
+
+}
+
+global_config::global_config(const id_thread& id, const ctx_bound& k,
+		const pda_state& s, const size_t& n) :
+		concrete_config(s, n), id(id), k(k) {
+
+}
+
+global_config::global_config(const id_thread& id, const ctx_bound& k,
+		const pda_state& s, const stack_vec& W) :
+		concrete_config(s, W), id(id), k(k) {
+
+}
+
+global_config::global_config(const global_config& c) :
+		concrete_config(c.get_state(), c.get_stacks()), id(c.get_thread_id()), k(
+				c.get_context_k()) {
+
+}
+
+global_config::~global_config() {
+
 }
 
 /////////////////////////////////////////////////////////////////////////

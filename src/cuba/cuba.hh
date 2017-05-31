@@ -15,8 +15,6 @@
 
 namespace cuba {
 
-using antichain = deque<concrete_config>;
-
 /////////////////////////////////////////////////////////////////////////
 /// PART 1. The following are the declarations for context-unbounded
 /// analysis.
@@ -120,6 +118,9 @@ private:
 /// PART 3. The following are the utilities for explore.
 ///
 /////////////////////////////////////////////////////////////////////////
+
+using antichain = deque<global_config>;
+
 /**
  * The class of explore:
  *     define a tool like explore in CAV'10 dynamic cutoff tool
@@ -149,8 +150,8 @@ private:
 
 	uint bounded_reachability(const size_t& n, const size_k& k);
 
-	antichain step(const concrete_config& tau);
-	bool is_reachable(const concrete_config& tau, antichain& R);
+	antichain step(const global_config& tau);
+	bool is_reachable(const global_config& tau, antichain& R);
 	void marking(const pda_state& s, const pda_alpha& l);
 	vertex retrieve(const pda_state& s, const pda_alpha& l);
 };
