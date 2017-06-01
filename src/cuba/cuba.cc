@@ -78,9 +78,6 @@ vector<deque<symbolic_config>> CUBA::context_bounded_analysis(
 	/// 1.1 <currLevel> = S_{k} \ S_{k-1}: the set of symbolic configurations
 	/// which are reached in the kth context for processing. It's initialized
 	/// as { <q_I, (A1_I, ..., An_I)> }.
-	///
-	///     <nextLevel> = S_{k+1} \ S_{k}: the set of symbolic configurations
-	/// which are reached in the (k+1)st context. It's initialized as empty.
 	deque<symbolic_config> currLevel;
 	currLevel.emplace_back(c_I);
 	size_k k = 0; /// k = 0 represents the initial configuration c_I
@@ -97,10 +94,13 @@ vector<deque<symbolic_config>> CUBA::context_bounded_analysis(
 	/// Step 2: compute all reachable configurations with up to k_bound
 	/// contexts.
 	while (k < k_bound) {
+		/// <nextLevel> = S_{k+1} \ S_{k}: the set of symbolic configurations
+		/// reached in the (k+1)st context. It's initialized as empty.
 		deque<symbolic_config> nextLevel;
 		/// 2.1 compute nextLevel, or R_{k+1}: iterate over all elements
 		/// in the currLevel. This is a BFS-like procedure.
 		while (!currLevel.empty()) {
+			cout << "==========++++++++++==========\n";
 			/// 2.1.1 remove a aggregate configuration from currLevel.
 			const auto c = currLevel.front();
 			currLevel.pop_front();
@@ -108,21 +108,24 @@ vector<deque<symbolic_config>> CUBA::context_bounded_analysis(
 			/// 2.1.2 extract the aggregate configuration from the pair.
 			const auto& automata = c.get_automata();
 			for (auto i = 0; i < automata.size(); ++i) {
-				const auto& _A = post_kleene(automata[i], CPDA[i]);
+				auto _A = post_kleene(automata[i], CPDA[i]);
+				cout << "post*:\n";
+				cout << _A << "\n";
 				for (const auto& _q : project_Q(_A)) {
-					const auto& _c = compose(_q, automata, i);
+					cout << _q << endl;
+					const auto& _c = compose(_q, _A, automata, i);
 					nextLevel.emplace_back(_c);
 				}
 			}
 		}
 
 		/// 2.2 check if all elements in currLevel has been processed.
-		currLevel.swap(nextLevel), ++k;
-
-		cout << "In context " << k << ":" << endl;
+		currLevel = nextLevel;
+		++k;
 		/// store R_{k+1} and the tops of configurations
+		cout << "In context " << k << ":" << endl;
 		global_R[k] = currLevel;
-		top_mapping(global_R[k], topped_R);
+		//top_mapping(global_R[k], topped_R);
 	}
 	return global_R;
 }
@@ -343,14 +346,15 @@ bool CUBA::is_equivalent(const store_automaton& A1, const store_automaton& A2) {
  * @param A
  * @return a list of states
  */
-deque<fsa_state> CUBA::project_Q(const store_automaton& A) {
-	unordered_map<fsa_state, deque<fsa_state>> transpose;
-	for (const auto& p : A.get_transitions()) {
-		for (const auto& r : p.second) {
-			transpose[r.get_dst()].push_back(p.first);
-		}
-	}
-	return BFS_visit(A.get_accept(), transpose, A.get_initials());
+set<fsa_state> CUBA::project_Q(const store_automaton& A) {
+//	unordered_map<fsa_state, deque<fsa_state>> transpose;
+//	for (const auto& p : A.get_transitions()) {
+//		for (const auto& r : p.second) {
+//			transpose[r.get_dst()].push_back(p.first);
+//		}
+//	}
+//	return BFS_visit(A.get_accept(), transpose, A.get_initials());
+	return A.get_initials();
 }
 
 /**
@@ -360,14 +364,14 @@ deque<fsa_state> CUBA::project_Q(const store_automaton& A) {
  * @param initials: the set of initial states
  * @return the set of initial states which can reach the accept state
  */
-deque<fsa_state> CUBA::BFS_visit(const fsa_state& root,
+set<fsa_state> CUBA::BFS_visit(const fsa_state& root,
 		const unordered_map<fsa_state, deque<fsa_state>>& adj,
 		const fsa_state_set& initials) {
 //	cout << "accept s" << root << endl;
 //	for (const auto q : initials) {
 //		cout << "initial q" << q << endl;
 //	}
-	deque<fsa_state> Q;
+	set<fsa_state> Q;
 
 	/// Mark whether a state is already visited or not:
 	/// to avoid a cycle
@@ -387,7 +391,7 @@ deque<fsa_state> CUBA::BFS_visit(const fsa_state& root,
 
 		/// store u if u is an initial state
 		if (initials.find(u) != initials.end())
-			Q.emplace_back(u);
+			Q.emplace(u);
 
 		auto ifind = adj.find(u);
 		if (ifind == adj.end())
@@ -409,15 +413,17 @@ deque<fsa_state> CUBA::BFS_visit(const fsa_state& root,
  * @param idx
  * @return symbolic configuration
  */
-symbolic_config CUBA::compose(const pda_state& q_I,
-		const vector<store_automaton>& automata, const int& idx) {
+symbolic_config CUBA::compose(const pda_state& q_I, const store_automaton& Ai,
+		const vector<store_automaton>& automata, const int& i) {
 	vector<store_automaton> W;
 	W.reserve(automata.size());
-	for (int i = 0; i < automata.size(); ++i) {
-		if (i == idx)
-			W.push_back(this->anonymize(automata[i], q_I));
+	for (auto j = 0; j < automata.size(); ++j) {
+		if (j == i)
+			W.push_back(this->anonymize(Ai, q_I));
 		else
-			W.push_back(this->rename(automata[i], q_I));
+			W.push_back(this->rename(automata[j], q_I));
+		cout << "compose......============\n";
+		cout << W[j] << "\n";
 	}
 	return symbolic_config(q_I, W);
 }

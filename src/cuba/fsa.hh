@@ -165,7 +165,7 @@ private:
  * @param fsa
  * @return ostream
  */
-inline ostream& operator<<(ostream& os, finite_automaton& fsa) {
+inline ostream& operator<<(ostream& os, const finite_automaton& fsa) {
 	if (fsa.get_states().size() == 0)
 		return os;
 
