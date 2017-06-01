@@ -117,6 +117,7 @@ vector<deque<symbolic_config>> CUBA::context_bounded_analysis(
 					nextLevel.emplace_back(_c);
 				}
 			}
+			cout<<nextLevel.size()<<"+++++++++++++++++++++++++++++++\n";
 		}
 
 		/// 2.2 check if all elements in currLevel has been processed.
