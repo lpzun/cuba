@@ -336,7 +336,7 @@ void cmd_line::create_argument_list() {
 	this->add_option(get_opt_index(opt_type::CON), "-n", "--threads",
 			"the number of threads", "1");
 	this->add_option(get_opt_index(opt_type::CON), "-k", "--ctx-bound",
-			"the bound of context switches", "1");
+			"the bound of contexts", "1");
 
 	/// other options
 	this->add_switch(get_opt_index(opt_type::OTHER), "-cmd", "--cmd-line",
