@@ -363,6 +363,14 @@ private:
 	vector<store_automaton> W;
 };
 
+inline ostream& operator<<(ostream& os, const symbolic_config& c) {
+	os << "<" << c.get_state() << "\n";
+	for (auto i = 0; i < c.get_automata().size(); ++i) {
+		os << "A" << i << "\n" << c.get_automata()[i];
+	}
+	os << ">" << endl;
+	return os;
+}
 /**
  * Defining the top of configuration, which is a global state
  */

@@ -41,6 +41,18 @@ public:
 		return label;
 	}
 
+	void set_dst(fsa_state dst) {
+		this->dst = dst;
+	}
+
+	void set_label(const fsa_alpha label) {
+		this->label = label;
+	}
+
+	void set_src(const fsa_state src) {
+		this->src = src;
+	}
+
 private:
 	fsa_state src;
 	fsa_state dst;

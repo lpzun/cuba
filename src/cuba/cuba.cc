@@ -72,7 +72,6 @@ void CUBA::context_bounded_analysis(const size_k& k_bound, const size_t& n) {
  */
 vector<deque<symbolic_config>> CUBA::context_bounded_analysis(
 		const size_k k_bound, const symbolic_config& c_I) {
-	cout << k_bound << "=======================\n";
 	/// Step 1: declare the data structures used in this procedure:
 	///
 	/// 1.1 <currLevel> = S_{k} \ S_{k-1}: the set of symbolic configurations
@@ -81,7 +80,7 @@ vector<deque<symbolic_config>> CUBA::context_bounded_analysis(
 	deque<symbolic_config> currLevel;
 	currLevel.emplace_back(c_I);
 	size_k k = 0; /// k = 0 represents the initial configuration c_I
-
+	cout << "Initial configuration: " << c_I << endl;
 	/// 1.2 <explored>: the set of reachable aggregate configurations
 	/// Initialization: empty set
 	/// 1.3 <topped_R>: the set of reachable tops of configurations.
@@ -89,6 +88,7 @@ vector<deque<symbolic_config>> CUBA::context_bounded_analysis(
 	vector<deque<symbolic_config>> global_R(k_bound + 1);
 	global_R[k] = {c_I};
 	vector<set<config_top>> topped_R(thread_state::S);
+	cout << "In context " << k << ":" << endl;
 	top_mapping(global_R[k], topped_R);
 
 	/// Step 2: compute all reachable configurations with up to k_bound
@@ -100,7 +100,6 @@ vector<deque<symbolic_config>> CUBA::context_bounded_analysis(
 		/// 2.1 compute nextLevel, or R_{k+1}: iterate over all elements
 		/// in the currLevel. This is a BFS-like procedure.
 		while (!currLevel.empty()) {
-			cout << "==========++++++++++==========\n";
 			/// 2.1.1 remove a aggregate configuration from currLevel.
 			const auto c = currLevel.front();
 			currLevel.pop_front();
@@ -108,25 +107,26 @@ vector<deque<symbolic_config>> CUBA::context_bounded_analysis(
 			/// 2.1.2 extract the aggregate configuration from the pair.
 			const auto& automata = c.get_automata();
 			for (auto i = 0; i < automata.size(); ++i) {
-				auto _A = post_kleene(automata[i], CPDA[i]);
-				cout << "post*:\n";
-				cout << _A << "\n";
+				const auto& _A = post_kleene(automata[i], CPDA[i]);
+//				cout << "post*:=+++++++++++++++++++++++++++\n"; // todo delete
+//				cout << _A << "\n";                             // todo delete
 				for (const auto& _q : project_Q(_A)) {
-					cout << _q << endl;
 					const auto& _c = compose(_q, _A, automata, i);
-					nextLevel.emplace_back(_c);
+					if (_c.get_automata()[i].get_states().size() > 0) {
+						nextLevel.push_back(_c);
+//						cout << _c << endl; // todo delete
+					}
 				}
+//				cout << "+++++++++++++++++++++++++++++=end\n"; // todo delete
 			}
-			cout<<nextLevel.size()<<"+++++++++++++++++++++++++++++++\n";
 		}
 
 		/// 2.2 check if all elements in currLevel has been processed.
-		currLevel = nextLevel;
-		++k;
+		currLevel.swap(nextLevel), ++k;
 		/// store R_{k+1} and the tops of configurations
 		cout << "In context " << k << ":" << endl;
 		global_R[k] = currLevel;
-		//top_mapping(global_R[k], topped_R);
+		top_mapping(global_R[k], topped_R);
 	}
 	return global_R;
 }
@@ -301,7 +301,6 @@ store_automaton CUBA::post_kleene(const store_automaton& A,
  *         false: otherwise.
  */
 bool CUBA::is_recongnizable(const store_automaton& A, const thread_config& c) {
-
 	queue<pair<fsa_state, int>> worklist;
 	worklist.emplace(c.get_state(), 0);
 
@@ -423,8 +422,6 @@ symbolic_config CUBA::compose(const pda_state& q_I, const store_automaton& Ai,
 			W.push_back(this->anonymize(Ai, q_I));
 		else
 			W.push_back(this->rename(automata[j], q_I));
-		cout << "compose......============\n";
-		cout << W[j] << "\n";
 	}
 	return symbolic_config(q_I, W);
 }
@@ -437,8 +434,20 @@ symbolic_config CUBA::compose(const pda_state& q_I, const store_automaton& Ai,
  * @return a store automaton
  */
 store_automaton CUBA::rename(const store_automaton& A, const pda_state& q_I) {
-	return store_automaton(A.get_states(), A.get_alphas(), A.get_transitions(),
-			{ q_I }, A.get_accept());
+	if (A.get_initials().size() == 0)
+		throw cuba_runtime_error("rename: no initial state");
+	auto old = *A.get_initials().begin();
+	auto ifind = A.get_transitions().find(old);
+	if (ifind == A.get_transitions().end())
+		return store_automaton(A.get_states(), A.get_alphas(),
+				A.get_transitions(), { q_I }, A.get_accept());
+	auto deltas = A.get_transitions();
+	deltas.erase(old);
+	for (const auto& r : ifind->second) {
+		deltas[q_I].emplace(q_I, r.get_dst(), r.get_label());
+	}
+	return store_automaton(A.get_states(), A.get_alphas(), deltas, { q_I },
+			A.get_accept());
 }
 
 /**
@@ -535,10 +544,12 @@ int CUBA::top_mapping(const deque<symbolic_config>& global_R,
 		vector<set<config_top>>& topped_R) {
 	int num_new_cbar = 0;
 	for (const auto& c : global_R) {
+		//cout << c << endl;
 		for (const auto& cbar : top_mapping(c)) {
+			//cout << "============" << cbar << "\n";
 			auto ret = topped_R[cbar.get_state()].emplace(cbar);
 			if (ret.second) {
-				cout << " " << cbar << "\n";
+				cout << "  " << cbar << "\n";
 				++num_new_cbar;
 			}
 		}
@@ -557,6 +568,8 @@ vector<config_top> CUBA::top_mapping(const symbolic_config& tau) {
 
 	for (auto i = 0; i < tau.get_automata().size(); ++i) {
 		toppings[i] = top_mapping(tau.get_automata()[i], q);
+		//for (const auto& s : toppings[i])
+		//	cout << i << "===================" << s << endl;
 	}
 
 	const auto& worklist = cross_product(toppings);
