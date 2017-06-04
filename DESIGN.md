@@ -1,3 +1,33 @@
+#Usage
+Usage:                    Purpose:
+ Debug/cuba -h [--help]    show help message
+ Debug/cuba source.pds     check given program
+
+
+Problem instance:
+ -f [--input-file] arg     an input pushdown system (default = X)
+ -a [--target] arg         a target configuration (default = 0|1.2,3.4, interpreated as the first stack's content is 12, while second stack's content is 34) 
+ -i [--initial] arg        an initial configuration (default = 0|0.0,1.1,2.2)
+ -p [--pushdown]           show the pushdown system
+ -m [--mode]
+ -r [--reachability]       check the reachability of the target (default = false, aka compute all of reachable configurations)
+ 
+Sequential Mode:
+ -atm [--automaton]        show the pushdown store automaton
+
+Concurrent Mode:
+ -k [--ctx-bound] arg      the bound of contexts (default = 1)
+ -n [--threads] arg        the number of threads (default = 1), this is only useful when the input pushdown system is parameterized
+ -s [--simulator]          run simulator, a forward search but probably non-terminate
+
+Other Options:
+ -h [--help]               help information
+ -cmd [--cmd-line]         show the command line
+ -all [--all]              show all of above messages
+ -v [--version]            show version information and exit
+
+
+
 #Source Code Organization
 ## util
 util contains all code that uses in this project. 

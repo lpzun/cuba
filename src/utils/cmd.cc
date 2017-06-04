@@ -316,19 +316,25 @@ void cmd_line::create_argument_list() {
 	/// problem instance
 	this->add_option(get_opt_index(opt_type::PROB), "-f", "--input-file",
 			"an input pushdown system", "X");
-
-	this->add_option(get_opt_index(opt_type::PROB), "-a", "--target",
-			"a target thread configuration", "0|0,1,2");
 	this->add_option(get_opt_index(opt_type::PROB), "-i", "--initial",
-			"an initial thread configuration", "0|0,1,2");
+			"an initial configuration", "0|0.0,1.2");
+	this->add_option(get_opt_index(opt_type::PROB), "-a", "--target",
+			"a target configuration", "0|1.2,3.4");
 	this->add_switch(get_opt_index(opt_type::PROB), "-l", "--pushdown",
 			"show the pushdown system");
+	this->add_switch(get_opt_index(opt_type::PROB), "-p", "--pushdown",
+			"show the pushdown system");
+	this->add_option(get_opt_index(opt_type::PROB), "-m", "--mode",
+			(string("exploration mode (default = C):\n") //
+			+ string(27, ' ') + " S: sequential mode\n" //
+					+ string(27, ' ') + " C: concurrent mode" //
+			).c_str(), "");
+	this->add_switch(get_opt_index(opt_type::SEQ), "-r", "--reachability",
+			"check the reachability of the given target");
 
 	/// sequential mode
 	this->add_switch(get_opt_index(opt_type::SEQ), "-s", "--sequential",
 			"the sequential mode");
-	this->add_switch(get_opt_index(opt_type::SEQ), "-r", "--reachability",
-			"check the reachability of the target");
 
 	/// concurrent mode
 	this->add_switch(get_opt_index(opt_type::CON), "-c", "--concurrent",
