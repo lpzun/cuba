@@ -17,7 +17,7 @@ Sequential Mode:
 
 Concurrent Mode:
  -k [--ctx-bound] arg      the bound of contexts (default = 1)
- -n [--threads] arg        the number of threads (default = 1), this is only useful when the input pushdown system is parameterized
+ -n [--threads] arg        the number of threads (default = 1), this is only useful
  -s [--simulator]          run simulator, a forward search but probably non-terminate
 
 Other Options:

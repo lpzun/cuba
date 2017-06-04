@@ -9,6 +9,7 @@
 #define CUBA_PDA_HH_
 
 #include "utilities.hh"
+#include "prop.hh"
 
 namespace cuba {
 

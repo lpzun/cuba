@@ -10,7 +10,7 @@
 namespace cuba {
 
 int alphabet::EPSILON = -1;
-char alphabet::OPT_EPSILON = 'e';
+char alphabet::OPT_EPSILON = '-';
 
 /**
  * constructor with default parameters

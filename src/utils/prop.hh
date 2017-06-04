@@ -22,9 +22,14 @@ public:
 	static bool OPT_PRINT_CMD;
 	static bool OPT_PRINT_ADJ;
 
-	static bool OPT_REACHABILITY;
+	static bool OPT_PROB_REACHABILITY;
+	static bool OPT_SEQ_ATM;
 
 	static const string COMMENT;
+
+	static const char SHARED_LOCAL_DELIMITER;
+	static const char STACK_DELIMITER;
+	static const char THREAD_DELIMITER;
 };
 
 } /* namespace cuba */

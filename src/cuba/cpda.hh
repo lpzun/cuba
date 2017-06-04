@@ -82,7 +82,7 @@ private:
  * @return bool
  */
 inline ostream& operator<<(ostream& os, const global_state& g) {
-	os << "(" << g.get_state() << "|";
+	os << "(" << g.get_state() << prop::SHARED_LOCAL_DELIMITER;
 	if (g.get_local().size() > 0)
 		os << g.get_local()[0];
 	for (auto i = 1; i < g.get_local().size(); ++i)
@@ -170,11 +170,11 @@ private:
  * @return ostream
  */
 inline ostream& operator<<(ostream& os, const concrete_config& c) {
-	os << "(" << c.get_state() << "|";
+	os << "(" << c.get_state() << prop::SHARED_LOCAL_DELIMITER;
 	if (c.get_stacks().size() > 0)
 		os << c.get_stacks()[0];
 	for (int i = 1; i < c.get_stacks().size(); ++i)
-		os << "," << c.get_stacks()[i];
+		os << prop::THREAD_DELIMITER << c.get_stacks()[i];
 	os << ")";
 	return os;
 }
@@ -266,12 +266,13 @@ private:
  * @return ostream
  */
 inline ostream& operator<<(ostream& os, const global_config& c) {
-	os << "(" << c.get_thread_id() << "," << c.get_context_k() << ",";
-	os << c.get_state() << "|";
+	os << "(" << c.get_thread_id() << prop::THREAD_DELIMITER
+			<< c.get_context_k() << prop::THREAD_DELIMITER;
+	os << c.get_state() << prop::SHARED_LOCAL_DELIMITER;
 	if (c.get_stacks().size() > 0)
 		os << c.get_stacks()[0];
 	for (int i = 1; i < c.get_stacks().size(); ++i)
-		os << "," << c.get_stacks()[i];
+		os << prop::THREAD_DELIMITER << c.get_stacks()[i];
 	os << ")";
 	return os;
 }

@@ -156,10 +156,10 @@ concrete_config parser::create_global_config_from_str(const string& s_ts,
 		throw("The format of concrete configuration is wrong!");
 	}
 
-	const auto& stacks = split(vs_cfg[1], ';');
+	const auto& stacks = split(vs_cfg[1], prop::THREAD_DELIMITER);
 	stack_vec W(stacks.size());
 	for (auto i = 0; i < stacks.size(); ++i) {
-		const auto& symbols = split(stacks[i], ',');
+		const auto& symbols = split(stacks[i], prop::STACK_DELIMITER);
 		for (const auto& s : symbols) {
 			W[i].push(std::stoi(s));
 		}
@@ -179,7 +179,7 @@ thread_config parser::create_thread_config_from_str(const string& s_ts,
 	if (vs_tg.size() != 2) {
 		throw("The format of thread configuration is wrong!");
 	}
-	const auto& symbols = split(vs_tg[1], ',');
+	const auto& symbols = split(vs_tg[1], prop::STACK_DELIMITER);
 	pda_stack w;
 	for (const auto& s : symbols) {
 		w.push(std::stoi(s));

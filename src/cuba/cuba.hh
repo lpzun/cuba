@@ -104,14 +104,14 @@ private:
 			const string& comment);
 
 	static thread_config create_thread_config_from_str(const string& s_ts,
-			const char& delim = '|');
+			const char& delim = prop::SHARED_LOCAL_DELIMITER);
 	static concrete_config create_global_config_from_str(const string& s_ts,
-			const char& delim = '|');
+			const char& delim = prop::SHARED_LOCAL_DELIMITER);
 
 	static thread_state create_thread_state_from_str(const string& s_ts,
-			const char& delim = '|');
+			const char& delim = prop::SHARED_LOCAL_DELIMITER);
 	static global_state create_global_state_from_str(const string& s_ts,
-			const char& delim = '|');
+			const char& delim = prop::SHARED_LOCAL_DELIMITER);
 
 };
 

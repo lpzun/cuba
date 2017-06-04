@@ -31,30 +31,55 @@ int main(const int argc, const char * const * const argv) {
 			return 0;
 		}
 
-		prop::OPT_PRINT_ADJ = cmd.arg_bool(
-				cmd_line::get_opt_index(opt_type::PROB), "--pushdown");
-		prop::OPT_PRINT_CMD = cmd.arg_bool(
-				cmd_line::get_opt_index(opt_type::OTHER), "--cmd-line");
-		prop::OPT_PRINT_ALL = cmd.arg_bool(
-				cmd_line::get_opt_index(opt_type::OTHER), "--all");
-
+		/// Problem Instances
 		const string& filename = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--input-file");
 		const string& initl = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--initial");
 		const string& final = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--target");
+		const string& mode = cmd.arg_value(
+				cmd_line::get_opt_index(opt_type::PROB), "--mode");
 
-		const string& n = cmd.arg_value(cmd_line::get_opt_index(opt_type::CON),
-				"--threads");
+		prop::OPT_PRINT_ADJ = cmd.arg_bool(
+				cmd_line::get_opt_index(opt_type::PROB), "--pushdown");
+		prop::OPT_PROB_REACHABILITY = cmd.arg_bool(
+				cmd_line::get_opt_index(opt_type::PROB), "--reachability");
+
+		/// Sequential Mode
+		prop::OPT_SEQ_ATM = cmd.arg_bool(cmd_line::get_opt_index(opt_type::SEQ),
+				"--automaton");
+
+		/// Concurrent Mode
 		const string& k = cmd.arg_value(cmd_line::get_opt_index(opt_type::CON),
 				"--ctx-bound");
+		const string& n = cmd.arg_value(cmd_line::get_opt_index(opt_type::CON),
+				"--threads");
+		const bool simulator = cmd.arg_bool(
+				cmd_line::get_opt_index(opt_type::CON), "--simulator");
 
-		prop::OPT_REACHABILITY = cmd.arg_bool(
-				cmd_line::get_opt_index(opt_type::SEQ), "--reachability");
+		/// Other Options
+		prop::OPT_PRINT_CMD = cmd.arg_bool(
+				cmd_line::get_opt_index(opt_type::OTHER), "--cmd-line");
+		prop::OPT_PRINT_ALL = cmd.arg_bool(
+				cmd_line::get_opt_index(opt_type::OTHER), "--all");
 
-		CUBA cuba(initl, final, filename);
-		cuba.context_bounded_analysis(std::stoul(k), std::stoul(n));
+		if (mode == "S") {
+			cout << "sequential mode\n";
+			cout << filename << " " << initl << " " << final << "\n";
+		} else {
+			cout << "concurrent mode\n";
+			if (simulator) {
+				cout << "simulator mode\n";
+				cout << filename << " " << initl << " " << final << "\n";
+
+			} else {
+				cout << "complete mode\n";
+				cout << filename << " " << initl << " " << final << "\n";
+				CUBA cuba(initl, final, filename);
+				cuba.context_bounded_analysis(std::stoul(k), std::stoul(n));
+			}
+		}
 
 	} catch (const cmd::cmd_runtime_error& e) {
 		e.what();
