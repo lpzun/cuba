@@ -1,9 +1,10 @@
 /**
  * An exmaple from
- * Summarizing Procedures in Concurrent Programs, 2004
+ *  "Summarizing Procedures in Concurrent Programs", 2004
  *
  * Nonterminating one when using their approach
  */
+ 
 #define mutex
 
 bool g = 0, x = 0, y = 0;

@@ -1,3 +1,6 @@
+/**
+ * A non-recursive program
+ */ 
 define DEFAULT_INT_BITS 1
 
 bool flag_0; 

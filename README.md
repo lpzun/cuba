@@ -1,5 +1,5 @@
-# cuba
-Context-Unbounded Analysis for Concurrent Software
+# CUBA
+CUBA (Context-UnBounded Analysis) contains algorithms for _context-unbounded reachability analysis for concurrent programs_. The program could contain recursion in which case reachability analysis is undecidable even for two threads. 
 
 # Installation
 1. git clone https://github.com/lpzun/cuba.git
@@ -7,11 +7,6 @@ Context-Unbounded Analysis for Concurrent Software
 
 # Usage
 ./cuba -h [--help]
-
-# Code Details
-
-## cuba
-cuba contains the algorithms for _Context-Unbounded Analysis for Concurrent Software_. 
 
 
   

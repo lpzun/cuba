@@ -1,3 +1,9 @@
+/**
+ * An non-recursive example from 
+ *   "Summarizing Procedures in Concurrent Programs", 2004
+ * 
+ */
+
 bool m = 0, task = 0;
 void foo () {
 	while (1) {
@@ -20,7 +26,7 @@ void bar () {
 }
 
 void do_task() {
-	task = !task();
+	task = !task;
 }
 
 void main () {
