@@ -316,8 +316,7 @@ inline bool operator>(const global_config& g1, const global_config& g2) {
  * @return bool
  */
 inline bool operator==(const global_config& g1, const global_config& g2) {
-	if (g1.get_thread_id() == g2.get_thread_id()
-			&& g1.get_state() == g2.get_state()) {
+	if (g1.get_state() == g2.get_state()) {
 		auto iw1 = g1.get_stacks().cbegin();
 		auto iw2 = g2.get_stacks().cbegin();
 		while (iw1 != g1.get_stacks().cend()) {

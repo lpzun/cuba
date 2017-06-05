@@ -76,7 +76,16 @@ bool simulator::k_bounded_reachability(const size_k k_bound,
 		//cout << tau << "\n"; /// deleting ---------------------
 
 		/// step 3.2: discard it if tau is already explored
-		if (is_reachable(tau, global_R[tau.get_context_k()][tau.get_state()]))
+		bool flag = false;
+		for (auto k = 0; k <= tau.get_context_k(); k++) {
+			if (is_reachable(tau, global_R[k][tau.get_state()])) {
+				flag = true;
+				break; /// TODO: There is a bug here, thus need to fix it.
+				       /// same reachable configuration with more contexts
+				       /// could reach earlier.
+			}
+		}
+		if (flag)
 			continue;
 		//cout << tau << "\n"; /// deleting ---------------------
 
@@ -124,15 +133,10 @@ bool simulator::k_bounded_reachability(const size_k k_bound,
  * @param R
  * @return bool
  */
-bool simulator::is_reachable(const global_config& tau, antichain& R) {
+bool simulator::is_reachable(const global_config& tau, const antichain& R) {
 	for (auto& c : R) {
-		if (c == tau) {
-			if (c.get_context_k() > tau.get_context_k()) {
-				c.set_context_k(tau.get_context_k());
-				return false;
-			}
+		if (c == tau)
 			return true;
-		}
 	}
 	return false;
 }

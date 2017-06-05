@@ -103,7 +103,7 @@ private:
 			const concrete_config& c_I);
 
 	antichain step(const global_config& tau, const size_k k_bound);
-	bool is_reachable(const global_config& tau, antichain& R);
+	bool is_reachable(const global_config& tau, const antichain& R);
 	void marking(const pda_state& s, const pda_alpha& l);
 
 	config_top top_mapping(const global_config& tau);

@@ -10,9 +10,8 @@ void foo() {
 }
 
 void bar() {
-	while (1) {
-		x = 1;
-	}
+	L: x = 1;
+	goto L;
 }
 
 void main() {

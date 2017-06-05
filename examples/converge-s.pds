@@ -1,3 +1,4 @@
+# Don't run the simulator on it. There is a loop inside threads, thus simulator is nonterminate. 
 2
 # PDA 1
 PDA 2 5
