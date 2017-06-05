@@ -340,7 +340,7 @@ void cmd_line::create_argument_list() {
 	this->add_option(get_opt_index(opt_type::CON), "-n", "--threads",
 			"the number of threads, used only for parameterized systems", "1");
 	this->add_switch(get_opt_index(opt_type::CON), "-x", "--explicit",
-			"an explicit forward search but probably not terminate");
+			"an explicit forward search but probably non-terminate");
 
 	/// other options
 	this->add_switch(get_opt_index(opt_type::OTHER), "-cmd", "--cmd-line",
