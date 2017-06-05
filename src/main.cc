@@ -55,7 +55,7 @@ int main(const int argc, const char * const * const argv) {
 				"--ctx-bound");
 		const string& n = cmd.arg_value(cmd_line::get_opt_index(opt_type::CON),
 				"--threads");
-		const bool simulator = cmd.arg_bool(
+		const bool is_simulate = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::CON), "--simulator");
 
 		/// Other Options
@@ -69,10 +69,11 @@ int main(const int argc, const char * const * const argv) {
 			cout << filename << " " << initl << " " << final << "\n";
 		} else {
 			cout << "concurrent mode\n";
-			if (simulator) {
+			if (is_simulate) {
 				cout << "simulator mode\n";
 				cout << filename << " " << initl << " " << final << "\n";
-
+				simulator simu(initl, final, filename);
+				simu.context_bounded_analysis(std::stoul(k), std::stoul(n));
 			} else {
 				cout << "complete mode\n";
 				cout << filename << " " << initl << " " << final << "\n";

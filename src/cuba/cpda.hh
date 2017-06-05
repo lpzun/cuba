@@ -83,10 +83,19 @@ private:
  */
 inline ostream& operator<<(ostream& os, const global_state& g) {
 	os << "(" << g.get_state() << prop::SHARED_LOCAL_DELIMITER;
-	if (g.get_local().size() > 0)
-		os << g.get_local()[0];
-	for (auto i = 1; i < g.get_local().size(); ++i)
-		cout << "," << g.get_local()[i];
+	if (g.get_local().size() > 0) {
+		if (g.get_local()[0] == alphabet::EPSILON)
+			os << alphabet::OPT_EPSILON;
+		else
+			os << g.get_local()[0];
+	}
+	for (auto i = 1; i < g.get_local().size(); ++i) {
+		cout << ",";
+		if (g.get_local()[i] == alphabet::EPSILON)
+			os << alphabet::OPT_EPSILON;
+		else
+			os << g.get_local()[i];
+	}
 	cout << ")";
 	return os;
 }
@@ -266,9 +275,12 @@ private:
  * @return ostream
  */
 inline ostream& operator<<(ostream& os, const global_config& c) {
-	os << "(" << c.get_thread_id() << prop::THREAD_DELIMITER
-			<< c.get_context_k() << prop::THREAD_DELIMITER;
-	os << c.get_state() << prop::SHARED_LOCAL_DELIMITER;
+	// os << "k=" << c.get_context_k() << " ";
+	if (c.get_thread_id() == c.get_stacks().size())
+		os << "t=" << "* ";
+	else
+		os << "t=" << c.get_thread_id() << " ";
+	os << "(" << c.get_state() << prop::SHARED_LOCAL_DELIMITER;
 	if (c.get_stacks().size() > 0)
 		os << c.get_stacks()[0];
 	for (int i = 1; i < c.get_stacks().size(); ++i)

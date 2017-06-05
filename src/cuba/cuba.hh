@@ -75,7 +75,42 @@ private:
 };
 
 /////////////////////////////////////////////////////////////////////////
-/// PART 2. The following are the utilities for PDS file parser.
+/// PART 2. The following are the utilities for explore.
+///
+/////////////////////////////////////////////////////////////////////////
+
+using antichain = deque<global_config>;
+
+/**
+ * The class of explore:
+ *     define a tool like explore in CAV'10 dynamic cutoff tool
+ */
+class simulator {
+public:
+	simulator(const string& initl, const string& final, const string& filename);
+
+	~simulator();
+
+	void context_bounded_analysis(const size_k& k, const size_t& n = 0);
+private:
+	///  Part 1: parse a pushdown system (PDS)
+	concrete_config initl_c;
+	concrete_config final_c;
+	concurrent_pushdown_automata CPDA;
+	vector<vector<bool>> reachable_T;
+
+	bool k_bounded_reachability(const size_k k_bound,
+			const concrete_config& c_I);
+
+	antichain step(const global_config& tau, const size_k k_bound);
+	bool is_reachable(const global_config& tau, antichain& R);
+	void marking(const pda_state& s, const pda_alpha& l);
+
+	config_top top_mapping(const global_config& tau);
+};
+
+/////////////////////////////////////////////////////////////////////////
+/// PART 3. The following are the utilities for PDS file parser.
 ///
 /////////////////////////////////////////////////////////////////////////
 class parser {
@@ -113,48 +148,6 @@ private:
 	static global_state create_global_state_from_str(const string& s_ts,
 			const char& delim = prop::SHARED_LOCAL_DELIMITER);
 
-};
-
-/////////////////////////////////////////////////////////////////////////
-/// PART 3. The following are the utilities for explore.
-///
-/////////////////////////////////////////////////////////////////////////
-
-using antichain = deque<global_config>;
-
-/**
- * The class of explore:
- *     define a tool like explore in CAV'10 dynamic cutoff tool
- */
-class simulator {
-public:
-	simulator(const ctx_bound& k, const thread_state& initl,
-			const thread_state& final,  ///
-			const vector<vector<vertex>>& mapping_Q, ///
-			const vector<thread_state>& Q, ///
-			const vector<pda_trans>& R);
-
-	~simulator();
-
-	void context_bounded_analysis(const size_t& n, const size_k& k);
-private:
-	///  Part 1: parse a pushdown system (PDS)
-	ctx_bound k_bound;
-	thread_state initl_TS;
-	thread_state final_TS;
-	vector<vector<vertex>> mapping_Q; /// mapping a control state to its ID
-	vector<thread_state> active_Q;       /// active control states
-	vector<pda_trans> active_R; /// active transitions
-	adj_list PDS;
-
-	vector<vector<bool>> reachable_T;
-
-	uint bounded_reachability(const size_t& n, const size_k& k);
-
-	antichain step(const global_config& tau);
-	bool is_reachable(const global_config& tau, antichain& R);
-	void marking(const pda_state& s, const pda_alpha& l);
-	vertex retrieve(const pda_state& s, const pda_alpha& l);
 };
 
 } /* namespace cuba */

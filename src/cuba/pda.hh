@@ -253,17 +253,17 @@ public:
 	}
 
 	T top() {
-		return worklist.back();
+		return worklist.front();
 	}
 
 	T top() const {
 		if (worklist.empty())
 			throw cuba_runtime_error("Stack is empty!");
-		return worklist.back();
+		return worklist.front();
 	}
 
 	void push(const T& _value) {
-		worklist.emplace_back(_value);
+		worklist.emplace_front(_value);
 	}
 
 	size_t size() const {
@@ -273,14 +273,14 @@ public:
 	bool pop() {
 		if (worklist.empty())
 			return false;
-		worklist.pop_back();
+		worklist.pop_front();
 		return true;
 	}
 
 	bool overwrite(const T& _value) {
 		if (worklist.empty())
 			return false;
-		worklist[worklist.size() - 1] = _value;
+		worklist[0] = _value;
 		return true;
 	}
 

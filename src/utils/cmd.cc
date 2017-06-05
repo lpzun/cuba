@@ -56,13 +56,13 @@ string widthify(const T& x, const ushort& width, const alignment& c,
 string cmd_line::get_opt_types(const opt_type& opt) {
 	switch (opt) {
 	case opt_type::PROB:
-		return "Problem instance:";
+		return "Problem Instance:";
 	case opt_type::SEQ:
-		return "Sequential mode:";
+		return "Sequential Mode:";
 	case opt_type::CON:
-		return "Concurrent mode:";
+		return "Concurrent Mode:";
 	case opt_type::OTHER:
-		return "Other options:";
+		return "Other Options:";
 	default:
 		return "";
 	}
@@ -253,7 +253,7 @@ void cmd_line::print_usage_info(const string& prog_name, const ushort& indent,
 	out << " "
 			<< widthify(prog_name + " source.pds ", this->name_width,
 					alignment::LEFTJUST)
-			<< widthify("check given program", 0, alignment::LEFTJUST) << "\n";
+			<< widthify("check given program", 0, alignment::LEFTJUST);
 
 	for (size_t i = 0; i < types.size(); i++) {
 		out << types[i] << "\n";
@@ -317,32 +317,30 @@ void cmd_line::create_argument_list() {
 	this->add_option(get_opt_index(opt_type::PROB), "-f", "--input-file",
 			"an input pushdown system", "X");
 	this->add_option(get_opt_index(opt_type::PROB), "-i", "--initial",
-			"an initial configuration", "0|0.0,1.2");
+			"an initial configuration", "0|0,0");
 	this->add_option(get_opt_index(opt_type::PROB), "-a", "--target",
-			"a target configuration", "0|1.2,3.4");
-	this->add_switch(get_opt_index(opt_type::PROB), "-l", "--pushdown",
-			"show the pushdown system");
+			"a target configuration", "0|0,0");
 	this->add_switch(get_opt_index(opt_type::PROB), "-p", "--pushdown",
 			"show the pushdown system");
 	this->add_option(get_opt_index(opt_type::PROB), "-m", "--mode",
-			(string("exploration mode (default = C):\n") //
-			+ string(27, ' ') + " S: sequential mode\n" //
-					+ string(27, ' ') + " C: concurrent mode" //
+			(string("input program mode (default = C):\n") //
+			+ string(27, ' ') + " \"S\": sequential mode\n" //
+					+ string(27, ' ') + " \"C\": concurrent mode" //
 			).c_str(), "");
-	this->add_switch(get_opt_index(opt_type::SEQ), "-r", "--reachability",
+	this->add_switch(get_opt_index(opt_type::PROB), "-r", "--reachability",
 			"check the reachability of the given target");
 
 	/// sequential mode
-	this->add_switch(get_opt_index(opt_type::SEQ), "-s", "--sequential",
-			"the sequential mode");
+	this->add_switch(get_opt_index(opt_type::SEQ), "-atm", "--automaton",
+			"show the pushdown store automaton");
 
 	/// concurrent mode
-	this->add_switch(get_opt_index(opt_type::CON), "-c", "--concurrent",
-			"the concurrent mode");
-	this->add_option(get_opt_index(opt_type::CON), "-n", "--threads",
-			"the number of threads", "1");
 	this->add_option(get_opt_index(opt_type::CON), "-k", "--ctx-bound",
 			"the bound of contexts", "1");
+	this->add_option(get_opt_index(opt_type::CON), "-n", "--threads",
+			"the number of threads, used only for parameterized systems", "1");
+	this->add_switch(get_opt_index(opt_type::CON), "-s", "--simulator",
+			"a forward search but probably not terminate");
 
 	/// other options
 	this->add_switch(get_opt_index(opt_type::OTHER), "-cmd", "--cmd-line",

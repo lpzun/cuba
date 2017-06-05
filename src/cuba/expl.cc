@@ -18,14 +18,12 @@ namespace cuba {
  * @param Q: active control states
  * @param R: active transitions
  */
-simulator::simulator(const ctx_bound& k, const thread_state& initl,
-		const thread_state& final,  ///
-		const vector<vector<vertex>>& mapping_Q, ///
-		const vector<thread_state>& Q, ///
-		const vector<pda_trans>& R) :
-		k_bound(k), initl_TS(initl), final_TS(final), ///
-		mapping_Q(), active_Q(), active_R(R) {
-
+simulator::simulator(const string& initl, const string& final,
+		const string& filename) :
+		initl_c(0, 1), final_c(0, 1), CPDA(), reachable_T() {
+	initl_c = parser::parse_input_cfg(initl);
+	final_c = parser::parse_input_cfg(final);
+	CPDA = parser::parse_input_cpds(filename);
 }
 
 /**
@@ -40,9 +38,11 @@ simulator::~simulator() {
  * @param n: the number of threads
  * @param k: the number of context switches
  */
-void simulator::context_bounded_analysis(const size_t& n, const size_k& k) {
-	auto size = bounded_reachability(n, k);
-	cout << "The number of reachable thread states is: " << size << endl;
+void simulator::context_bounded_analysis(const size_k& k, const size_t& n) {
+	auto is_reachable = k_bounded_reachability(k, initl_c);
+	if (is_reachable) {
+		cout << final_c << " is reachable!" << endl;
+	}
 }
 
 /**
@@ -52,81 +52,83 @@ void simulator::context_bounded_analysis(const size_t& n, const size_k& k) {
  * @param k: the upper bound of context switches
  * @return the number of reachable thread/global states
  */
-uint simulator::bounded_reachability(const size_t& n, const size_k& k) {
+bool simulator::k_bounded_reachability(const size_k k_bound,
+		const concrete_config& c_I) {
 	/// step 1: build the initial  global configuration
 	///         Here we build the set of initial stacks
-	stack_vec W_0(n, pda_stack()); /// the set of initial stacks
-	for (auto tid = 0; tid < n; ++tid) {
-		W_0[tid].push(initl_TS.get_symbol());
-	}
 
 	/// step 2: set the data structures that used in the exploration
 	///         procedure
 	/// the set of unexplored global configurations
 	antichain worklist;
 	/// set the initial global configuration
-	worklist.emplace_back(0, 0, initl_TS.get_state(), W_0);
+	worklist.emplace_back(CPDA.size(), 0, c_I.get_state(), c_I.get_stacks());
 	/// the set of reachable global configurations
-	vector<antichain> explored(thread_state::S);
-
-	/// step 2.1: this part is used to mark the reachable thread states
-	this->reachable_T = vector<vector<bool>>(thread_state::S,
-			vector<bool>(thread_state::L, false));
-	this->marking(initl_TS.get_state(), initl_TS.get_symbol());
+	vector<vector<antichain>> global_R(k_bound + 1,
+			vector<antichain>(thread_state::S));
+	vector<set<config_top>> topped_R(thread_state::S);
 
 	/// step 3: the exploration procedure: it is based on BFS
 	while (!worklist.empty()) {
-		/// step 3.1: remove an element from worklist
+		/// step 3.1: remove an element from currLevel
 		const auto tau = worklist.front();
 		worklist.pop_front();
-		cout << tau << "\n"; /// deleting ---------------------
+		//cout << tau << "\n"; /// deleting ---------------------
 
 		/// step 3.2: discard it if tau is already explored
-		if (is_reachable(tau, explored[tau.get_state()]))
+		if (is_reachable(tau, global_R[tau.get_context_k()][tau.get_state()]))
 			continue;
+		//cout << tau << "\n"; /// deleting ---------------------
 
 		/// step 3.3: compute its successors and process them
 		///           one by one
-		const auto& images = step(tau);
+		const auto& images = step(tau, k_bound);
 		for (const auto& _tau : images) {
-			cout << "  " << _tau << "\n"; /// deleting ---------------------
+			//cout << string(3, ' ') << _tau << "\n"; /// deleting ---------------------
 			worklist.emplace_back(_tau);
 		}
-		/// step 3.4: add current configuration to explored set
-		explored[tau.get_state()].emplace_back(tau);
+		/// step 3.4: add current configuration to global_R set
+		global_R[tau.get_context_k()][tau.get_state()].emplace_back(tau);
 	}
 
-	/// step 4: compute the set of reachable thread states
-	int counting = 0;
-	for (auto s = 0; s < thread_state::S; ++s) {
-		for (auto l = 0; l < thread_state::L; ++l) {
-			if (reachable_T[s][l])
-				++counting;
+	cout << "======================================\n";
+	for (auto k = 0; k < global_R.size(); ++k) {
+		cout << "context " << k << "\n";
+		for (auto q = 0; q < global_R[q].size(); ++q) {
+			for (const auto& c : global_R[k][q]) {
+				cout << string(2, ' ') << c;
+				const auto& cbar = top_mapping(c);
+				const auto& ret = topped_R[c.get_state()].emplace(cbar);
+				if (ret.second)
+					cout << " | " << cbar;
+				cout << "\n";
+			}
 		}
 	}
-	return counting; /// return the number of reachable thread states
+	cout << "======================================\n";
+	return false; /// return the number of reachable thread states
 }
 
 /**
- * This procedure is to determine whether there exists g \in explored such that
- *  (1) g == tau;
- *  (2) g.id == tau.id /\ g.s == tau.s /\ g.W == tau.W /\ g.k < tau.k.
+ * This procedure is to determine whether there exists c \in R such that
+ *  (1) c == tau;
+ *  (2) c.id == tau.id /\ c.s == c.s /\ c.W == tau.W /\ c.k < tau.k.
  * It returns true if any of above conditions satisfies. Otherwise, it returns
  * false.
  *
- * One special case is that: there exists g \in explored such that
- *    g.id == tau.id /\ g.s == tau.s /\ g.W == tau.W /\ g.k > tau.k,
- * then, the procedure replaces g by tau except returning false.
+ * One special case is that: there exists c \in explored such that
+ *    c.id == tau.id /\ c.s == tau.s /\ c.W == tau.W /\ c.k > tau.k,
+ * then, the procedure replaces c by tau except returning false.
  *
  * @param tau
  * @param R
  * @return bool
  */
 bool simulator::is_reachable(const global_config& tau, antichain& R) {
-	for (auto& g : R) {
-		if (g == tau) {
-			if (g.get_context_k() > tau.get_context_k()) {
-				g.set_context_k(tau.get_context_k());
+	for (auto& c : R) {
+		if (c == tau) {
+			if (c.get_context_k() > tau.get_context_k()) {
+				c.set_context_k(tau.get_context_k());
 				return false;
 			}
 			return true;
@@ -140,62 +142,60 @@ bool simulator::is_reachable(const global_config& tau, antichain& R) {
  * @param tau: a global configuration
  * @return a list of successors, aka. global configurations
  */
-antichain simulator::step(const global_config& tau) {
+antichain simulator::step(const global_config& tau, const size_k k_bound) {
 	antichain successors;
+	const auto& k = tau.get_context_k(); /// the context switches to tau
+
+	/// step 1: if context switches already reach to the upper bound
 	const auto& q = tau.get_state();     /// the control state of tau
 	const auto& W = tau.get_stacks();    /// the stacks of tau
-	const auto& k = tau.get_context_k(); /// the context switches to tau
-	const auto& t = tau.get_thread_id(); /// the previous thread id to tau
 
-	/// step 1: if context switches already reach to the uppper bound
-	if (k == k_bound)
-		return successors;
-	/*
-	 /// step 2: iterate over all threads
-	 for (auto tid = 0; tid < W.size(); ++tid) {
-	 /// step 2.1: set context switches
-	 ///           if context switch occurs, then k = k + 1;
-	 auto _k = tid == t ? k : k + 1;
-	 /// step 2.2: iterator over all successor of current thread state
-	 const auto& transs = PDS[retrieve(q, W[tid].top())];
-	 for (const auto& rid : transs) { /// rid: transition id
-	 const auto& r = active_R[rid];
-	 const auto& dst = active_Q[r.get_dst()];
-	 auto _W = W; /// duplicate the stacks in current global conf.
-	 switch (r.get_oper_type()) {
-	 case type_stack_operation::PUSH: { /// push operation
-	 _W[tid].push(dst.get_symbol());
-	 successors.emplace_back(tid, _k, dst.get_state(), _W);
-	 }
-	 break;
-	 case type_stack_operation::POP: { /// pop operation
-	 if (_W[tid].pop())
-	 successors.emplace_back(tid, _k, dst.get_state(), _W);
-	 }
-	 break;
-	 default: { /// overwrite operation
-	 if (_W[tid].overwrite(dst.get_symbol()))
-	 successors.emplace_back(tid, _k, dst.get_state(), _W);
-	 }
-	 break;
-	 }
-	 /// marking thread state dst is reachable
-	 this->marking(dst.get_state(), dst.get_symbol());
-	 }
+	/// step 2: iterate over all threads
+	for (auto tid = 0; tid < W.size(); ++tid) {
+		//cout << tid << "\\\\\\\\\\\\\\\\\\\\\\\\\n";
+		if (W[tid].empty() || (k == k_bound && tid != tau.get_thread_id())) {
+			continue;
+		}
+		/// step 2.1: set context switches
+		///           if context switch occurs, then k = k + 1;
+		auto _k = tid == tau.get_thread_id() ? k : k + 1;
+		/// step 2.2: iterator over all successor of current thread state
 
-	 }
-	 */
+		//cout << q << "," << W[tid].top() << "\\\\\\\\\\\\\\\\\\\\\\\\\n";
+		const auto& ifind = CPDA[tid].get_pda().find(
+				thread_state(q, W[tid].top()));
+		if (ifind == CPDA[tid].get_pda().end())
+			continue;
+		for (const auto& rid : ifind->second) { /// rid: transition id
+			const auto& r = CPDA[tid].get_actions()[rid];
+			const auto& dst = r.get_dst();
+
+			auto _W = W; /// duplicate the stacks in current global conf.
+
+			switch (r.get_oper_type()) {
+			case type_stack_operation::PUSH: { /// push operation
+				_W[tid].pop();
+				for (auto is = dst.get_stack().get_worklist().rbegin();
+						is != dst.get_stack().get_worklist().rend(); ++is) {
+					_W[tid].push(*is);
+				}
+				successors.emplace_back(tid, _k, dst.get_state(), _W);
+			}
+				break;
+			case type_stack_operation::POP: { /// pop operation
+				if (_W[tid].pop())
+					successors.emplace_back(tid, _k, dst.get_state(), _W);
+			}
+				break;
+			default: { /// overwrite operation
+				if (_W[tid].overwrite(dst.get_stack().top()))
+					successors.emplace_back(tid, _k, dst.get_state(), _W);
+			}
+				break;
+			}
+		}
+	}
 	return successors; /// the set of successors of tau
-}
-
-/**
- * This procedure is to retrieve the id of thread state
- * @param s: control state
- * @param l: stack symbol
- * @return thread state id
- */
-vertex simulator::retrieve(const pda_state& s, const pda_alpha& l) {
-	return mapping_Q[s][l];
 }
 
 /**
@@ -206,6 +206,22 @@ vertex simulator::retrieve(const pda_state& s, const pda_alpha& l) {
 void simulator::marking(const pda_state& s, const pda_alpha& l) {
 	if (!reachable_T[s][l])
 		reachable_T[s][l] = true;
+}
+
+/**
+ * Obtain the top of configuration
+ * @param global_R
+ * @return
+ */
+config_top simulator::top_mapping(const global_config& tau) {
+	vector<pda_alpha> L(tau.get_stacks().size());
+	for (auto i = 0; i < tau.get_stacks().size(); ++i) {
+		if (tau.get_stacks()[i].empty())
+			L[i] = alphabet::EPSILON;
+		else
+			L[i] = tau.get_stacks()[i].top();
+	}
+	return config_top(tau.get_state(), L);
 }
 
 } /* namespace cuba */
