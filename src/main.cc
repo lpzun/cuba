@@ -56,7 +56,7 @@ int main(const int argc, const char * const * const argv) {
 		const string& n = cmd.arg_value(cmd_line::get_opt_index(opt_type::CON),
 				"--threads");
 		const bool is_simulate = cmd.arg_bool(
-				cmd_line::get_opt_index(opt_type::CON), "--simulator");
+				cmd_line::get_opt_index(opt_type::CON), "--explicit");
 
 		/// Other Options
 		prop::OPT_PRINT_CMD = cmd.arg_bool(
@@ -67,16 +67,17 @@ int main(const int argc, const char * const * const argv) {
 		if (mode == "S") {
 			cout << "sequential mode\n";
 			cout << filename << " " << initl << " " << final << "\n";
+			cout << "sequential computation is not set up yet! \n";
 		} else {
 			cout << "concurrent mode\n";
 			if (is_simulate) {
-				cout << "simulator mode\n";
-				cout << filename << " " << initl << " " << final << "\n";
+				cout << "explicit exploration\n";
+				//cout << filename << " " << initl << " " << final << "\n";
 				simulator simu(initl, final, filename);
 				simu.context_bounded_analysis(std::stoul(k), std::stoul(n));
 			} else {
-				cout << "complete mode\n";
-				cout << filename << " " << initl << " " << final << "\n";
+				cout << "symbolic exploration\n";
+				//cout << filename << " " << initl << " " << final << "\n";
 				CUBA cuba(initl, final, filename);
 				cuba.context_bounded_analysis(std::stoul(k), std::stoul(n));
 			}
