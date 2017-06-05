@@ -69,9 +69,9 @@ int main(const int argc, const char * const * const argv) {
 			cout << filename << " " << initl << " " << final << "\n";
 			cout << "sequential computation is not set up yet! \n";
 		} else {
-			cout << "concurrent mode\n";
+			cout << "concurrent mode......\n";
 			if (is_simulate) {
-				cout << "explicit exploration\n";
+				cout << "explicit exploration......\n";
 				//cout << filename << " " << initl << " " << final << "\n";
 				simulator simu(initl, final, filename);
 				simu.context_bounded_analysis(std::stoul(k), std::stoul(n));
