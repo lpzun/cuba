@@ -21,6 +21,9 @@ the repos is totally public, right?
    For un-parameterized input, like stutter.pds, -n is useless. The number 
    of threads depends on how many PDAs you have in your input
 
+--- This is fine. You can add to the help: "[only for parameterized
+    programs; ignored for others]" or something.
+
 - help line:
 
   -a [--target] arg         a target thread configuration (default = 0|0,1,2)
@@ -35,13 +38,24 @@ the repos is totally public, right?
   correct?
 
 -- REPLY: No, stack sizes for initial configurations could be arbitrarily 
-   large. Comma is a delimiter for symbols in the same stack. But you are 
+   large.
+
+--- That is good, for flexible experimentation.
+
+-- Comma is a delimiter for symbols in the same stack. But you are 
    right: (i) The help info is misleading; (ii) using comma to separate stack 
    content is not a good design. I will update this, and make the help info
-   more readable. 
+   more readable.
+
+--- I see. This actually makes sense (but is not understandable from the
+    help). How about giving a *general* initial stack, like
+
+    0|1,2;3,4
+
+    Then you explain the diff between , and ; .
 
 - on my desktop I cannot compile the program; it says: "-lz: lib not
-  found". Any idea what I needto install?
+  found". Any idea what I need to install?
 
   (Turns out: when I remove the -lz link flag, it still compiles [without
   the error].)
