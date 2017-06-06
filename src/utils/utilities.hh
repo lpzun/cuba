@@ -21,8 +21,7 @@ enum class alignment {
 class algs {
 public:
 	template<typename T>
-	static int compare(const vector<T>& v1, const vector<T>& v2,
-			const bool& is_symmetry);
+	static int compare(const vector<T>& v1, const vector<T>& v2);
 
 	template<class T>
 	static string widthify(const T& x, const ushort& width = 0,
@@ -45,22 +44,21 @@ private:
  *         +1: v1 > v2;
  */
 template<typename T>
-int algs::compare(const vector<T>& v1, const vector<T>& v2,
-		const bool& is_symmetry) {
+int algs::compare(const vector<T>& v1, const vector<T>& v2) {
 	if (v1.size() != v2.size()) {
 		throw cuba_runtime_error("algs::compare: sizes are not equal!");
 	}
 
-	auto tv1(v1);
-	auto tv2(v2);
-	if (is_symmetry) {
-		std::sort(tv1.begin(), tv1.end());
-		std::sort(tv2.begin(), tv2.end());
-	}
+//	auto tv1(v1);
+//	auto tv2(v2);
+//	if (is_symmetry) {
+//		std::sort(tv1.begin(), tv1.end());
+//		std::sort(tv2.begin(), tv2.end());
+//	}
 
-	auto iv1 = tv1.cbegin();
-	auto iv2 = tv2.cbegin();
-	while (iv1 != tv1.cend()) {
+	auto iv1 = v1.cbegin();
+	auto iv2 = v2.cbegin();
+	while (iv1 != v1.cend()) {
 		if (*iv1 < *iv2)
 			return -1;
 		if (*iv1 > *iv2)

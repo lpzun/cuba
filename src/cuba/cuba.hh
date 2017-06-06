@@ -103,7 +103,7 @@ private:
 			const concrete_config& c_I);
 
 	antichain step(const global_config& tau, const size_k k_bound);
-	bool is_reachable(const global_config& tau, const antichain& R);
+	bool is_reachable(const global_config& tau, vector<vector<antichain>>& R);
 	void marking(const pda_state& s, const pda_alpha& l);
 
 	config_top top_mapping(const global_config& tau);
@@ -111,8 +111,7 @@ private:
 	/// cycle detection
 	bool is_cyclic(const size_t tid);
 	bool is_cyclic(const size_t tid, const thread_state& s, stack<pda_alpha>& W,
-			unordered_map<vertex, bool>& visit,
-			unordered_map<vertex, bool>& trace);
+			map<vertex, bool>& visit, map<vertex, bool>& trace);
 };
 
 /////////////////////////////////////////////////////////////////////////
