@@ -6,7 +6,7 @@ Usage:                    Purpose:
 
 Problem instance:
  -f [--input-file] arg     an input pushdown system (default = X)
- -a [--target] arg         a target configuration (default = 0|1.2,3.4, interpreated as the first stack's content is 12, while second stack's content is 34) 
+ -a [--target] arg         a target configuration (default = 0|1.2,3.4, interpreated as the first stack's content is 12, while second stack's) 
  -i [--initial] arg        an initial configuration (default = 0|0.0,1.1,2.2)
  -p [--pushdown]           show the pushdown system
  -m [--mode]
