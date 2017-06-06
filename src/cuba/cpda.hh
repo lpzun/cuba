@@ -89,7 +89,7 @@ inline ostream& operator<<(ostream& os, const global_state& g) {
 		else
 			os << g.get_local()[0];
 	}
-	for (auto i = 1; i < g.get_local().size(); ++i) {
+	for (uint i = 1; i < g.get_local().size(); ++i) {
 		cout << ",";
 		if (g.get_local()[i] == alphabet::EPSILON)
 			os << alphabet::OPT_EPSILON;
@@ -182,7 +182,7 @@ inline ostream& operator<<(ostream& os, const concrete_config& c) {
 	os << "(" << c.get_state() << prop::SHARED_LOCAL_DELIMITER;
 	if (c.get_stacks().size() > 0)
 		os << c.get_stacks()[0];
-	for (int i = 1; i < c.get_stacks().size(); ++i)
+	for (uint i = 1; i < c.get_stacks().size(); ++i)
 		os << prop::THREAD_DELIMITER << c.get_stacks()[i];
 	os << ")";
 	return os;
@@ -280,12 +280,12 @@ inline ostream& operator<<(ostream& os, const global_config& c) {
 		os << "t=" << "* ";
 	else
 		os << "t=" << c.get_thread_id() << " ";
-	os << "(" << c.get_state() << prop::SHARED_LOCAL_DELIMITER;
+	os << "<" << c.get_state() << prop::SHARED_LOCAL_DELIMITER;
 	if (c.get_stacks().size() > 0)
 		os << c.get_stacks()[0];
-	for (int i = 1; i < c.get_stacks().size(); ++i)
+	for (uint i = 1; i < c.get_stacks().size(); ++i)
 		os << prop::THREAD_DELIMITER << c.get_stacks()[i];
-	os << ")";
+	os << ">";
 	return os;
 }
 
@@ -355,6 +355,9 @@ inline bool operator!=(const global_config& g1, const global_config& g2) {
  */
 using store_automaton = finite_automaton;
 
+/**
+ * Define a symbolic configuration
+ */
 class symbolic_config {
 public:
 	symbolic_config(const pda_state& q, const vector<store_automaton>& W);
@@ -377,7 +380,7 @@ private:
 
 inline ostream& operator<<(ostream& os, const symbolic_config& c) {
 	os << "<" << c.get_state() << "\n";
-	for (auto i = 0; i < c.get_automata().size(); ++i) {
+	for (uint i = 0; i < c.get_automata().size(); ++i) {
 		os << "A" << i << "\n" << c.get_automata()[i];
 	}
 	os << ">" << endl;

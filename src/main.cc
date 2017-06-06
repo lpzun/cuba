@@ -72,12 +72,10 @@ int main(const int argc, const char * const * const argv) {
 			cout << "concurrent mode......\n";
 			if (is_simulate) {
 				cout << "explicit exploration......\n";
-				//cout << filename << " " << initl << " " << final << "\n";
 				simulator simu(initl, final, filename);
 				simu.context_bounded_analysis(std::stoul(k), std::stoul(n));
 			} else {
-				cout << "symbolic exploration\n";
-				//cout << filename << " " << initl << " " << final << "\n";
+				cout << "symbolic exploration......\n";
 				CUBA cuba(initl, final, filename);
 				cuba.context_bounded_analysis(std::stoul(k), std::stoul(n));
 			}

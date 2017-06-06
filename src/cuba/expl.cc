@@ -81,8 +81,8 @@ bool simulator::k_bounded_reachability(const size_k k_bound,
 			if (is_reachable(tau, global_R[k][tau.get_state()])) {
 				flag = true;
 				break; /// TODO: There is a bug here, thus need to fix it.
-				       /// same reachable configuration with more contexts
-				       /// could reach earlier.
+					   /// same reachable configuration with more contexts
+					   /// could reach earlier.
 			}
 		}
 		if (flag)
@@ -155,7 +155,7 @@ antichain simulator::step(const global_config& tau, const size_k k_bound) {
 	const auto& W = tau.get_stacks();    /// the stacks of tau
 
 	/// step 2: iterate over all threads
-	for (auto tid = 0; tid < W.size(); ++tid) {
+	for (size_t tid = 0; tid < W.size(); ++tid) {
 		//cout << tid << "\\\\\\\\\\\\\\\\\\\\\\\\\n";
 		if (W[tid].empty() || (k == k_bound && tid != tau.get_thread_id())) {
 			continue;
@@ -219,13 +219,45 @@ void simulator::marking(const pda_state& s, const pda_alpha& l) {
  */
 config_top simulator::top_mapping(const global_config& tau) {
 	vector<pda_alpha> L(tau.get_stacks().size());
-	for (auto i = 0; i < tau.get_stacks().size(); ++i) {
+	for (size_t i = 0; i < tau.get_stacks().size(); ++i) {
 		if (tau.get_stacks()[i].empty())
 			L[i] = alphabet::EPSILON;
 		else
 			L[i] = tau.get_stacks()[i].top();
 	}
 	return config_top(tau.get_state(), L);
+}
+
+bool simulator::is_cyclic(const size_t tid) {
+//	unordered_map<vertex, bool> visit;
+//	unordered_map<vertex, bool> trace;
+//	for (const auto& p : CPDA[tid].get_pda()) {
+//		visit[p.first] = false;
+//		trace[p.first] = false;
+//	}
+//
+//	for (const auto& p : CPDA[tid].get_pda()) {
+//		stack<pda_alpha> W;
+//		W.push(p.first.get_symbol());
+//		if (!visit[p.first] && is_cyclic(tid, p.first, W, visit, trace)) {
+//			return true;
+//		}
+//	}
+	return false;
+}
+
+/**
+ *
+ * @param tid
+ * @param c
+ * @param visit
+ * @param trace
+ * @return
+ */
+bool simulator::is_cyclic(const size_t tid, const thread_state& s,
+		stack<pda_alpha>& W, unordered_map<thread_state, bool>& visit,
+		unordered_map<thread_state, bool>& trace) {
+return false;
 }
 
 } /* namespace cuba */

@@ -40,7 +40,7 @@ CUBA::~CUBA() {
  */
 void CUBA::context_bounded_analysis(const size_k& k_bound, const size_t& n) {
 	vector<store_automaton> W;
-	for (auto i = 0; i < CPDA.size(); ++i) {
+	for (uint i = 0; i < CPDA.size(); ++i) {
 		auto fsa = create_init_automaton(i);
 		W.push_back(fsa);
 
@@ -106,13 +106,13 @@ vector<deque<symbolic_config>> CUBA::context_bounded_analysis(
 
 			/// 2.1.2 extract the aggregate configuration from the pair.
 			const auto& automata = c.get_automata();
-			for (auto i = 0; i < automata.size(); ++i) {
+			for (uint i = 0; i < automata.size(); ++i) {
 				const auto& _A = post_kleene(automata[i], CPDA[i]);
 //				cout << "post*:=+++++++++++++++++++++++++++\n"; // todo delete
 //				cout << _A << "\n";                             // todo delete
 				for (const auto& _q : project_Q(_A)) {
 					const auto& _c = compose(_q, _A, automata, i);
-					if (_c.get_automata()[i].get_states().size() > 0) {
+					if (!_c.get_automata()[i].empty()) {
 						nextLevel.push_back(_c);
 //						cout << _c << endl; // todo delete
 					}
@@ -218,7 +218,7 @@ store_automaton CUBA::post_kleene(const store_automaton& A,
 
 	unordered_map<int, fsa_state> map_r_to_aux_state;
 	auto s = create_interm_state(states);
-	for (auto i = 0; i < P.get_actions().size(); ++i) {
+	for (uint i = 0; i < P.get_actions().size(); ++i) {
 		if (P.get_actions()[i].get_oper_type() == type_stack_operation::PUSH)
 			map_r_to_aux_state.emplace(i, s++);
 	}
@@ -301,7 +301,7 @@ store_automaton CUBA::post_kleene(const store_automaton& A,
  *         false: otherwise.
  */
 bool CUBA::is_recongnizable(const store_automaton& A, const thread_config& c) {
-	queue<pair<fsa_state, int>> worklist;
+	queue<pair<fsa_state, uint>> worklist;
 	worklist.emplace(c.get_state(), 0);
 
 	const auto& w = c.get_stack();
@@ -417,7 +417,7 @@ symbolic_config CUBA::compose(const pda_state& q_I, const store_automaton& Ai,
 		const vector<store_automaton>& automata, const int& i) {
 	vector<store_automaton> W;
 	W.reserve(automata.size());
-	for (auto j = 0; j < automata.size(); ++j) {
+	for (uint j = 0; j < automata.size(); ++j) {
 		if (j == i)
 			W.push_back(this->anonymize(Ai, q_I));
 		else
@@ -566,7 +566,7 @@ vector<config_top> CUBA::top_mapping(const symbolic_config& tau) {
 	const auto q = tau.get_state();
 	vector<set<pda_alpha>> toppings(tau.get_automata().size());
 
-	for (auto i = 0; i < tau.get_automata().size(); ++i) {
+	for (uint i = 0; i < tau.get_automata().size(); ++i) {
 		toppings[i] = top_mapping(tau.get_automata()[i], q);
 		//for (const auto& s : toppings[i])
 		//	cout << i << "===================" << s << endl;

@@ -84,7 +84,7 @@ pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
 	vector<pda_trans> actions;
 	adj_list PDA;
 	id_transition trans_id = 0;
-	for (int i = 1; i < sPDA.size(); ++i) {
+	for (uint i = 1; i < sPDA.size(); ++i) {
 		/// three types of transition:
 		///   PUSH: (s1, l1) -> (s2, l2l3)
 		///   POP : (s1, l1) -> (s2, )
@@ -158,7 +158,7 @@ concrete_config parser::create_global_config_from_str(const string& s_ts,
 
 	const auto& stacks = split(vs_cfg[1], prop::THREAD_DELIMITER);
 	stack_vec W(stacks.size());
-	for (auto i = 0; i < stacks.size(); ++i) {
+	for (uint i = 0; i < stacks.size(); ++i) {
 		const auto& symbols = split(stacks[i], prop::STACK_DELIMITER);
 		for (const auto& s : symbols) {
 			W[i].push(std::stoi(s));

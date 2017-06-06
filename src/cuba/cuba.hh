@@ -107,6 +107,12 @@ private:
 	void marking(const pda_state& s, const pda_alpha& l);
 
 	config_top top_mapping(const global_config& tau);
+
+	/// cycle detection
+	bool is_cyclic(const size_t tid);
+	bool is_cyclic(const size_t tid, const thread_state& s, stack<pda_alpha>& W,
+			unordered_map<vertex, bool>& visit,
+			unordered_map<vertex, bool>& trace);
 };
 
 /////////////////////////////////////////////////////////////////////////

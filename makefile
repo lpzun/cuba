@@ -110,14 +110,10 @@ robjects:
 ############################
 # Cleaning (do not change) #
 ############################
-
 clean: 	CLEANOBJS
-	#rm -f $(BASES)
-	rm -f *.o test a.out
 
 distclean: clean CLEANOBJS
 	rm -rf $(BINDIR)
-	rm -f *~
 	$(foreach DIR,$(RDIRS),$(MAKE) -C $(DIR) $(EXPORT) distclean || $(DERROR);)
 	$(DISTCLEAN)
 
@@ -127,4 +123,5 @@ CLEANOBJS:
 # description: for cleaning all objects
 define clean-obj
 	find . -name '*.o' -type f -delete
+	find . -name '*.~' -type f -delete
 endef

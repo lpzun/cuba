@@ -162,6 +162,10 @@ public:
 		return accept;
 	}
 
+	bool empty() const {
+		return states.size() == 0;
+	}
+
 private:
 	fsa_state_set states;    /// it represents state 0...|states|-1
 	fsa_alphabet alphas;   ///
