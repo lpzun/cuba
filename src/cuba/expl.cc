@@ -77,7 +77,7 @@ bool simulator::k_bounded_reachability(const size_k k_bound,
 
 		/// step 3.2: discard it if tau is already explored
 		bool flag = false;
-		for (auto k = 0; k <= tau.get_context_k(); k++) {
+		for (uint k = 0; k <= tau.get_context_k(); k++) {
 			if (is_reachable(tau, global_R[k][tau.get_state()])) {
 				flag = true;
 				break; /// TODO: There is a bug here, thus need to fix it.
@@ -101,9 +101,9 @@ bool simulator::k_bounded_reachability(const size_k k_bound,
 	}
 
 	cout << "======================================\n";
-	for (auto k = 0; k < global_R.size(); ++k) {
+	for (uint k = 0; k < global_R.size(); ++k) {
 		cout << "context " << k << "\n";
-		for (auto q = 0; q < global_R[q].size(); ++q) {
+		for (uint q = 0; q < global_R[q].size(); ++q) {
 			for (const auto& c : global_R[k][q]) {
 				cout << string(2, ' ') << c;
 				const auto& cbar = top_mapping(c);
@@ -155,7 +155,7 @@ antichain simulator::step(const global_config& tau, const size_k k_bound) {
 	const auto& W = tau.get_stacks();    /// the stacks of tau
 
 	/// step 2: iterate over all threads
-	for (size_t tid = 0; tid < W.size(); ++tid) {
+	for (uint tid = 0; tid < W.size(); ++tid) {
 		//cout << tid << "\\\\\\\\\\\\\\\\\\\\\\\\\n";
 		if (W[tid].empty() || (k == k_bound && tid != tau.get_thread_id())) {
 			continue;

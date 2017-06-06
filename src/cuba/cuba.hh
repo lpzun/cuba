@@ -47,7 +47,7 @@ private:
 			const unordered_map<fsa_state, deque<fsa_state>>& adj,
 			const fsa_state_set& initials);
 	symbolic_config compose(const pda_state& _q, const store_automaton& Ai,
-			const vector<store_automaton>& automata, const int& idx);
+			const vector<store_automaton>& automata, const size_t& idx);
 	store_automaton rename(const store_automaton& A, const pda_state& q_I);
 	store_automaton anonymize(const store_automaton& A, const pda_state& q_I,
 			const bool& is_rename = false);

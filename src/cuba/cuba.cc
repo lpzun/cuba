@@ -414,7 +414,7 @@ set<fsa_state> CUBA::BFS_visit(const fsa_state& root,
  * @return symbolic configuration
  */
 symbolic_config CUBA::compose(const pda_state& q_I, const store_automaton& Ai,
-		const vector<store_automaton>& automata, const int& i) {
+		const vector<store_automaton>& automata, const size_t& i) {
 	vector<store_automaton> W;
 	W.reserve(automata.size());
 	for (uint j = 0; j < automata.size(); ++j) {
