@@ -154,7 +154,7 @@ concrete_config::~concrete_config() {
  */
 global_state concrete_config::top() const {
 	vector<pda_alpha> L(W.size());
-	for (auto i = 0; i < W.size(); ++i) {
+	for (uint i = 0; i < W.size(); ++i) {
 		L[i] = W[i].top();
 	}
 	return global_state(s, L);
@@ -166,7 +166,7 @@ global_state concrete_config::top() const {
  */
 global_state concrete_config::top() {
 	vector<pda_alpha> L(W.size());
-	for (auto i = 0; i < W.size(); ++i) {
+	for (uint i = 0; i < W.size(); ++i) {
 		L[i] = W[i].top();
 	}
 	return global_state(s, L);
