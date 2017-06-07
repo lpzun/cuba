@@ -49,7 +49,7 @@ void simulator::context_bounded_analysis(const size_k& k, const size_t& n) {
 	}
 	if (cycle)
 		return;
-	auto is_reachable = k_bounded_reachability(k, initl_c);
+	const auto is_reachable = k_bounded_reachability(k, initl_c);
 	if (is_reachable) {
 		cout << final_c << " is reachable!" << endl;
 	}
@@ -83,7 +83,7 @@ bool simulator::k_bounded_reachability(const size_k k_bound,
 		/// step 3.1: remove an element from currLevel
 		const auto tau = worklist.front();
 		worklist.pop_front();
-		cout << tau << "\n"; /// deleting ---------------------
+		// cout << tau << "\n"; /// deleting ---------------------
 
 		/// step 3.2: discard it if tau is already explored
 		if (is_reachable(tau, global_R))
@@ -234,7 +234,6 @@ void simulator::marking(const pda_state& s, const pda_alpha& l) {
  */
 config_top simulator::top_mapping(const global_config& tau) {
 	vector<pda_alpha> L(tau.get_stacks().size());
-	cout << "=======================";
 	for (size_t i = 0; i < tau.get_stacks().size(); ++i) {
 		if (tau.get_stacks()[i].empty())
 			L[i] = alphabet::EPSILON;
@@ -285,20 +284,18 @@ bool simulator::is_cyclic(const size_t tid, const thread_state& s,
 		for (const auto rid : ifind->second) {
 			const auto& r = CPDA[tid].get_actions()[rid];
 			const auto& dst = r.get_dst();
+			W.pop();
 			switch (r.get_oper_type()) {
 			case type_stack_operation::PUSH: {
-				W.pop();
 				W.push(dst.get_stack().get_worklist()[1]);
 				W.push(dst.get_stack().get_worklist()[0]);
 			}
 				break;
-			case type_stack_operation::POP: {
-				W.pop();
+			case type_stack_operation::OVERWRITE: {
+				W.push(dst.get_stack().top());
 			}
 				break;
 			default: {
-				W.pop();
-				W.push(dst.get_stack().top());
 			}
 				break;
 			}
@@ -307,9 +304,9 @@ bool simulator::is_cyclic(const size_t tid, const thread_state& s,
 			thread_state t(dst.get_state(), W.top());
 			if (!visit[t] && is_cyclic(tid, t, W, visit, trace)) {
 				return true;
-			} else {
-				if (trace[t])
-					return W.size() > 1;
+			} else if (trace[t]) {
+				if (W.size() > 1)
+					return true;
 			}
 		}
 	}
