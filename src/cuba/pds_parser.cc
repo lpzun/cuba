@@ -33,18 +33,17 @@ concurrent_pushdown_automata parser::parse_input_cpds(const string& filename) {
 	/// parse the set of control states: MUST be in the first line
 	new_in >> thread_state::S;
 	set<pda_state> states;
-	for (auto s = 0; s < thread_state::S; ++s) {
+	for (pda_state s = 0; s < thread_state::S; ++s) {
 		states.emplace(s);
 	}
 
 	vector<vector<string>> sCPDS;
 	string line;
 	while (std::getline(new_in, line)) {
-		if (line == "") /// nothing in the line
+		if (line == "" || line.size() < 2) /// nothing in the line
 			continue;
-		if (line.at(0) == 'P') {
+		if (line.at(0) == 'P')
 			sCPDS.emplace_back(vector<string>());
-		}
 		sCPDS.back().emplace_back(line);
 	}
 	new_in.close();

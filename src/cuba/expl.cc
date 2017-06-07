@@ -39,7 +39,17 @@ simulator::~simulator() {
  * @param k: the number of context switches
  */
 void simulator::context_bounded_analysis(const size_k& k, const size_t& n) {
-	auto is_reachable = k_bounded_reachability(k, initl_c);
+	bool cycle = false;
+	for (size_t tid = 0; tid < CPDA.size(); ++tid) {
+		if (is_cyclic(tid)) {
+			cycle = true;
+			cout << "PDA " << tid << " contains cycles. Simulator exits...\n";
+			break;
+		}
+	}
+	if (cycle)
+		return;
+	const auto is_reachable = k_bounded_reachability(k, initl_c);
 	if (is_reachable) {
 		cout << final_c << " is reachable!" << endl;
 	}
@@ -73,19 +83,10 @@ bool simulator::k_bounded_reachability(const size_k k_bound,
 		/// step 3.1: remove an element from currLevel
 		const auto tau = worklist.front();
 		worklist.pop_front();
-		//cout << tau << "\n"; /// deleting ---------------------
+		// cout << tau << "\n"; /// deleting ---------------------
 
 		/// step 3.2: discard it if tau is already explored
-		bool flag = false;
-		for (uint k = 0; k <= tau.get_context_k(); k++) {
-			if (is_reachable(tau, global_R[k][tau.get_state()])) {
-				flag = true;
-				break; /// TODO: There is a bug here, thus need to fix it.
-					   /// same reachable configuration with more contexts
-					   /// could reach earlier.
-			}
-		}
-		if (flag)
+		if (is_reachable(tau, global_R))
 			continue;
 		//cout << tau << "\n"; /// deleting ---------------------
 
@@ -93,7 +94,7 @@ bool simulator::k_bounded_reachability(const size_k k_bound,
 		///           one by one
 		const auto& images = step(tau, k_bound);
 		for (const auto& _tau : images) {
-			//cout << string(3, ' ') << _tau << "\n"; /// deleting ---------------------
+			//cout << string(3, ' ') << _tau << "\n"; // todo deleting ---------------------
 			worklist.emplace_back(_tau);
 		}
 		/// step 3.4: add current configuration to global_R set
@@ -107,6 +108,7 @@ bool simulator::k_bounded_reachability(const size_k k_bound,
 			for (const auto& c : global_R[k][q]) {
 				cout << string(2, ' ') << c;
 				const auto& cbar = top_mapping(c);
+				//cout << c << " .... " << cbar << endl; // todo deleting -------------
 				const auto& ret = topped_R[c.get_state()].emplace(cbar);
 				if (ret.second)
 					cout << " | " << cbar;
@@ -133,12 +135,25 @@ bool simulator::k_bounded_reachability(const size_k k_bound,
  * @param R
  * @return bool
  */
-bool simulator::is_reachable(const global_config& tau, const antichain& R) {
-	for (auto& c : R) {
-		if (c == tau)
-			return true;
+bool simulator::is_reachable(const global_config& tau,
+		vector<vector<antichain>>& R) {
+	bool flag = false;
+	for (uint k = 0; k <= tau.get_context_k(); k++) {
+		for (const auto& c : R[k][tau.get_state()]) {
+			if (c == tau) {
+				flag = true;
+				break;
+			}
+		}
 	}
-	return false;
+
+	for (uint k = tau.get_context_k() + 1; k < R.size(); ++k) {
+		for (auto it = R[k][tau.get_state()].begin();
+				it != R[k][tau.get_state()].end(); ++it) {
+			R[k][tau.get_state()].erase(it);
+		}
+	}
+	return flag;
 }
 
 /**
@@ -228,21 +243,26 @@ config_top simulator::top_mapping(const global_config& tau) {
 	return config_top(tau.get_state(), L);
 }
 
+/**
+ * Cycle detection
+ * @param tid
+ * @return bool
+ */
 bool simulator::is_cyclic(const size_t tid) {
-//	unordered_map<vertex, bool> visit;
-//	unordered_map<vertex, bool> trace;
-//	for (const auto& p : CPDA[tid].get_pda()) {
-//		visit[p.first] = false;
-//		trace[p.first] = false;
-//	}
-//
-//	for (const auto& p : CPDA[tid].get_pda()) {
-//		stack<pda_alpha> W;
-//		W.push(p.first.get_symbol());
-//		if (!visit[p.first] && is_cyclic(tid, p.first, W, visit, trace)) {
-//			return true;
-//		}
-//	}
+	map<vertex, bool> visit;
+	map<vertex, bool> trace;
+	for (const auto& p : CPDA[tid].get_pda()) {
+		visit[p.first] = false;
+		trace[p.first] = false;
+	}
+
+	for (const auto& p : CPDA[tid].get_pda()) {
+		stack<pda_alpha> W;
+		W.push(p.first.get_symbol());
+		if (!visit[p.first] && is_cyclic(tid, p.first, W, visit, trace)) {
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -255,9 +275,43 @@ bool simulator::is_cyclic(const size_t tid) {
  * @return
  */
 bool simulator::is_cyclic(const size_t tid, const thread_state& s,
-		stack<pda_alpha>& W, unordered_map<thread_state, bool>& visit,
-		unordered_map<thread_state, bool>& trace) {
-return false;
+		stack<pda_alpha>& W, map<thread_state, bool>& visit,
+		map<thread_state, bool>& trace) {
+	visit[s] = true;
+	trace[s] = true;
+	auto ifind = CPDA[tid].get_pda().find(s);
+	if (ifind != CPDA[tid].get_pda().end()) {
+		for (const auto rid : ifind->second) {
+			const auto& r = CPDA[tid].get_actions()[rid];
+			const auto& dst = r.get_dst();
+			W.pop();
+			switch (r.get_oper_type()) {
+			case type_stack_operation::PUSH: {
+				W.push(dst.get_stack().get_worklist()[1]);
+				W.push(dst.get_stack().get_worklist()[0]);
+			}
+				break;
+			case type_stack_operation::OVERWRITE: {
+				W.push(dst.get_stack().top());
+			}
+				break;
+			default: {
+			}
+				break;
+			}
+			if (W.empty())
+				continue;
+			thread_state t(dst.get_state(), W.top());
+			if (!visit[t] && is_cyclic(tid, t, W, visit, trace)) {
+				return true;
+			} else if (trace[t]) {
+				if (W.size() > 1)
+					return true;
+			}
+		}
+	}
+	trace[s] = false;
+	return false;
 }
 
 } /* namespace cuba */

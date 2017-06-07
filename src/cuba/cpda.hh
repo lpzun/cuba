@@ -108,7 +108,7 @@ inline ostream& operator<<(ostream& os, const global_state& g) {
  */
 inline bool operator<(const global_state& g1, const global_state& g2) {
 	if (g1.get_state() == g2.get_state()) {
-		return algs::compare(g1.get_local(), g2.get_local(), true) == -1;
+		return algs::compare(g1.get_local(), g2.get_local()) == -1;
 	}
 	return g1.get_state() < g2.get_state();
 }
@@ -131,7 +131,7 @@ inline bool operator>(const global_state& g1, const global_state& g2) {
  */
 inline bool operator==(const global_state& g1, const global_state& g2) {
 	if (g1.get_state() == g2.get_state()) {
-		return algs::compare(g1.get_local(), g2.get_local(), true) == 0;
+		return algs::compare(g1.get_local(), g2.get_local()) == 0;
 	}
 	return false;
 }
