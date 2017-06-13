@@ -249,11 +249,11 @@ void cmd_line::print_usage_info(const string& prog_name, const ushort& indent,
 			<< widthify(
 					prog_name + " " + SHORT_HELP_OPT + " [" + LONG_HELP_OPT
 							+ "]", this->name_width, alignment::LEFTJUST)
-			<< widthify("show help message", 0, alignment::LEFTJUST) << "\n";
-	out << " "
-			<< widthify(prog_name + " source.pds ", this->name_width,
-					alignment::LEFTJUST)
-			<< widthify("check given program", 0, alignment::LEFTJUST);
+			<< widthify("show help message", 0, alignment::LEFTJUST);
+//	out << " "
+//			<< widthify(prog_name + " -f source.pds ", this->name_width,
+//					alignment::LEFTJUST)
+//			<< widthify("check given program", 0, alignment::LEFTJUST);
 
 	for (size_t i = 0; i < types.size(); i++) {
 		out << types[i] << "\n";
@@ -338,9 +338,9 @@ void cmd_line::create_argument_list() {
 	this->add_option(get_opt_index(opt_type::CON), "-k", "--ctx-bound",
 			"the bound of contexts", "1");
 	this->add_option(get_opt_index(opt_type::CON), "-n", "--threads",
-			"the number of threads, used only for parameterized systems", "1");
+			"the number of threads (used only for parameterized systems)", "1");
 	this->add_switch(get_opt_index(opt_type::CON), "-x", "--explicit",
-			"an explicit forward search but probably non-terminate");
+			"an explicit forward search (may not terminate)");
 
 	/// other options
 	this->add_switch(get_opt_index(opt_type::OTHER), "-cmd", "--cmd-line",
