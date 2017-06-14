@@ -57,7 +57,7 @@ thread_config::thread_config(const pda_state& s, const pda_alpha& l) :
  */
 thread_config::thread_config(const thread_state& t) :
 		s(t.get_state()), w() {
-	w.push(t.get_symbol());
+	w.push(t.get_alpha());
 }
 /**
  * A constructor with a control state and an alphabet

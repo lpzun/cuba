@@ -389,7 +389,7 @@ inline ostream& operator<<(ostream& os, const symbolic_config& c) {
 /**
  * Defining the top of configuration, which is a global state
  */
-using config_top = global_state;
+using top_config = global_state;
 
 }
 /* namespace cuba */

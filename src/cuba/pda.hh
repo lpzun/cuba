@@ -166,7 +166,7 @@ public:
 	/**
 	 * @return the stack symbol of current thread state
 	 */
-	pda_alpha get_symbol() const {
+	pda_alpha get_alpha() const {
 		return l;
 	}
 
@@ -189,7 +189,7 @@ private:
  * @return ostream
  */
 inline ostream& operator<<(ostream& os, const thread_state& t) {
-	os << "(" << t.get_state() << "," << t.get_symbol() << ")";
+	os << "(" << t.get_state() << "," << t.get_alpha() << ")";
 	return os;
 }
 
@@ -201,7 +201,7 @@ inline ostream& operator<<(ostream& os, const thread_state& t) {
  */
 inline bool operator<(const thread_state& t1, const thread_state& t2) {
 	if (t1.get_state() == t2.get_state())
-		return t1.get_symbol() < t2.get_symbol();
+		return t1.get_alpha() < t2.get_alpha();
 	return t1.get_state() < t2.get_state();
 }
 
@@ -223,7 +223,7 @@ inline bool operator>(const thread_state& t1, const thread_state& t2) {
  */
 inline bool operator==(const thread_state& t1, const thread_state& t2) {
 	return (t1.get_state() == t2.get_state())
-			&& (t1.get_symbol() == t2.get_symbol());
+			&& (t1.get_alpha() == t2.get_alpha());
 }
 
 /**

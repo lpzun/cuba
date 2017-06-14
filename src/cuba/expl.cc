@@ -76,7 +76,7 @@ bool simulator::k_bounded_reachability(const size_k k_bound,
 	/// the set of reachable global configurations
 	vector<vector<antichain>> global_R(k_bound + 1,
 			vector<antichain>(thread_state::S));
-	vector<set<config_top>> topped_R(thread_state::S);
+	vector<set<top_config>> topped_R(thread_state::S);
 
 	/// step 3: the exploration procedure: it is based on BFS
 	while (!worklist.empty()) {
@@ -232,7 +232,7 @@ void simulator::marking(const pda_state& s, const pda_alpha& l) {
  * @param global_R
  * @return
  */
-config_top simulator::top_mapping(const global_config& tau) {
+top_config simulator::top_mapping(const global_config& tau) {
 	vector<pda_alpha> L(tau.get_stacks().size());
 	for (size_t i = 0; i < tau.get_stacks().size(); ++i) {
 		if (tau.get_stacks()[i].empty())
@@ -240,7 +240,7 @@ config_top simulator::top_mapping(const global_config& tau) {
 		else
 			L[i] = tau.get_stacks()[i].top();
 	}
-	return config_top(tau.get_state(), L);
+	return top_config(tau.get_state(), L);
 }
 
 /**
@@ -258,7 +258,7 @@ bool simulator::is_cyclic(const size_t tid) {
 
 	for (const auto& p : CPDA[tid].get_pda()) {
 		stack<pda_alpha> W;
-		W.push(p.first.get_symbol());
+		W.push(p.first.get_alpha());
 		if (!visit[p.first] && is_cyclic(tid, p.first, W, visit, trace)) {
 			return true;
 		}

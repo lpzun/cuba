@@ -87,7 +87,7 @@ vector<deque<symbolic_config>> CUBA::context_bounded_analysis(
 	/// We obtain this by computing the symbolic configurations.
 	vector<deque<symbolic_config>> global_R(k_bound + 1);
 	global_R[k] = {c_I};
-	vector<set<config_top>> topped_R(thread_state::S);
+	vector<set<top_config>> topped_R(thread_state::S);
 	cout << "In context " << k << ":" << endl;
 	top_mapping(global_R[k], topped_R);
 
@@ -541,7 +541,7 @@ store_automaton CUBA::anonymize_by_rename(const store_automaton& A,
  * @param topped_R
  */
 int CUBA::top_mapping(const deque<symbolic_config>& global_R,
-		vector<set<config_top>>& topped_R) {
+		vector<set<top_config>>& topped_R) {
 	int num_new_cbar = 0;
 	for (const auto& c : global_R) {
 		//cout << c << endl;
@@ -562,7 +562,7 @@ int CUBA::top_mapping(const deque<symbolic_config>& global_R,
  * @param tau
  * @return a set of configuration tops
  */
-vector<config_top> CUBA::top_mapping(const symbolic_config& tau) {
+vector<top_config> CUBA::top_mapping(const symbolic_config& tau) {
 	const auto q = tau.get_state();
 	vector<set<pda_alpha>> toppings(tau.get_automata().size());
 
@@ -574,7 +574,7 @@ vector<config_top> CUBA::top_mapping(const symbolic_config& tau) {
 
 	const auto& worklist = cross_product(toppings);
 
-	vector<config_top> tops;
+	vector<top_config> tops;
 	tops.reserve(worklist.size());
 	for (const auto& W : worklist) {
 		tops.emplace_back(q, W);

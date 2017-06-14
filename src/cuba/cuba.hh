@@ -68,8 +68,8 @@ private:
 
 	/// determine bar(R_k) = bar(R_{k+1})s
 	int top_mapping(const deque<symbolic_config>& global_R,
-			vector<set<config_top>>& topped_R);
-	vector<config_top> top_mapping(const symbolic_config& tau);
+			vector<set<top_config>>& topped_R);
+	vector<top_config> top_mapping(const symbolic_config& tau);
 	set<pda_alpha> top_mapping(const store_automaton& A, const pda_state q);
 	vector<vector<pda_alpha>> cross_product(const vector<set<pda_alpha>>& tops);
 };
@@ -106,7 +106,7 @@ private:
 	bool is_reachable(const global_config& tau, vector<vector<antichain>>& R);
 	void marking(const pda_state& s, const pda_alpha& l);
 
-	config_top top_mapping(const global_config& tau);
+	top_config top_mapping(const global_config& tau);
 
 	/// cycle detection
 	bool is_cyclic(const size_t tid);
@@ -155,6 +155,29 @@ private:
 
 };
 
-} /* namespace cuba */
+/////////////////////////////////////////////////////////////////////////
+/// PART 4. A preprocessor, overapproximate the set of reachable top
+/// configurations
+///
+/////////////////////////////////////////////////////////////////////////
+using finite_machine = map<vertex, deque<vertex>>;
+
+class processor {
+public:
+	processor(const top_config& c_I, const vector<finite_machine>& cfsm);
+	~processor();
+
+	vector<set<top_config>> over_approx_top_R();
+	vector<set<top_config>> project_lead_top_R();
+
+private:
+	top_config initl_c;
+	vector<finite_machine> cfsm;
+
+	vector<set<top_config>> standard_FWS();
+	deque<top_config> step(const top_config& c);
+};
+
+}/* namespace cuba */
 
 #endif /* CUBA_CUBA_HH_ */
