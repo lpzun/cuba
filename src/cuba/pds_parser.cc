@@ -14,55 +14,41 @@ namespace cuba {
  * @param filename
  */
 concurrent_pushdown_automata parser::parse_input_cpds(const string& filename) {
-	if (filename == "X")
-		throw cuba_runtime_error("Please assign the input file!");
-
-	/// original input file, possibly with comments
-	ifstream org_in(filename.c_str());
-	if (!org_in.good())
-		throw cuba_runtime_error("Input file does not exist!");
-	remove_comments(org_in, "/tmp/tmp.pds.no_comment", prop::COMMENT);
-	org_in.close();
-
-	ifstream new_in("/tmp/tmp.pds.no_comment");
-	/// read the set of control states
-	if (!new_in.good())
-		throw cuba_runtime_error(
-				"Something wrong when reading the input file!");
-
-	/// parse the set of control states: MUST be in the first line
-	new_in >> thread_state::S;
-	set<pda_state> states;
-	for (pda_state s = 0; s < thread_state::S; ++s) {
-		states.emplace(s);
-	}
-
-	vector<vector<string>> sCPDS;
-	string line;
-	while (std::getline(new_in, line)) {
-		if (line == "" || line.size() < 2) /// nothing in the line
-			continue;
-		if (line.at(0) == 'P')
-			sCPDS.emplace_back(vector<string>());
-		sCPDS.back().emplace_back(line);
-	}
-	new_in.close();
-
 	/// build concurrent pushdown automaton
 	concurrent_pushdown_automata CPDA;
-	concurrent_finite_machine CFSM;
-	for (auto pda : sCPDS) {
+	set<pda_state> states;
+	const auto& sCPDA = read_input_cpds(filename, states);
+	for (const auto& pda : sCPDA) {
 		CPDA.emplace_back(parse_input_pda(states, pda));
 	}
 	return CPDA;
 }
 
 /**
- *
+ * Read and parse CPDS from file and build a concurrent finite machine. This
+ * is used for context-insensitive over-approximation.
  * @param filename
  * @return concurrent finite machine
  */
 concurrent_finite_machine parser::parse_input_cfsm(const string& filename) {
+	/// build concurrent finite machine
+	concurrent_finite_machine CFSM;
+	set<pda_state> states;
+	const auto& sCPDA = read_input_cpds(filename, states);
+	for (auto pda : sCPDA) {
+		CFSM.emplace_back(parse_input_fsm(states, pda));
+		cout << "\n"; // delete ---------------------------
+	}
+	return CFSM;
+}
+
+/**
+ *
+ * @param filename
+ * @return
+ */
+vector<vector<string>> parser::read_input_cpds(const string& filename,
+		set<pda_state>& states) {
 	if (filename == "X")
 		throw cuba_runtime_error("Please assign the input file!");
 
@@ -81,7 +67,6 @@ concurrent_finite_machine parser::parse_input_cfsm(const string& filename) {
 
 	/// parse the set of control states: MUST be in the first line
 	new_in >> thread_state::S;
-	set<pda_state> states;
 	for (pda_state s = 0; s < thread_state::S; ++s) {
 		states.emplace(s);
 	}
@@ -96,18 +81,76 @@ concurrent_finite_machine parser::parse_input_cfsm(const string& filename) {
 		sCPDS.back().emplace_back(line);
 	}
 	new_in.close();
-
-	/// build concurrent pushdown automaton
-	concurrent_finite_machine CFSM;
-	for (auto pda : sCPDS) {
-		CFSM.emplace_back(parse_input_fsm(states, pda));
-		cout << "\n";
-	}
-	return CFSM;
+	return sCPDS;
 }
 
 /**
- *
+ * To parse the input PDS
+ * @param filename
+ */
+pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
+		const vector<string>& sPDA) {
+	if (sPDA.size() == 0)
+		return pushdown_automaton();
+	/// step 1: current PDA's stack symbols
+	set<pda_alpha> alphas;
+	{
+		istringstream iss(sPDA[0]);
+		string pda_mark;
+		pda_alpha start, end;
+		iss >> pda_mark >> start >> end;
+		if (pda_mark != "PDA")
+			throw cuba_runtime_error("PDA input format error!");
+		/// step 1.1: set up alphabet
+		for (auto l = start; l <= end; ++l) {
+			alphas.emplace(l);
+		}
+	}
+
+	/// step 2: current PDA's actions and adjacency list
+	vector<pda_action> actions;
+	adj_list PDA;
+	id_transition trans_id = 0;
+	for (uint i = 1; i < sPDA.size(); ++i) {
+		/// three types of transition:
+		///   PUSH: (s1, l1) -> (s2, l2l3)
+		///   POP : (s1, l1) -> (s2, )
+		///   OVERWRITE: (s1, l1) -> (s2, l2)
+		pda_state s1;  /// source state
+		pda_alpha l1;  /// source alpha
+		string sep;    /// separator ->
+		pda_state s2;  /// destination state
+		string l2, l3; /// destination alphabets. Note: using string here
+
+		istringstream iss(sPDA[i]);
+		iss >> s1 >> l1 >> sep >> s2 >> l2 >> l3;
+
+		/// source thread state
+		thread_state src(s1, l1);
+		/// destination thread configuration
+		pda_stack W; /// the stack of the destination thread configuration
+		if (l3 != "") { /// push operation
+			W.push(std::stoi(l3));
+			W.push(std::stoi(l2));
+			thread_config dst(s2, W);
+			actions.push_back(pda_action(src, dst, type_stack_operation::PUSH));
+		} else if (l2 != "") { /// overwrite operation
+			W.push(std::stoi(l2));
+			thread_config dst(s2, W);
+			actions.push_back(
+					pda_action(src, dst, type_stack_operation::OVERWRITE));
+		} else { /// pop operation
+			thread_config dst(s2, W);
+			actions.push_back(pda_action(src, dst, type_stack_operation::POP));
+		}
+
+		PDA[src].emplace_back(trans_id++); /// add transition id to src's map
+	}
+	return pushdown_automaton(states, alphas, actions, PDA);
+}
+
+/**
+ * Build a finite machine that is used for context-insensitive over-approximation.
  * @param states
  * @param sPDA
  * @return
@@ -147,9 +190,11 @@ finite_machine parser::parse_input_fsm(const set<pda_state>& states,
 		/// destination thread configuration
 		if (l3 != "") { /// push operation
 			pop_candidate.emplace(std::stoi(l3));
-			fsm[src].emplace_back(s2, std::stoi(l2));
+			thread_state dst(s2, std::stoi(l2));
+			fsm[src].emplace_back(src, dst, type_stack_operation::PUSH);
 		} else if (l2 != "") { /// overwrite operation
-			fsm[src].emplace_back(s2, std::stoi(l2));
+			thread_state dst(s2, std::stoi(l2));
+			fsm[src].emplace_back(src, dst, type_stack_operation::OVERWRITE);
 		} else { /// pop operation
 			pop_action_id.emplace_back(i);
 		}
@@ -164,8 +209,10 @@ finite_machine parser::parse_input_fsm(const set<pda_state>& states,
 		istringstream iss(sPDA[i]);
 		iss >> s1 >> l1 >> sep >> s2;
 		thread_state src(s1, l1);
-		for (const auto l : pop_candidate)
-			fsm[src].emplace_back(s2, l);
+		for (const auto l2 : pop_candidate) {
+			thread_state dst(s2, l2);
+			fsm[src].emplace_back(src, dst, type_stack_operation::POP);
+		}
 	}
 
 	for (const auto& p : fsm) {
@@ -174,71 +221,6 @@ finite_machine parser::parse_input_fsm(const set<pda_state>& states,
 		}
 	}
 	return fsm;
-}
-
-/**
- * To parse the input PDS
- * @param filename
- */
-pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
-		const vector<string>& sPDA) {
-	if (sPDA.size() == 0)
-		return pushdown_automaton();
-	/// step 1: current PDA's stack symbols
-	set<pda_alpha> alphas;
-	{
-		istringstream iss(sPDA[0]);
-		string pda_mark;
-		pda_alpha start, end;
-		iss >> pda_mark >> start >> end;
-		if (pda_mark != "PDA")
-			throw cuba_runtime_error("PDA input format error!");
-		/// step 1.1: set up alphabet
-		for (auto l = start; l <= end; ++l) {
-			alphas.emplace(l);
-		}
-	}
-
-	/// step 2: current PDA's actions and adjacency list
-	vector<pda_trans> actions;
-	adj_list PDA;
-	id_transition trans_id = 0;
-	for (uint i = 1; i < sPDA.size(); ++i) {
-		/// three types of transition:
-		///   PUSH: (s1, l1) -> (s2, l2l3)
-		///   POP : (s1, l1) -> (s2, )
-		///   OVERWRITE: (s1, l1) -> (s2, l2)
-		pda_state s1;  /// source state
-		pda_alpha l1;  /// source alpha
-		string sep;    /// separator ->
-		pda_state s2;  /// destination state
-		string l2, l3; /// destination alphabets. Note: using string here
-
-		istringstream iss(sPDA[i]);
-		iss >> s1 >> l1 >> sep >> s2 >> l2 >> l3;
-
-		/// source thread state
-		thread_state src(s1, l1);
-		/// destination thread configuration
-		pda_stack W; /// the stack of the destination thread configuration
-		if (l3 != "") { /// push operation
-			W.push(std::stoi(l3));
-			W.push(std::stoi(l2));
-			thread_config dst(s2, W);
-			actions.push_back(pda_trans(src, dst, type_stack_operation::PUSH));
-		} else if (l2 != "") { /// overwrite operation
-			W.push(std::stoi(l2));
-			thread_config dst(s2, W);
-			actions.push_back(
-					pda_trans(src, dst, type_stack_operation::OVERWRITE));
-		} else { /// pop operation
-			thread_config dst(s2, W);
-			actions.push_back(pda_trans(src, dst, type_stack_operation::POP));
-		}
-
-		PDA[src].emplace_back(trans_id++); /// add transition id to src's map
-	}
-	return pushdown_automaton(states, alphas, actions, PDA);
 }
 
 /**

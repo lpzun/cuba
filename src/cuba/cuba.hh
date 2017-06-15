@@ -80,7 +80,7 @@ private:
 /////////////////////////////////////////////////////////////////////////
 
 using antichain = deque<global_config>;
-using finite_machine = map<vertex, deque<vertex>>;
+using finite_machine = map<thread_state, deque<transition<thread_state, thread_state>>>;
 using concurrent_finite_machine = vector<finite_machine>;
 
 /**
@@ -137,7 +137,7 @@ private:
 	vector<finite_machine> cfsm;
 
 	vector<set<top_config>> standard_FWS();
-	deque<top_config> step(const top_config& c);
+	deque<top_config> step(const top_config& c, vector<set<top_config>>& approx_X);
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -157,6 +157,8 @@ public:
 	static type_synchronization parse_type_synchronization(const char& c);
 
 private:
+	static vector<vector<string>> read_input_cpds(const string& filename,
+			set<pda_state>& states);
 	static pushdown_automaton parse_input_pda(const set<pda_state>& states,
 			const vector<string>& sPDA);
 	static finite_machine parse_input_fsm(const set<pda_state>& states,
@@ -184,6 +186,7 @@ private:
 			const char& delim = prop::SHARED_LOCAL_DELIMITER);
 
 };
-}/* namespace cuba */
+}
+/* namespace cuba */
 
 #endif /* CUBA_CUBA_HH_ */

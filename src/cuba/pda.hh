@@ -478,7 +478,7 @@ using id_transition = uint;
 using vertex = thread_state;
 using edge = id_transition;
 using adj_list = map<vertex, deque<edge>>;
-using pda_trans = transition<vertex, thread_config>;
+using pda_action = transition<vertex, thread_config>;
 
 /**
  * Definition of Pushdown automaton
@@ -488,7 +488,7 @@ public:
 	pushdown_automaton();
 	pushdown_automaton(const set<pda_state>& states,
 			const set<pda_alpha>& alphas, ///
-			const vector<pda_trans>& actions, ///
+			const vector<pda_action>& actions, ///
 			const adj_list& PDA);
 	~pushdown_automaton();
 
@@ -500,7 +500,7 @@ public:
 		return alphas;
 	}
 
-	const vector<pda_trans>& get_actions() const {
+	const vector<pda_action>& get_actions() const {
 		return actions;
 	}
 
@@ -514,7 +514,7 @@ private:
 	/// the set of stack symbols
 	set<pda_alpha> alphas;
 	/// the set of actions
-	vector<pda_trans> actions;
+	vector<pda_action> actions;
 	/// store PDA in adjacency list
 	adj_list PDA;
 };

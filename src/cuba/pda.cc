@@ -29,7 +29,7 @@ pushdown_automaton::pushdown_automaton() :
  * @param PDA
  */
 pushdown_automaton::pushdown_automaton(const set<pda_state>& states,
-		const set<pda_alpha>& alphas, const vector<pda_trans>& actions,
+		const set<pda_alpha>& alphas, const vector<pda_action>& actions,
 		const adj_list& PDA) :
 		states(states), alphas(alphas), actions(actions), PDA(PDA) {
 }
