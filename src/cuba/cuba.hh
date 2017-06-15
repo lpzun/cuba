@@ -99,13 +99,15 @@ private:
 	concrete_config initl_c;
 	concrete_config final_c;
 	concurrent_pushdown_automata CPDA;
+	vector<set<top_config>> approx_X;
 	vector<vector<bool>> reachable_T;
-	concurrent_finite_machine CFSM;
 
 	bool k_bounded_reachability(const size_k k_bound,
 			const concrete_config& c_I);
-
 	antichain step(const global_config& tau, const size_k k_bound);
+
+	/// determine convergence, reachability of a target and so on
+	bool determine_k_convergence(const vector<vector<antichain>>& R);
 	bool is_reachable(const global_config& tau, vector<vector<antichain>>& R);
 	void marking(const pda_state& s, const pda_alpha& l);
 
@@ -137,7 +139,8 @@ private:
 	vector<finite_machine> cfsm;
 
 	vector<set<top_config>> standard_FWS();
-	deque<top_config> step(const top_config& c, vector<set<top_config>>& approx_X);
+	deque<top_config> step(const top_config& c,
+			vector<set<top_config>>& approx_X);
 };
 
 /////////////////////////////////////////////////////////////////////////

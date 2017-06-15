@@ -36,19 +36,20 @@ vector<set<top_config>> processor::over_approx_top_R() {
  */
 vector<set<top_config>> processor::standard_FWS() {
 	/// step 1: set up the data structures
-	/// 1.1  <approx_R>: the  overapproximation of the set of reachable
-	///      top configurations
-	vector<set<top_config>> approx_R(thread_state::S);
+	/// 1.1 <approx_R>: the overapproximation of the set of reachable
+	///     top configurations
+	vector<set<top_config>> approx_x(thread_state::S);
+	/// 1.2 <approx_R>: the overapproximation of the set of reachable
+	///     popped top configurations
 	vector<set<top_config>> approx_X(thread_state::S);
-	/// 1.2 <worklist>: a worklist
-	queue<top_config> worklist;
-	worklist.emplace(initl_c);
+	/// 1.3 <worklist>: a worklist
+	queue<top_config> worklist( { initl_c });
 
 	while (!worklist.empty()) {
 		const auto c = worklist.front();
 		worklist.pop();
 
-		const auto ret = approx_R[c.get_state()].emplace(c);
+		const auto& ret = approx_x[c.get_state()].emplace(c);
 		if (!ret.second)
 			continue;
 		const auto& successors = step(c, approx_X);
@@ -57,9 +58,9 @@ vector<set<top_config>> processor::standard_FWS() {
 		}
 	}
 
-	// delete------------
+	// delete-----------------------
 	cout << "Approximation Z:\n";
-	for (const auto& v : approx_R) {
+	for (const auto& v : approx_x) {
 		for (const auto& c : v)
 			cout << c << endl;
 	}
@@ -68,8 +69,8 @@ vector<set<top_config>> processor::standard_FWS() {
 		for (const auto& c : v)
 			cout << c << endl;
 	}
-	// delete------------
-	return approx_R;
+	// delete-----------------------
+	return approx_X;
 }
 
 /**

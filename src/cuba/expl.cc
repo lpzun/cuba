@@ -20,11 +20,12 @@ namespace cuba {
  */
 simulator::simulator(const string& initl, const string& final,
 		const string& filename) :
-		initl_c(0, 1), final_c(0, 1), CPDA(), reachable_T(), CFSM() {
+		initl_c(0, 1), final_c(0, 1), CPDA(), reachable_T() {
 	initl_c = parser::parse_input_cfg(initl);
 	final_c = parser::parse_input_cfg(final);
 	CPDA = parser::parse_input_cpds(filename);
-	CFSM = parser::parse_input_cfsm(filename);
+	processor proc(top_mapping(initl_c), parser::parse_input_cfsm(filename));
+	approx_X = proc.over_approx_top_R();
 }
 
 /**
@@ -50,8 +51,6 @@ void simulator::context_bounded_analysis(const size_k& k, const size_t& n) {
 	}
 	if (cycle)
 		return;
-	processor proc(top_mapping(initl_c), CFSM);
-	proc.over_approx_top_R();
 	const auto is_reachable = k_bounded_reachability(k, initl_c);
 	if (is_reachable) {
 		cout << final_c << " is reachable!" << endl;
@@ -174,13 +173,13 @@ antichain simulator::step(const global_config& tau, const size_k k_bound) {
 
 	/// step 2: iterate over all threads
 	for (uint tid = 0; tid < W.size(); ++tid) {
-		//cout << tid << "\\\\\\\\\\\\\\\\\\\\\\\\\n";
+		// cout << tid << "\\\\\\\\\\\\\\\\\\\\\\\\\n";
 		if (W[tid].empty() || (k == k_bound && tid != tau.get_thread_id())) {
 			continue;
 		}
 		/// step 2.1: set context switches
 		///           if context switch occurs, then k = k + 1;
-		auto _k = tid == tau.get_thread_id() ? k : k + 1;
+		auto _k = (tid == tau.get_thread_id() ? k : k + 1);
 		/// step 2.2: iterator over all successor of current thread state
 
 		//cout << q << "," << W[tid].top() << "\\\\\\\\\\\\\\\\\\\\\\\\\n";

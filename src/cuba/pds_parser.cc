@@ -37,7 +37,7 @@ concurrent_finite_machine parser::parse_input_cfsm(const string& filename) {
 	const auto& sCPDA = read_input_cpds(filename, states);
 	for (auto pda : sCPDA) {
 		CFSM.emplace_back(parse_input_fsm(states, pda));
-		cout << "\n"; // delete ---------------------------
+		// cout << "\n"; // delete ---------------------------
 	}
 	return CFSM;
 }
@@ -215,11 +215,12 @@ finite_machine parser::parse_input_fsm(const set<pda_state>& states,
 		}
 	}
 
-	for (const auto& p : fsm) {
-		for (const auto& dst : p.second) {
-			cout << p.first << "->" << dst << "\n";
-		}
-	}
+	// delete ------------------------------------
+//	for (const auto& p : fsm) {
+//		for (const auto& dst : p.second) {
+//			cout << p.first << "->" << dst << "\n";
+//		}
+//	}
 	return fsm;
 }
 
