@@ -78,7 +78,6 @@ bool simulator::k_bounded_reachability(const size_k k_bound,
 	/// the set of reachable global configurations
 	vector<vector<antichain>> global_R(k_bound + 1,
 			vector<antichain>(thread_state::S));
-	vector<set<top_config>> topped_R(thread_state::S);
 
 	/// step 3: the exploration procedure: it is based on BFS
 	while (!worklist.empty()) {
@@ -102,60 +101,7 @@ bool simulator::k_bounded_reachability(const size_k k_bound,
 		/// step 3.4: add current configuration to global_R set
 		global_R[tau.get_context_k()][tau.get_state()].emplace_back(tau);
 	}
-
-	cout << "======================================\n";
-	for (uint k = 0; k < global_R.size(); ++k) {
-		cout << "context " << k << "\n";
-		for (uint q = 0; q < global_R[q].size(); ++q) {
-			for (const auto& c : global_R[k][q]) {
-				cout << string(2, ' ') << c;
-				const auto& cbar = top_mapping(c);
-				//cout << c << " .... " << cbar << endl; // todo deleting -------------
-				const auto& ret = topped_R[c.get_state()].emplace(cbar);
-				if (ret.second)
-					cout << " | " << cbar;
-				cout << "\n";
-			}
-		}
-	}
-	cout << "======================================\n";
-	return false; /// return the number of reachable thread states
-}
-
-/**
- * This procedure is to determine whether there exists c \in R such that
- *  (1) c == tau;
- *  (2) c.id == tau.id /\ c.s == c.s /\ c.W == tau.W /\ c.k < tau.k.
- * It returns true if any of above conditions satisfies. Otherwise, it returns
- * false.
- *
- * One special case is that: there exists c \in explored such that
- *    c.id == tau.id /\ c.s == tau.s /\ c.W == tau.W /\ c.k > tau.k,
- * then, the procedure replaces c by tau except returning false.
- *
- * @param tau
- * @param R
- * @return bool
- */
-bool simulator::is_reachable(const global_config& tau,
-		vector<vector<antichain>>& R) {
-	bool flag = false;
-	for (uint k = 0; k <= tau.get_context_k(); k++) {
-		for (const auto& c : R[k][tau.get_state()]) {
-			if (c == tau) {
-				flag = true;
-				break;
-			}
-		}
-	}
-
-	for (uint k = tau.get_context_k() + 1; k < R.size(); ++k) {
-		for (auto it = R[k][tau.get_state()].begin();
-				it != R[k][tau.get_state()].end(); ++it) {
-			R[k][tau.get_state()].erase(it);
-		}
-	}
-	return flag;
+	return determine_convergence(global_R); /// return the number of reachable thread states
 }
 
 /**
@@ -217,6 +163,96 @@ antichain simulator::step(const global_config& tau, const size_k k_bound) {
 		}
 	}
 	return successors; /// the set of successors of tau
+}
+
+/**
+ * Determine whether reaching a convergence in k contexts
+ * @param R
+ * @return
+ */
+bool simulator::determine_convergence(
+		const vector<vector<antichain>>& global_R) {
+	bool convergent = false;
+	vector<set<top_config>> topped_R(thread_state::S);
+	cout << "======================================\n";
+	for (uint k = 0; k < global_R.size(); ++k) {
+		cout << "context " << k << "\n";
+		/// the number of new reachable top configurations
+		uint cnt_new_top_cfg = 0;
+		for (uint q = 0; q < global_R[k].size(); ++q) {
+			for (const auto& c : global_R[k][q]) {
+				cout << string(2, ' ') << c;
+				const auto& top_c = top_mapping(c);
+				// cout << c << " .... " << cbar << endl; // todo deleting -------------
+				const auto& ret = topped_R[c.get_state()].emplace(top_c);
+				if (ret.second) {
+					cout << " | " << top_c;
+					/// find a new top configuration
+					++cnt_new_top_cfg;
+					/// updating approx_X
+					auto ifind = approx_X[top_c.get_state()].find(top_c);
+					if (ifind != approx_X[top_c.get_state()].end()) {
+						approx_X[top_c.get_state()].erase(ifind);
+					}
+				}
+				cout << "\n";
+			}
+		}
+		if (cnt_new_top_cfg == 0 && !convergent && is_convergent()) {
+			cout << "=> OS3 converges at k = " << k - 1 << "\n";
+			convergent = true;
+		}
+	}
+	cout << "======================================" << endl;
+	return convergent;
+}
+
+/**
+ *
+ * @return
+ */
+bool simulator::is_convergent() {
+	for (const auto& s : approx_X) {
+		if (!s.empty())
+			return false;
+	}
+	return true;
+}
+
+/**
+ * This procedure is to determine whether there exists c \in R such that
+ *  (1) c == tau;
+ *  (2) c.id == tau.id /\ c.s == c.s /\ c.W == tau.W /\ c.k < tau.k.
+ * It returns true if any of above conditions satisfies. Otherwise, it returns
+ * false.
+ *
+ * One special case is that: there exists c \in explored such that
+ *    c.id == tau.id /\ c.s == tau.s /\ c.W == tau.W /\ c.k > tau.k,
+ * then, the procedure replaces c by tau except returning false.
+ *
+ * @param tau
+ * @param R
+ * @return bool
+ */
+bool simulator::is_reachable(const global_config& tau,
+		vector<vector<antichain>>& R) {
+	bool flag = false;
+	for (uint k = 0; k <= tau.get_context_k(); k++) {
+		for (const auto& c : R[k][tau.get_state()]) {
+			if (c == tau) {
+				flag = true;
+				break;
+			}
+		}
+	}
+
+	for (uint k = tau.get_context_k() + 1; k < R.size(); ++k) {
+		for (auto it = R[k][tau.get_state()].begin();
+				it != R[k][tau.get_state()].end(); ++it) {
+			R[k][tau.get_state()].erase(it);
+		}
+	}
+	return flag;
 }
 
 /**

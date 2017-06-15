@@ -61,13 +61,21 @@ vector<set<top_config>> processor::standard_FWS() {
 	// delete-----------------------
 	cout << "Approximation Z:\n";
 	for (const auto& v : approx_x) {
+		if (v.size() == 0)
+			continue;
+		cout << "  ";
 		for (const auto& c : v)
-			cout << c << endl;
+			cout << c << " ";
+		cout << "\n";
 	}
 	cout << "Approximation X:\n";
 	for (const auto& v : approx_X) {
+		if (v.size() == 0)
+			continue;
+		cout << "  ";
 		for (const auto& c : v)
-			cout << c << endl;
+			cout << c << " ";
+		cout << "\n";
 	}
 	// delete-----------------------
 	return approx_X;

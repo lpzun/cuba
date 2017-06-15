@@ -107,7 +107,8 @@ private:
 	antichain step(const global_config& tau, const size_k k_bound);
 
 	/// determine convergence, reachability of a target and so on
-	bool determine_k_convergence(const vector<vector<antichain>>& R);
+	bool determine_convergence(const vector<vector<antichain>>& R);
+	bool is_convergent();
 	bool is_reachable(const global_config& tau, vector<vector<antichain>>& R);
 	void marking(const pda_state& s, const pda_alpha& l);
 
