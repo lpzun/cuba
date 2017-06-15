@@ -52,7 +52,7 @@ void simulator::context_bounded_analysis(const size_k& k, const size_t& n) {
 	if (cycle)
 		return;
 	const auto is_reachable = k_bounded_reachability(k, initl_c);
-	if (is_reachable) {
+	if (prop::OPT_PROB_REACHABILITY && is_reachable) {
 		cout << final_c << " is reachable!" << endl;
 	}
 }
