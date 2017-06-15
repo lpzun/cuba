@@ -20,10 +20,11 @@ namespace cuba {
  */
 simulator::simulator(const string& initl, const string& final,
 		const string& filename) :
-		initl_c(0, 1), final_c(0, 1), CPDA(), reachable_T() {
+		initl_c(0, 1), final_c(0, 1), CPDA(), reachable_T(), CFSM() {
 	initl_c = parser::parse_input_cfg(initl);
 	final_c = parser::parse_input_cfg(final);
 	CPDA = parser::parse_input_cpds(filename);
+	CFSM = parser::parse_input_cfsm(filename);
 }
 
 /**
@@ -49,6 +50,8 @@ void simulator::context_bounded_analysis(const size_k& k, const size_t& n) {
 	}
 	if (cycle)
 		return;
+	processor proc(top_mapping(initl_c), CFSM);
+	proc.over_approx_top_R();
 	const auto is_reachable = k_bounded_reachability(k, initl_c);
 	if (is_reachable) {
 		cout << final_c << " is reachable!" << endl;
@@ -229,10 +232,26 @@ void simulator::marking(const pda_state& s, const pda_alpha& l) {
 
 /**
  * Obtain the top of configuration
- * @param global_R
+ * @param tau
  * @return
  */
 top_config simulator::top_mapping(const global_config& tau) {
+	vector<pda_alpha> L(tau.get_stacks().size());
+	for (size_t i = 0; i < tau.get_stacks().size(); ++i) {
+		if (tau.get_stacks()[i].empty())
+			L[i] = alphabet::EPSILON;
+		else
+			L[i] = tau.get_stacks()[i].top();
+	}
+	return top_config(tau.get_state(), L);
+}
+
+/**
+ * Obtain the top of configuration
+ * @param tau
+ * @return
+ */
+top_config simulator::top_mapping(const concrete_config& tau) {
 	vector<pda_alpha> L(tau.get_stacks().size());
 	for (size_t i = 0; i < tau.get_stacks().size(); ++i) {
 		if (tau.get_stacks()[i].empty())

@@ -50,10 +50,130 @@ concurrent_pushdown_automata parser::parse_input_cpds(const string& filename) {
 
 	/// build concurrent pushdown automaton
 	concurrent_pushdown_automata CPDA;
+	concurrent_finite_machine CFSM;
 	for (auto pda : sCPDS) {
 		CPDA.emplace_back(parse_input_pda(states, pda));
 	}
 	return CPDA;
+}
+
+/**
+ *
+ * @param filename
+ * @return concurrent finite machine
+ */
+concurrent_finite_machine parser::parse_input_cfsm(const string& filename) {
+	if (filename == "X")
+		throw cuba_runtime_error("Please assign the input file!");
+
+	/// original input file, possibly with comments
+	ifstream org_in(filename.c_str());
+	if (!org_in.good())
+		throw cuba_runtime_error("Input file does not exist!");
+	remove_comments(org_in, "/tmp/tmp.pds.no_comment", prop::COMMENT);
+	org_in.close();
+
+	ifstream new_in("/tmp/tmp.pds.no_comment");
+	/// read the set of control states
+	if (!new_in.good())
+		throw cuba_runtime_error(
+				"Something wrong when reading the input file!");
+
+	/// parse the set of control states: MUST be in the first line
+	new_in >> thread_state::S;
+	set<pda_state> states;
+	for (pda_state s = 0; s < thread_state::S; ++s) {
+		states.emplace(s);
+	}
+
+	vector<vector<string>> sCPDS;
+	string line;
+	while (std::getline(new_in, line)) {
+		if (line == "" || line.size() < 2) /// nothing in the line
+			continue;
+		if (line.at(0) == 'P')
+			sCPDS.emplace_back(vector<string>());
+		sCPDS.back().emplace_back(line);
+	}
+	new_in.close();
+
+	/// build concurrent pushdown automaton
+	concurrent_finite_machine CFSM;
+	for (auto pda : sCPDS) {
+		CFSM.emplace_back(parse_input_fsm(states, pda));
+		cout << "\n";
+	}
+	return CFSM;
+}
+
+/**
+ *
+ * @param states
+ * @param sPDA
+ * @return
+ */
+finite_machine parser::parse_input_fsm(const set<pda_state>& states,
+		const vector<string>& sPDA) {
+	if (sPDA.size() == 0)
+		return finite_machine();
+	{
+		istringstream iss(sPDA[0]);
+		string pda_mark;
+		pda_alpha start, end;
+		iss >> pda_mark >> start >> end;
+		if (pda_mark != "PDA")
+			throw cuba_runtime_error("PDA input format error!");
+	}
+	set<pda_alpha> pop_candidate;
+	deque<uint> pop_action_id;
+	pop_candidate.emplace(alphabet::EPSILON);
+	finite_machine fsm;
+	for (uint i = 1; i < sPDA.size(); ++i) {
+		/// three types of transition:
+		///   PUSH: (s1, l1) -> (s2, l2l3)
+		///   POP : (s1, l1) -> (s2, )
+		///   OVERWRITE: (s1, l1) -> (s2, l2)
+		pda_state s1;  /// source state
+		pda_alpha l1;  /// source alpha
+		string sep;    /// separator ->
+		pda_state s2;  /// destination state
+		string l2, l3; /// destination alphabets. Note: using string here
+
+		istringstream iss(sPDA[i]);
+		iss >> s1 >> l1 >> sep >> s2 >> l2 >> l3;
+
+		/// source thread state
+		thread_state src(s1, l1);
+		/// destination thread configuration
+		if (l3 != "") { /// push operation
+			pop_candidate.emplace(std::stoi(l3));
+			fsm[src].emplace_back(s2, std::stoi(l2));
+		} else if (l2 != "") { /// overwrite operation
+			fsm[src].emplace_back(s2, std::stoi(l2));
+		} else { /// pop operation
+			pop_action_id.emplace_back(i);
+		}
+	}
+
+	for (const auto i : pop_action_id) {
+		pda_state s1;  /// source state
+		pda_alpha l1;  /// source alpha
+		string sep;    /// separator ->
+		pda_state s2;  /// destination state
+
+		istringstream iss(sPDA[i]);
+		iss >> s1 >> l1 >> sep >> s2;
+		thread_state src(s1, l1);
+		for (const auto l : pop_candidate)
+			fsm[src].emplace_back(s2, l);
+	}
+
+	for (const auto& p : fsm) {
+		for (const auto& dst : p.second) {
+			cout << p.first << "->" << dst << "\n";
+		}
+	}
+	return fsm;
 }
 
 /**

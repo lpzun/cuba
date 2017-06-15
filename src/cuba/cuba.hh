@@ -80,6 +80,8 @@ private:
 /////////////////////////////////////////////////////////////////////////
 
 using antichain = deque<global_config>;
+using finite_machine = map<vertex, deque<vertex>>;
+using concurrent_finite_machine = vector<finite_machine>;
 
 /**
  * The class of explore:
@@ -98,6 +100,7 @@ private:
 	concrete_config final_c;
 	concurrent_pushdown_automata CPDA;
 	vector<vector<bool>> reachable_T;
+	concurrent_finite_machine CFSM;
 
 	bool k_bounded_reachability(const size_k k_bound,
 			const concrete_config& c_I);
@@ -107,6 +110,7 @@ private:
 	void marking(const pda_state& s, const pda_alpha& l);
 
 	top_config top_mapping(const global_config& tau);
+	top_config top_mapping(const concrete_config& tau);
 
 	/// cycle detection
 	bool is_cyclic(const size_t tid);
@@ -115,13 +119,37 @@ private:
 };
 
 /////////////////////////////////////////////////////////////////////////
-/// PART 3. The following are the utilities for PDS file parser.
+/// PART 3. A preprocessor, overapproximate the set of reachable top
+/// configurations
+///
+/////////////////////////////////////////////////////////////////////////
+
+class processor {
+public:
+	processor(const top_config& c_I, const concurrent_finite_machine& cfsm);
+	~processor();
+
+	vector<set<top_config>> over_approx_top_R();
+	vector<set<top_config>> project_lead_top_R();
+
+private:
+	top_config initl_c;
+	vector<finite_machine> cfsm;
+
+	vector<set<top_config>> standard_FWS();
+	deque<top_config> step(const top_config& c);
+};
+
+/////////////////////////////////////////////////////////////////////////
+/// PART 4. The following are the utilities for PDS file parser.
 ///
 /////////////////////////////////////////////////////////////////////////
 class parser {
 public:
 	static concurrent_pushdown_automata parse_input_cpds(
 			const string& filename);
+
+	static concurrent_finite_machine parse_input_cfsm(const string& filename);
 
 	static concrete_config parse_input_cfg(const string& s);
 
@@ -130,6 +158,8 @@ public:
 
 private:
 	static pushdown_automaton parse_input_pda(const set<pda_state>& states,
+			const vector<string>& sPDA);
+	static finite_machine parse_input_fsm(const set<pda_state>& states,
 			const vector<string>& sPDA);
 
 	static void remove_comments(istream& in, ostream& out,
@@ -154,30 +184,6 @@ private:
 			const char& delim = prop::SHARED_LOCAL_DELIMITER);
 
 };
-
-/////////////////////////////////////////////////////////////////////////
-/// PART 4. A preprocessor, overapproximate the set of reachable top
-/// configurations
-///
-/////////////////////////////////////////////////////////////////////////
-using finite_machine = map<vertex, deque<vertex>>;
-
-class processor {
-public:
-	processor(const top_config& c_I, const vector<finite_machine>& cfsm);
-	~processor();
-
-	vector<set<top_config>> over_approx_top_R();
-	vector<set<top_config>> project_lead_top_R();
-
-private:
-	top_config initl_c;
-	vector<finite_machine> cfsm;
-
-	vector<set<top_config>> standard_FWS();
-	deque<top_config> step(const top_config& c);
-};
-
 }/* namespace cuba */
 
 #endif /* CUBA_CUBA_HH_ */

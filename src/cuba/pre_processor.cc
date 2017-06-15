@@ -14,7 +14,6 @@ namespace cuba {
  */
 processor::processor(const top_config& c_I, const vector<finite_machine>& cfsm) :
 		initl_c(c_I), cfsm(cfsm) {
-
 }
 
 /**
@@ -22,6 +21,10 @@ processor::processor(const top_config& c_I, const vector<finite_machine>& cfsm) 
  */
 processor::~processor() {
 
+}
+
+vector<set<top_config>> processor::over_approx_top_R() {
+	return standard_FWS();
 }
 
 /**
@@ -34,7 +37,7 @@ vector<set<top_config>> processor::standard_FWS() {
 	/// step 1: set up the data structures
 	/// 1.1  <approx_R>: the  overapproximation of the set of reachable
 	///      top configurations
-	vector<set<top_config>> approx_R(cfsm.size());
+	vector<set<top_config>> approx_R(thread_state::S);
 	/// 1.2 <worklist>: a worklist
 	queue<top_config> worklist;
 	worklist.emplace(initl_c);
@@ -50,6 +53,12 @@ vector<set<top_config>> processor::standard_FWS() {
 		for (const auto& _c : successors) {
 			worklist.emplace(_c);
 		}
+	}
+
+	// delete------------
+	for (const auto& v : approx_R) {
+		for (const auto& c : v)
+			cout << c << endl;
 	}
 	return approx_R;
 }

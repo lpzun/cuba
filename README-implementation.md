@@ -25,3 +25,5 @@ Here is a patch for some textual change I would make in the help:
  	/// other options
  	this->add_switch(get_opt_index(opt_type::OTHER), "-cmd", "--cmd-line",
 ---------------------------------------------------------------------------
+
+A segementation fault occurs when k = 1: need to fix it.
