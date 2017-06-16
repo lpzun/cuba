@@ -325,7 +325,8 @@ void cmd_line::create_argument_list() {
 	this->add_option(get_opt_index(opt_type::PROB), "-m", "--mode",
 			(string("input program mode (default = C):\n") //
 			+ string(27, ' ') + " \"S\": sequential mode\n" //
-					+ string(27, ' ') + " \"C\": concurrent mode" //
+					+ string(27, ' ') + " \"C\": concurrent mode\n" //
+					+ string(27, ' ') + " \"O\": overapproximation mode" //
 			).c_str(), "");
 	this->add_switch(get_opt_index(opt_type::PROB), "-r", "--reachability",
 			"check the reachability of the given target");

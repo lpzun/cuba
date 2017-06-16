@@ -113,7 +113,6 @@ private:
 	void marking(const pda_state& s, const pda_alpha& l);
 
 	top_config top_mapping(const global_config& tau);
-	top_config top_mapping(const concrete_config& tau);
 
 	/// cycle detection
 	bool is_cyclic(const size_t tid);
@@ -129,19 +128,21 @@ private:
 
 class processor {
 public:
-	processor(const top_config& c_I, const concurrent_finite_machine& cfsm);
+	processor(const string& initl, const string& final, const string& filename);
+	processor(const concrete_config& initl, const string& filename);
 	~processor();
 
 	vector<set<top_config>> over_approx_top_R();
-	vector<set<top_config>> project_lead_top_R();
 
 private:
 	top_config initl_c;
+	top_config final_c;
 	vector<finite_machine> cfsm;
 
 	vector<set<top_config>> standard_FWS();
 	deque<top_config> step(const top_config& c,
 			vector<set<top_config>>& approx_X);
+	top_config top_mapping(const concrete_config& tau);
 };
 
 /////////////////////////////////////////////////////////////////////////

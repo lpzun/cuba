@@ -64,7 +64,12 @@ int main(const int argc, const char * const * const argv) {
 		prop::OPT_PRINT_ALL = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--all");
 
-		if (mode == "S") {
+		if (mode == "O") {
+			cout << "Overapproximation mode\n";
+			cout << filename << " " << initl << "\n";
+			processor proc(initl, final, filename);
+			proc.over_approx_top_R();
+		} else if (mode == "S") {
 			cout << "sequential mode\n";
 			cout << filename << " " << initl << " " << final << "\n";
 			cout << "sequential computation is not set up yet! \n";

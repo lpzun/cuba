@@ -24,7 +24,9 @@ simulator::simulator(const string& initl, const string& final,
 	initl_c = parser::parse_input_cfg(initl);
 	final_c = parser::parse_input_cfg(final);
 	CPDA = parser::parse_input_cpds(filename);
-	processor proc(top_mapping(initl_c), parser::parse_input_cfsm(filename));
+
+	/// set up overapproximation of reachable top configurations
+	processor proc(initl_c, filename);
 	approx_X = proc.over_approx_top_R();
 }
 
@@ -271,22 +273,6 @@ void simulator::marking(const pda_state& s, const pda_alpha& l) {
  * @return
  */
 top_config simulator::top_mapping(const global_config& tau) {
-	vector<pda_alpha> L(tau.get_stacks().size());
-	for (size_t i = 0; i < tau.get_stacks().size(); ++i) {
-		if (tau.get_stacks()[i].empty())
-			L[i] = alphabet::EPSILON;
-		else
-			L[i] = tau.get_stacks()[i].top();
-	}
-	return top_config(tau.get_state(), L);
-}
-
-/**
- * Obtain the top of configuration
- * @param tau
- * @return
- */
-top_config simulator::top_mapping(const concrete_config& tau) {
 	vector<pda_alpha> L(tau.get_stacks().size());
 	for (size_t i = 0; i < tau.get_stacks().size(); ++i) {
 		if (tau.get_stacks()[i].empty())

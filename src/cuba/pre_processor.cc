@@ -12,9 +12,23 @@ namespace cuba {
  * @param c_I : an initial top configuration
  * @param cfsm: concurrent finite machine
  */
-processor::processor(const top_config& c_I,
-		const concurrent_finite_machine& cfsm) :
-		initl_c(c_I), cfsm(cfsm) {
+processor::processor(const string& initl, const string& final,
+		const string& filename) :
+		initl_c(0, 1), final_c(0, 1), cfsm() {
+	initl_c = top_mapping(parser::parse_input_cfg(initl));
+	final_c = top_mapping(parser::parse_input_cfg(final));
+	cfsm = parser::parse_input_cfsm(filename);
+}
+
+/**
+ *
+ * @param initl
+ * @param final
+ * @param filename
+ */
+processor::processor(const concrete_config& initl, const string& filename) :
+		initl_c(top_mapping(initl)), final_c(0, 1), cfsm() {
+	cfsm = parser::parse_input_cfsm(filename);
 }
 
 /**
@@ -105,6 +119,22 @@ deque<top_config> processor::step(const top_config& c,
 		}
 	}
 	return successors;
+}
+
+/**
+ * Obtain the top of configuration
+ * @param tau
+ * @return
+ */
+top_config processor::top_mapping(const concrete_config& tau) {
+	vector<pda_alpha> L(tau.get_stacks().size());
+	for (size_t i = 0; i < tau.get_stacks().size(); ++i) {
+		if (tau.get_stacks()[i].empty())
+			L[i] = alphabet::EPSILON;
+		else
+			L[i] = tau.get_stacks()[i].top();
+	}
+	return top_config(tau.get_state(), L);
 }
 
 } /* namespace cuba */
