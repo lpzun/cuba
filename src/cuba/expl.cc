@@ -5,7 +5,7 @@
  * @author: lpzun
  */
 
-#include "cuba.hh"
+#include <cuba.hh>
 
 namespace cuba {
 
@@ -18,7 +18,7 @@ namespace cuba {
  * @param Q: active control states
  * @param R: active transitions
  */
-simulator::simulator(const string& initl, const string& final,
+explicit_cuba::explicit_cuba(const string& initl, const string& final,
 		const string& filename) :
 		initl_c(0, 1), final_c(0, 1), CPDA(), reachable_T() {
 	initl_c = parser::parse_input_cfg(initl);
@@ -33,7 +33,7 @@ simulator::simulator(const string& initl, const string& final,
 /**
  * destructor
  */
-simulator::~simulator() {
+explicit_cuba::~explicit_cuba() {
 
 }
 
@@ -42,7 +42,7 @@ simulator::~simulator() {
  * @param n: the number of threads
  * @param k: the number of context switches
  */
-void simulator::context_bounded_analysis(const size_k& k, const size_t& n) {
+void explicit_cuba::context_bounded_analysis(const size_k& k, const size_t& n) {
 	bool cycle = false;
 	for (size_t tid = 0; tid < CPDA.size(); ++tid) {
 		if (is_cyclic(tid)) {
@@ -66,7 +66,7 @@ void simulator::context_bounded_analysis(const size_k& k, const size_t& n) {
  * @param k: the upper bound of context switches
  * @return the number of reachable thread/global states
  */
-bool simulator::k_bounded_reachability(const size_k k_bound,
+bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		const concrete_config& c_I) {
 	/// step 1: build the initial  global configuration
 	///         Here we build the set of initial stacks
@@ -111,7 +111,7 @@ bool simulator::k_bounded_reachability(const size_k k_bound,
  * @param tau: a global configuration
  * @return a list of successors, aka. global configurations
  */
-antichain simulator::step(const global_config& tau, const size_k k_bound) {
+antichain explicit_cuba::step(const global_config& tau, const size_k k_bound) {
 	antichain successors;
 	const auto& k = tau.get_context_k(); /// the context switches to tau
 
@@ -172,7 +172,7 @@ antichain simulator::step(const global_config& tau, const size_k k_bound) {
  * @param R
  * @return
  */
-bool simulator::determine_convergence(
+bool explicit_cuba::determine_convergence(
 		const vector<vector<antichain>>& global_R) {
 	bool convergent = false;
 	vector<set<top_config>> topped_R(thread_state::S);
@@ -213,7 +213,7 @@ bool simulator::determine_convergence(
  *
  * @return
  */
-bool simulator::is_convergent() {
+bool explicit_cuba::is_convergent() {
 	for (const auto& s : approx_X) {
 		if (!s.empty())
 			return false;
@@ -236,7 +236,7 @@ bool simulator::is_convergent() {
  * @param R
  * @return bool
  */
-bool simulator::is_reachable(const global_config& tau,
+bool explicit_cuba::is_reachable(const global_config& tau,
 		vector<vector<antichain>>& R) {
 	bool flag = false;
 	for (uint k = 0; k <= tau.get_context_k(); k++) {
@@ -262,7 +262,7 @@ bool simulator::is_reachable(const global_config& tau,
  * @param s
  * @param l
  */
-void simulator::marking(const pda_state& s, const pda_alpha& l) {
+void explicit_cuba::marking(const pda_state& s, const pda_alpha& l) {
 	if (!reachable_T[s][l])
 		reachable_T[s][l] = true;
 }
@@ -272,7 +272,7 @@ void simulator::marking(const pda_state& s, const pda_alpha& l) {
  * @param tau
  * @return
  */
-top_config simulator::top_mapping(const global_config& tau) {
+top_config explicit_cuba::top_mapping(const global_config& tau) {
 	vector<pda_alpha> L(tau.get_stacks().size());
 	for (size_t i = 0; i < tau.get_stacks().size(); ++i) {
 		if (tau.get_stacks()[i].empty())
@@ -288,7 +288,7 @@ top_config simulator::top_mapping(const global_config& tau) {
  * @param tid
  * @return bool
  */
-bool simulator::is_cyclic(const size_t tid) {
+bool explicit_cuba::is_cyclic(const size_t tid) {
 	map<vertex, bool> visit;
 	map<vertex, bool> trace;
 	for (const auto& p : CPDA[tid].get_pda()) {
@@ -314,7 +314,7 @@ bool simulator::is_cyclic(const size_t tid) {
  * @param trace
  * @return
  */
-bool simulator::is_cyclic(const size_t tid, const thread_state& s,
+bool explicit_cuba::is_cyclic(const size_t tid, const thread_state& s,
 		stack<pda_alpha>& W, map<thread_state, bool>& visit,
 		map<thread_state, bool>& trace) {
 	visit[s] = true;

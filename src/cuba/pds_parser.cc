@@ -5,7 +5,7 @@
  * @author: Peizun Liu
  */
 
-#include "cuba.hh"
+#include <cuba.hh>
 
 namespace cuba {
 
@@ -37,7 +37,6 @@ concurrent_finite_machine parser::parse_input_cfsm(const string& filename) {
 	const auto& sCPDA = read_input_cpds(filename, states);
 	for (auto pda : sCPDA) {
 		CFSM.emplace_back(parse_input_fsm(states, pda));
-		// cout << "\n"; // delete ---------------------------
 	}
 	return CFSM;
 }
@@ -153,7 +152,7 @@ pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
  * Build a finite machine that is used for context-insensitive over-approximation.
  * @param states
  * @param sPDA
- * @return
+ * @return a finite machine
  */
 finite_machine parser::parse_input_fsm(const set<pda_state>& states,
 		const vector<string>& sPDA) {
@@ -167,8 +166,9 @@ finite_machine parser::parse_input_fsm(const set<pda_state>& states,
 		if (pda_mark != "PDA")
 			throw cuba_runtime_error("PDA input format error!");
 	}
-	set<pda_alpha> pop_candidate;
-	deque<uint> pop_action_id;
+	set<pda_alpha> pop_candidate; /// collect all after-pop symbols
+	deque<uint> pop_action_id; /// collect pop action ids
+
 	pop_candidate.emplace(alphabet::EPSILON);
 	finite_machine fsm;
 	for (uint i = 1; i < sPDA.size(); ++i) {

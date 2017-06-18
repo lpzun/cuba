@@ -4,7 +4,7 @@
  * @date  : Jun 13, 2017
  * @author: Peizun Liu
  */
-#include "cuba.hh"
+#include <cuba.hh>
 
 namespace cuba {
 /**

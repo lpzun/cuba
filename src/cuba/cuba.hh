@@ -19,10 +19,11 @@ namespace cuba {
 /// PART 1. The following are the declarations for context-unbounded
 /// analysis.
 /////////////////////////////////////////////////////////////////////////
-class CUBA {
+class symbolic_cuba {
 public:
-	CUBA(const string& initl, const string& final, const string& filename);
-	~CUBA();
+	symbolic_cuba(const string& initl, const string& final,
+			const string& filename);
+	~symbolic_cuba();
 
 	void context_bounded_analysis(const size_k& k, const size_t& n = 0);
 
@@ -87,11 +88,12 @@ using concurrent_finite_machine = vector<finite_machine>;
  * The class of explore:
  *     define a tool like explore in CAV'10 dynamic cutoff tool
  */
-class simulator {
+class explicit_cuba {
 public:
-	simulator(const string& initl, const string& final, const string& filename);
+	explicit_cuba(const string& initl, const string& final,
+			const string& filename);
 
-	~simulator();
+	~explicit_cuba();
 
 	void context_bounded_analysis(const size_k& k, const size_t& n = 0);
 private:

@@ -5,7 +5,7 @@
  * @author: lpzun
  */
 
-#include "cuba.hh"
+#include <cuba.hh>
 
 namespace cuba {
 
@@ -15,7 +15,8 @@ namespace cuba {
  * @param initl
  * @param final
  */
-CUBA::CUBA(const string& initl, const string& final, const string& filename) :
+symbolic_cuba::symbolic_cuba(const string& initl, const string& final,
+		const string& filename) :
 		initl_c(0, 1), final_c(0, 1), CPDA() {
 	initl_c = parser::parse_input_cfg(initl);
 	final_c = parser::parse_input_cfg(final);
@@ -25,7 +26,7 @@ CUBA::CUBA(const string& initl, const string& final, const string& filename) :
 /**
  * destructor
  */
-CUBA::~CUBA() {
+symbolic_cuba::~symbolic_cuba() {
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -38,7 +39,8 @@ CUBA::~CUBA() {
  * @param n: the number of threads
  * @param k: the number of context switches
  */
-void CUBA::context_bounded_analysis(const size_k& k_bound, const size_t& n) {
+void symbolic_cuba::context_bounded_analysis(const size_k& k_bound,
+		const size_t& n) {
 	vector<store_automaton> W;
 	for (uint i = 0; i < CPDA.size(); ++i) {
 		auto fsa = create_init_automaton(i);
@@ -70,7 +72,7 @@ void CUBA::context_bounded_analysis(const size_k& k_bound, const size_t& n) {
  * @param c_I: the initial symbolic configuration
  * @return a set of reachable symbolic configuration
  */
-vector<deque<symbolic_config>> CUBA::context_bounded_analysis(
+vector<deque<symbolic_config>> symbolic_cuba::context_bounded_analysis(
 		const size_k k_bound, const symbolic_config& c_I) {
 	/// Step 1: declare the data structures used in this procedure:
 	///
@@ -135,7 +137,7 @@ vector<deque<symbolic_config>> CUBA::context_bounded_analysis(
  * The procedure of building the reachability automaton FSA for a PDA
  * @return a finite automaton
  */
-store_automaton CUBA::create_store_automaton(const size_t i) {
+store_automaton symbolic_cuba::create_store_automaton(const size_t i) {
 	auto fsa = create_init_automaton(i);
 	cout << "Initial automaton: \n";
 	cout << fsa << endl;
@@ -149,7 +151,7 @@ store_automaton CUBA::create_store_automaton(const size_t i) {
  * @param PDA
  * @return
  */
-store_automaton CUBA::create_init_automaton(const size_t i) {
+store_automaton symbolic_cuba::create_init_automaton(const size_t i) {
 	/// step 0: set up the accept state
 	const auto& P = CPDA[i];
 	const auto& q_I = initl_c.get_state();
@@ -187,7 +189,7 @@ store_automaton CUBA::create_init_automaton(const size_t i) {
  * @param states
  * @return
  */
-fsa_state CUBA::create_accept_state(const fsa_state_set& states) {
+fsa_state symbolic_cuba::create_accept_state(const fsa_state_set& states) {
 	if (states.size() == 0)
 		throw cuba_runtime_error("no control state!");
 	auto s = *(states.rbegin()); /// s is an intermediate state
@@ -198,7 +200,7 @@ fsa_state CUBA::create_accept_state(const fsa_state_set& states) {
  * @param states
  * @return
  */
-fsa_state CUBA::create_interm_state(const fsa_state_set& states) {
+fsa_state symbolic_cuba::create_interm_state(const fsa_state_set& states) {
 	if (states.size() == 0)
 		throw cuba_runtime_error("no control state!");
 	auto s = *(states.rbegin()); /// s is an intermediate state
@@ -210,7 +212,7 @@ fsa_state CUBA::create_interm_state(const fsa_state_set& states) {
  * @param A
  * @return a finite automaton
  */
-store_automaton CUBA::post_kleene(const store_automaton& A,
+store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
 		const pushdown_automaton& P) {
 	auto states = A.get_states();
 	auto alphas = A.get_alphas();
@@ -300,7 +302,8 @@ store_automaton CUBA::post_kleene(const store_automaton& A,
  *         true : if c is reachable
  *         false: otherwise.
  */
-bool CUBA::is_recongnizable(const store_automaton& A, const thread_config& c) {
+bool symbolic_cuba::is_recongnizable(const store_automaton& A,
+		const thread_config& c) {
 	queue<pair<fsa_state, uint>> worklist;
 	worklist.emplace(c.get_state(), 0);
 
@@ -336,7 +339,8 @@ bool CUBA::is_recongnizable(const store_automaton& A, const thread_config& c) {
  * @param A2
  * @return bool
  */
-bool CUBA::is_equivalent(const store_automaton& A1, const store_automaton& A2) {
+bool symbolic_cuba::is_equivalent(const store_automaton& A1,
+		const store_automaton& A2) {
 	return true;
 }
 
@@ -346,7 +350,7 @@ bool CUBA::is_equivalent(const store_automaton& A1, const store_automaton& A2) {
  * @param A
  * @return a list of states
  */
-set<fsa_state> CUBA::project_Q(const store_automaton& A) {
+set<fsa_state> symbolic_cuba::project_Q(const store_automaton& A) {
 //	unordered_map<fsa_state, deque<fsa_state>> transpose;
 //	for (const auto& p : A.get_transitions()) {
 //		for (const auto& r : p.second) {
@@ -364,7 +368,7 @@ set<fsa_state> CUBA::project_Q(const store_automaton& A) {
  * @param initials: the set of initial states
  * @return the set of initial states which can reach the accept state
  */
-set<fsa_state> CUBA::BFS_visit(const fsa_state& root,
+set<fsa_state> symbolic_cuba::BFS_visit(const fsa_state& root,
 		const unordered_map<fsa_state, deque<fsa_state>>& adj,
 		const fsa_state_set& initials) {
 //	cout << "accept s" << root << endl;
@@ -413,8 +417,9 @@ set<fsa_state> CUBA::BFS_visit(const fsa_state& root,
  * @param idx
  * @return symbolic configuration
  */
-symbolic_config CUBA::compose(const pda_state& q_I, const store_automaton& Ai,
-		const vector<store_automaton>& automata, const size_t& i) {
+symbolic_config symbolic_cuba::compose(const pda_state& q_I,
+		const store_automaton& Ai, const vector<store_automaton>& automata,
+		const size_t& i) {
 	vector<store_automaton> W;
 	W.reserve(automata.size());
 	for (uint j = 0; j < automata.size(); ++j) {
@@ -433,7 +438,8 @@ symbolic_config CUBA::compose(const pda_state& q_I, const store_automaton& Ai,
  * @param q
  * @return a store automaton
  */
-store_automaton CUBA::rename(const store_automaton& A, const pda_state& q_I) {
+store_automaton symbolic_cuba::rename(const store_automaton& A,
+		const pda_state& q_I) {
 	if (A.get_initials().size() == 0)
 		throw cuba_runtime_error("rename: no initial state");
 	auto old = *A.get_initials().begin();
@@ -459,8 +465,8 @@ store_automaton CUBA::rename(const store_automaton& A, const pda_state& q_I) {
  * @param is_rename
  * @return a store automaton
  */
-store_automaton CUBA::anonymize(const store_automaton& A, const pda_state& q_I,
-		const bool& is_rename) {
+store_automaton symbolic_cuba::anonymize(const store_automaton& A,
+		const pda_state& q_I, const bool& is_rename) {
 	if (is_rename)
 		return anonymize_by_rename(A, q_I);
 	return anonymize_by_split(A, q_I);
@@ -477,7 +483,7 @@ store_automaton CUBA::anonymize(const store_automaton& A, const pda_state& q_I,
  * @param q_I
  * @return a store automaton
  */
-store_automaton CUBA::anonymize_by_split(const store_automaton& A,
+store_automaton symbolic_cuba::anonymize_by_split(const store_automaton& A,
 		const pda_state& q_I) {
 	fsa_state_set states;
 	fsa_delta deltas;
@@ -517,7 +523,7 @@ store_automaton CUBA::anonymize_by_split(const store_automaton& A,
  * @param q_I
  * @return a finite automaton
  */
-store_automaton CUBA::anonymize_by_rename(const store_automaton& A,
+store_automaton symbolic_cuba::anonymize_by_rename(const store_automaton& A,
 		const pda_state& q_I) {
 	auto states = A.get_states();
 	auto transs = A.get_transitions();
@@ -540,7 +546,7 @@ store_automaton CUBA::anonymize_by_rename(const store_automaton& A,
  * @param S_k
  * @param topped_R
  */
-int CUBA::top_mapping(const deque<symbolic_config>& global_R,
+int symbolic_cuba::top_mapping(const deque<symbolic_config>& global_R,
 		vector<set<top_config>>& topped_R) {
 	int num_new_cbar = 0;
 	for (const auto& c : global_R) {
@@ -562,7 +568,7 @@ int CUBA::top_mapping(const deque<symbolic_config>& global_R,
  * @param tau
  * @return a set of configuration tops
  */
-vector<top_config> CUBA::top_mapping(const symbolic_config& tau) {
+vector<top_config> symbolic_cuba::top_mapping(const symbolic_config& tau) {
 	const auto q = tau.get_state();
 	vector<set<pda_alpha>> toppings(tau.get_automata().size());
 
@@ -588,7 +594,8 @@ vector<top_config> CUBA::top_mapping(const symbolic_config& tau) {
  * @param q
  * @return a set of top symbols
  */
-set<pda_alpha> CUBA::top_mapping(const store_automaton& A, const pda_state q) {
+set<pda_alpha> symbolic_cuba::top_mapping(const store_automaton& A,
+		const pda_state q) {
 	set<pda_alpha> tops; /// the set of top symbols
 	queue<pda_state> worklist; ///
 	worklist.emplace(q);
@@ -616,7 +623,7 @@ set<pda_alpha> CUBA::top_mapping(const store_automaton& A, const pda_state q) {
  * @param tops
  * @return the cross product of tops
  */
-vector<vector<pda_alpha>> CUBA::cross_product(
+vector<vector<pda_alpha>> symbolic_cuba::cross_product(
 		const vector<set<pda_alpha>>& tops) {
 	vector<vector<pda_alpha>> worklist;
 	worklist.emplace_back(vector<pda_alpha>());

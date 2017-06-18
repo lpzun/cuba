@@ -6,9 +6,9 @@
 // Description : Hello World in C++, Ansi-style
 //============================================================================
 
+#include <cuba.hh>
 #include <iostream>
 
-#include "cuba/cuba.hh"
 #include "utils/cmd.hh"
 
 using namespace std;
@@ -77,12 +77,12 @@ int main(const int argc, const char * const * const argv) {
 			cout << "concurrent mode......\n";
 			if (is_simulate) {
 				cout << "explicit exploration......\n";
-				simulator simu(initl, final, filename);
-				simu.context_bounded_analysis(std::stoul(k), std::stoul(n));
+				explicit_cuba ecuba(initl, final, filename);
+				ecuba.context_bounded_analysis(std::stoul(k), std::stoul(n));
 			} else {
 				cout << "symbolic exploration......\n";
-				CUBA cuba(initl, final, filename);
-				cuba.context_bounded_analysis(std::stoul(k), std::stoul(n));
+				symbolic_cuba scuba(initl, final, filename);
+				scuba.context_bounded_analysis(std::stoul(k), std::stoul(n));
 			}
 		}
 
