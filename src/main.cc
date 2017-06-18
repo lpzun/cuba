@@ -55,7 +55,7 @@ int main(const int argc, const char * const * const argv) {
 				"--ctx-bound");
 		const string& n = cmd.arg_value(cmd_line::get_opt_index(opt_type::CON),
 				"--threads");
-		const bool is_simulate = cmd.arg_bool(
+		const bool is_explicit = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::CON), "--explicit");
 
 		/// Other Options
@@ -75,7 +75,7 @@ int main(const int argc, const char * const * const argv) {
 			cout << "sequential computation is not set up yet! \n";
 		} else {
 			cout << "concurrent mode......\n";
-			if (is_simulate) {
+			if (is_explicit) {
 				cout << "explicit exploration......\n";
 				explicit_cuba ecuba(initl, final, filename);
 				ecuba.context_bounded_analysis(std::stoul(k), std::stoul(n));

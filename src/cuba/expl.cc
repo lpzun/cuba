@@ -20,7 +20,7 @@ namespace cuba {
  */
 explicit_cuba::explicit_cuba(const string& initl, const string& final,
 		const string& filename) :
-		initl_c(0, 1), final_c(0, 1), CPDA(), reachable_T() {
+		initl_c(0, 1), final_c(0, 1), CPDA(), approx_X(), reachable_T() {
 	initl_c = parser::parse_input_cfg(initl);
 	final_c = parser::parse_input_cfg(final);
 	CPDA = parser::parse_input_cpds(filename);
@@ -103,7 +103,7 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		/// step 3.4: add current configuration to global_R set
 		global_R[tau.get_context_k()][tau.get_state()].emplace_back(tau);
 	}
-	return determine_convergence(global_R); /// return the number of reachable thread states
+	return converge(global_R); /// return the number of reachable thread states
 }
 
 /**
@@ -172,8 +172,7 @@ antichain explicit_cuba::step(const global_config& tau, const size_k k_bound) {
  * @param R
  * @return
  */
-bool explicit_cuba::determine_convergence(
-		const vector<vector<antichain>>& global_R) {
+bool explicit_cuba::converge(const vector<vector<antichain>>& global_R) {
 	bool convergent = false;
 	vector<set<top_config>> topped_R(thread_state::S);
 	cout << "======================================\n";

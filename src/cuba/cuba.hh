@@ -31,6 +31,7 @@ private:
 	concrete_config initl_c;
 	concrete_config final_c;
 	concurrent_pushdown_automata CPDA;
+	vector<set<top_config>> approx_X;
 
 	/// Post*(A): build pushdown store automaton
 	store_automaton create_store_automaton(const size_t i);
@@ -41,8 +42,7 @@ private:
 			const pushdown_automaton& P);
 
 	/// QR algorithm: context-bounded analysis
-	vector<deque<symbolic_config>> context_bounded_analysis(const size_k k,
-			const symbolic_config& cfg_I);
+	bool context_bounded_analysis(const size_k k, const symbolic_config& cfg_I);
 	set<fsa_state> project_Q(const store_automaton& A);
 	set<fsa_state> BFS_visit(const fsa_state& root,
 			const unordered_map<fsa_state, deque<fsa_state>>& adj,
@@ -68,7 +68,8 @@ private:
 	store_automaton cross_product(const vector<store_automaton>& W);
 
 	/// determine bar(R_k) = bar(R_{k+1})s
-	int top_mapping(const deque<symbolic_config>& global_R,
+	bool converge(const vector<deque<symbolic_config>>& R);
+	int top_mapping(const deque<symbolic_config>& R,
 			vector<set<top_config>>& topped_R);
 	vector<top_config> top_mapping(const symbolic_config& tau);
 	set<pda_alpha> top_mapping(const store_automaton& A, const pda_state q);
@@ -109,7 +110,7 @@ private:
 	antichain step(const global_config& tau, const size_k k_bound);
 
 	/// determine convergence, reachability of a target and so on
-	bool determine_convergence(const vector<vector<antichain>>& R);
+	bool converge(const vector<vector<antichain>>& R);
 	bool is_convergent();
 	bool is_reachable(const global_config& tau, vector<vector<antichain>>& R);
 	void marking(const pda_state& s, const pda_alpha& l);

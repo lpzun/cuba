@@ -17,10 +17,14 @@ namespace cuba {
  */
 symbolic_cuba::symbolic_cuba(const string& initl, const string& final,
 		const string& filename) :
-		initl_c(0, 1), final_c(0, 1), CPDA() {
+		initl_c(0, 1), final_c(0, 1), CPDA(), approx_X() {
 	initl_c = parser::parse_input_cfg(initl);
 	final_c = parser::parse_input_cfg(final);
 	CPDA = parser::parse_input_cpds(filename);
+
+	/// set up the over-approximation of reachable top configurations
+	processor proc(initl_c, filename);
+	approx_X = proc.over_approx_top_R();
 }
 
 /**
@@ -41,27 +45,21 @@ symbolic_cuba::~symbolic_cuba() {
  */
 void symbolic_cuba::context_bounded_analysis(const size_k& k_bound,
 		const size_t& n) {
+	/// step 1: set up the initial configurations
 	vector<store_automaton> W;
 	for (uint i = 0; i < CPDA.size(); ++i) {
-		auto fsa = create_init_automaton(i);
-		W.push_back(fsa);
-
-//		cout << "pushdown store automaton " << i << "\n";
-//		cout << fsa << endl;
-//
-//		auto fsa2 = post_kleene(fsa, CPDA[i]);
-//		cout << fsa2 << endl;
-//
-//		auto Q = project_Q(fsa2);
-//		cout << Q.size() << endl;
-//		for (const auto q : Q) {
-//			cout << "q" << q << endl;
-//			auto fsa3 = anonymize_by_split(fsa2, q);
-//			cout << fsa3 << endl;
-//		}
+		W.emplace_back(create_init_automaton(i));
 	}
 	symbolic_config cfg_I(initl_c.get_state(), W);
-	auto R = context_bounded_analysis(k_bound, cfg_I);
+
+	/// step 2: perform context-unbounded analysis
+	cout << "\n" << "Initial configuration: " << cfg_I << endl;
+	cout << "======================================\n";
+	auto is_reachable = context_bounded_analysis(k_bound, cfg_I);
+	if (prop::OPT_PROB_REACHABILITY && is_reachable) {
+		cout << final_c << " is reachable!" << endl;
+	}
+	cout << "======================================" << endl;
 }
 
 /// a pair of configuration used in QR algorithm
@@ -72,8 +70,8 @@ void symbolic_cuba::context_bounded_analysis(const size_k& k_bound,
  * @param c_I: the initial symbolic configuration
  * @return a set of reachable symbolic configuration
  */
-vector<deque<symbolic_config>> symbolic_cuba::context_bounded_analysis(
-		const size_k k_bound, const symbolic_config& c_I) {
+bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
+		const symbolic_config& c_I) {
 	/// Step 1: declare the data structures used in this procedure:
 	///
 	/// 1.1 <currLevel> = S_{k} \ S_{k-1}: the set of symbolic configurations
@@ -82,16 +80,12 @@ vector<deque<symbolic_config>> symbolic_cuba::context_bounded_analysis(
 	deque<symbolic_config> currLevel;
 	currLevel.emplace_back(c_I);
 	size_k k = 0; /// k = 0 represents the initial configuration c_I
-	cout << "Initial configuration: " << c_I << endl;
 	/// 1.2 <explored>: the set of reachable aggregate configurations
 	/// Initialization: empty set
 	/// 1.3 <topped_R>: the set of reachable tops of configurations.
 	/// We obtain this by computing the symbolic configurations.
 	vector<deque<symbolic_config>> global_R(k_bound + 1);
 	global_R[k] = {c_I};
-	vector<set<top_config>> topped_R(thread_state::S);
-	cout << "In context " << k << ":" << endl;
-	top_mapping(global_R[k], topped_R);
 
 	/// Step 2: compute all reachable configurations with up to k_bound
 	/// contexts.
@@ -109,15 +103,17 @@ vector<deque<symbolic_config>> symbolic_cuba::context_bounded_analysis(
 			/// 2.1.2 extract the aggregate configuration from the pair.
 			const auto& automata = c.get_automata();
 			for (uint i = 0; i < automata.size(); ++i) {
+				if (automata[i].empty())
+					continue;
 				const auto& _A = post_kleene(automata[i], CPDA[i]);
 //				cout << "post*:=+++++++++++++++++++++++++++\n"; // todo delete
 //				cout << _A << "\n";                             // todo delete
 				for (const auto& _q : project_Q(_A)) {
 					const auto& _c = compose(_q, _A, automata, i);
-					if (!_c.get_automata()[i].empty()) {
-						nextLevel.push_back(_c);
+//					if (!_c.get_automata()[i].empty()) {
+					nextLevel.push_back(_c);
 //						cout << _c << endl; // todo delete
-					}
+//					}
 				}
 //				cout << "+++++++++++++++++++++++++++++=end\n"; // todo delete
 			}
@@ -126,11 +122,23 @@ vector<deque<symbolic_config>> symbolic_cuba::context_bounded_analysis(
 		/// 2.2 check if all elements in currLevel has been processed.
 		currLevel.swap(nextLevel), ++k;
 		/// store R_{k+1} and the tops of configurations
-		cout << "In context " << k << ":" << endl;
 		global_R[k] = currLevel;
-		top_mapping(global_R[k], topped_R);
 	}
-	return global_R;
+	return !converge(global_R);
+}
+
+/**
+ * Determine whether top configuration converges or not
+ * @param R
+ * @return bool
+ */
+bool symbolic_cuba::converge(const vector<deque<symbolic_config>>& R) {
+	vector<set<top_config>> topped_R(thread_state::S);
+	for (uint k = 0; k < R.size(); ++k) {
+		cout << "context " << k << "\n";
+		top_mapping(R[k], topped_R);
+	}
+	return false;
 }
 
 /**
@@ -208,7 +216,7 @@ fsa_state symbolic_cuba::create_interm_state(const fsa_state_set& states) {
 }
 
 /**
- * build the reachability automaton for a finite automaton
+ * Post*(A): all reachable states from states represented by A
  * @param A
  * @return a finite automaton
  */
@@ -351,13 +359,17 @@ bool symbolic_cuba::is_equivalent(const store_automaton& A1,
  * @return a list of states
  */
 set<fsa_state> symbolic_cuba::project_Q(const store_automaton& A) {
-//	unordered_map<fsa_state, deque<fsa_state>> transpose;
-//	for (const auto& p : A.get_transitions()) {
-//		for (const auto& r : p.second) {
-//			transpose[r.get_dst()].push_back(p.first);
-//		}
-//	}
-//	return BFS_visit(A.get_accept(), transpose, A.get_initials());
+	/// A precise but also inefficient way to extract all initial states
+	/// I comment it away
+	/**
+	 unordered_map<fsa_state, deque<fsa_state>> transpose;
+	 for (const auto& p : A.get_transitions()) {
+	 for (const auto& r : p.second) {
+	 transpose[r.get_dst()].push_back(p.first);
+	 }
+	 }
+	 return BFS_visit(A.get_accept(), transpose, A.get_initials());
+	 */
 	return A.get_initials();
 }
 
@@ -555,7 +567,7 @@ int symbolic_cuba::top_mapping(const deque<symbolic_config>& global_R,
 			//cout << "============" << cbar << "\n";
 			auto ret = topped_R[cbar.get_state()].emplace(cbar);
 			if (ret.second) {
-				cout << "  " << cbar << "\n";
+				cout << string(2, ' ') << cbar << "\n";
 				++num_new_cbar;
 			}
 		}
@@ -610,9 +622,8 @@ set<pda_alpha> symbolic_cuba::top_mapping(const store_automaton& A,
 		/// iterate all out-going edges
 		for (const auto& r : ifind->second) {
 			if (r.get_label() == alphabet::EPSILON) /// epsilon label
-				worklist.push(r.get_dst());
-			else
-				tops.insert(r.get_label());
+				worklist.emplace(r.get_dst());
+			tops.emplace(r.get_label());
 		}
 	}
 	return tops;
