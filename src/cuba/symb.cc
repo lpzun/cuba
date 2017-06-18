@@ -568,24 +568,26 @@ bool symbolic_cuba::is_convergent() {
 
 /**
  *
- * @param S_k
+ * @param R
  * @param topped_R
+ * @return
  */
-uint symbolic_cuba::top_mapping(const deque<symbolic_config>& global_R,
+uint symbolic_cuba::top_mapping(const deque<symbolic_config>& R,
 		vector<set<top_config>>& topped_R) {
 	uint cnt_new_top_cfg = 0;
-	for (const auto& c : global_R) {
+	for (const auto& c : R) {
 		//cout << c << endl;
 		for (const auto& top_c : top_mapping(c)) {
-			//cout << "============" << cbar << "\n";
 			auto ret = topped_R[top_c.get_state()].emplace(top_c);
 			if (ret.second) {
 				cout << string(2, ' ') << top_c << "\n";
 				++cnt_new_top_cfg;
 				/// updating approx_X
 				auto ifind = approx_X[top_c.get_state()].find(top_c);
-				if (ifind != approx_X[top_c.get_state()].end())
+				if (ifind != approx_X[top_c.get_state()].end()) {
+					//cout << "----------------" << top_c << endl;
 					approx_X[top_c.get_state()].erase(ifind);
+				}
 			}
 		}
 	}

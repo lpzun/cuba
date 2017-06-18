@@ -96,26 +96,27 @@ vector<set<top_config>> processor::standard_FWS() {
 }
 
 /**
- *
+ * Compute the successors of top configuration c and update approx_X
  * @param c
- * @return
+ * @return return a list of top configurations
  */
 deque<top_config> processor::step(const top_config& c,
 		vector<set<top_config>>& approx_X) {
 	deque<top_config> successors;
 	for (uint i = 0; i < c.get_local().size(); ++i) {
-		thread_state src(c.get_state(), c.get_local()[i]);
-		auto ifind = CFSM[i].find(src);
+		auto ifind = CFSM[i].find(
+				thread_state(c.get_state(), c.get_local()[i]));
 		if (ifind == CFSM[i].end())
 			continue;
 		for (const auto& trans : ifind->second) {
-			const auto& dst = trans.get_dst();
-			auto local(c.get_local());
-			local[i] = dst.get_alpha();
-			successors.emplace_back(dst.get_state(), local);
-			if (trans.get_oper_type() == type_stack_operation::POP) {
-				approx_X[c.get_state()].emplace(dst.get_state(), local);
-			}
+			/// set up successors' control states
+			auto _q = trans.get_dst().get_state();
+			/// set up successors' stack contents
+			auto _local(c.get_local());
+			_local[i] = trans.get_dst().get_alpha();
+			successors.emplace_back(_q, _local);
+			if (trans.get_oper_type() == type_stack_operation::POP)
+				approx_X[_q].emplace(_q, _local);
 		}
 	}
 	return successors;
