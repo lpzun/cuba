@@ -172,16 +172,16 @@ antichain explicit_cuba::step(const global_config& tau, const size_k k_bound) {
  * @param R
  * @return
  */
-bool explicit_cuba::converge(const vector<vector<antichain>>& global_R) {
+bool explicit_cuba::converge(const vector<vector<antichain>>& R) {
 	bool convergent = false;
 	vector<set<top_config>> topped_R(thread_state::S);
 	cout << "======================================\n";
-	for (uint k = 0; k < global_R.size(); ++k) {
+	for (uint k = 0; k < R.size(); ++k) {
 		cout << "context " << k << "\n";
 		/// the number of new reachable top configurations
 		uint cnt_new_top_cfg = 0;
-		for (uint q = 0; q < global_R[k].size(); ++q) {
-			for (const auto& c : global_R[k][q]) {
+		for (uint q = 0; q < R[k].size(); ++q) {
+			for (const auto& c : R[k][q]) {
 				cout << string(2, ' ') << c;
 				const auto& top_c = top_mapping(c);
 				// cout << c << " .... " << cbar << endl; // todo deleting -------------
@@ -209,8 +209,10 @@ bool explicit_cuba::converge(const vector<vector<antichain>>& global_R) {
 }
 
 /**
- *
- * @return
+ * Determine if OS3 converges or not
+ * @return bool
+ *         true : if OS3 converges
+ *         false: otherwise
  */
 bool explicit_cuba::is_convergent() {
 	for (const auto& s : approx_X) {

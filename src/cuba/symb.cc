@@ -106,16 +106,10 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 				if (automata[i].empty())
 					continue;
 				const auto& _A = post_kleene(automata[i], CPDA[i]);
-//				cout << "post*:=+++++++++++++++++++++++++++\n"; // todo delete
-//				cout << _A << "\n";                             // todo delete
 				for (const auto& _q : project_Q(_A)) {
 					const auto& _c = compose(_q, _A, automata, i);
-//					if (!_c.get_automata()[i].empty()) {
 					nextLevel.push_back(_c);
-//						cout << _c << endl; // todo delete
-//					}
 				}
-//				cout << "+++++++++++++++++++++++++++++=end\n"; // todo delete
 			}
 		}
 
@@ -125,20 +119,6 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 		global_R[k] = currLevel;
 	}
 	return !converge(global_R);
-}
-
-/**
- * Determine whether top configuration converges or not
- * @param R
- * @return bool
- */
-bool symbolic_cuba::converge(const vector<deque<symbolic_config>>& R) {
-	vector<set<top_config>> topped_R(thread_state::S);
-	for (uint k = 0; k < R.size(); ++k) {
-		cout << "context " << k << "\n";
-		top_mapping(R[k], topped_R);
-	}
-	return false;
 }
 
 /**
@@ -554,25 +534,62 @@ store_automaton symbolic_cuba::anonymize_by_rename(const store_automaton& A,
 /////////////////////////////////////////////////////////////////////////
 
 /**
+ * Determine whether top configuration converges or not
+ * @param R
+ * @return bool
+ */
+bool symbolic_cuba::converge(const vector<deque<symbolic_config>>& R) {
+	bool convergent = false;
+	vector<set<top_config>> topped_R(thread_state::S);
+	for (uint k = 0; k < R.size(); ++k) {
+		cout << "context " << k << "\n";
+		auto cnt_new_top_cfg = top_mapping(R[k], topped_R);
+		if (cnt_new_top_cfg == 0 && !convergent && is_convergent()) {
+			cout << "=> OS3 converges at k = " << k - 1 << "\n";
+			convergent = true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Determine if OS3 converges or not
+ * @return bool
+ *         true : if OS3 converges
+ *         false: otherwise
+ */
+bool symbolic_cuba::is_convergent() {
+	for (const auto& s : approx_X) {
+		if (!s.empty())
+			return false;
+	}
+	return true;
+}
+
+/**
  *
  * @param S_k
  * @param topped_R
  */
-int symbolic_cuba::top_mapping(const deque<symbolic_config>& global_R,
+uint symbolic_cuba::top_mapping(const deque<symbolic_config>& global_R,
 		vector<set<top_config>>& topped_R) {
-	int num_new_cbar = 0;
+	uint cnt_new_top_cfg = 0;
 	for (const auto& c : global_R) {
 		//cout << c << endl;
-		for (const auto& cbar : top_mapping(c)) {
+		for (const auto& top_c : top_mapping(c)) {
 			//cout << "============" << cbar << "\n";
-			auto ret = topped_R[cbar.get_state()].emplace(cbar);
+			auto ret = topped_R[top_c.get_state()].emplace(top_c);
 			if (ret.second) {
-				cout << string(2, ' ') << cbar << "\n";
-				++num_new_cbar;
+				cout << string(2, ' ') << top_c << "\n";
+				++cnt_new_top_cfg;
+				/// updating approx_X
+				auto ifind = approx_X[top_c.get_state()].find(top_c);
+				if (ifind != approx_X[top_c.get_state()].end())
+					approx_X[top_c.get_state()].erase(ifind);
 			}
 		}
 	}
-	return num_new_cbar;
+	return cnt_new_top_cfg;
 }
 
 /**
@@ -639,14 +656,14 @@ vector<vector<pda_alpha>> symbolic_cuba::cross_product(
 	vector<vector<pda_alpha>> worklist;
 	worklist.emplace_back(vector<pda_alpha>());
 	for (const auto& ts : tops) {
-		vector<vector<pda_alpha>> templist;
+		vector<vector<pda_alpha>> temp;
 		for (const auto s : ts) {
-			for (auto v : worklist) {
-				v.emplace_back(s);
-				templist.emplace_back(v);
+			for (auto W : worklist) {
+				W.emplace_back(s);
+				temp.emplace_back(W);
 			}
 		}
-		worklist.swap(templist);
+		worklist.swap(temp);
 	}
 	return worklist;
 }

@@ -69,7 +69,8 @@ private:
 
 	/// determine bar(R_k) = bar(R_{k+1})s
 	bool converge(const vector<deque<symbolic_config>>& R);
-	int top_mapping(const deque<symbolic_config>& R,
+	bool is_convergent();
+	uint top_mapping(const deque<symbolic_config>& R,
 			vector<set<top_config>>& topped_R);
 	vector<top_config> top_mapping(const symbolic_config& tau);
 	set<pda_alpha> top_mapping(const store_automaton& A, const pda_state q);
