@@ -163,7 +163,7 @@ public:
 	}
 
 	bool empty() const {
-		return states.size() == 0;
+		return states.size() == 0 || transitions.size() == 0;
 	}
 
 private:
@@ -220,17 +220,19 @@ inline ostream& operator<<(ostream& os, const finite_automaton& fsa) {
 	 os << "\n";
 	 }
 	 */
-	os << "states: ";
+	os << "S = { ";
 	for (auto q : fsa.get_initials())
-		os << "q" << q << " ";
+		os << q << " ";
 	for (auto s : fsa.get_states())
-		os << "s" << s << " ";
-	os << "\n";
-	os << "accept: " << fsa.get_accept() << "\n";
+		os << s << " ";
+	os << "}\n";
+	os << "F = { " << fsa.get_accept() << "}\n";
+	os << "D = {\n";
 	for (auto p : fsa.get_transitions()) {
 		for (auto r : p.second)
-			os << r << "\n";
+			os << string(4, ' ') << r << "\n";
 	}
+	os << "}";
 	return os;
 }
 

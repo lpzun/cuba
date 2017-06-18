@@ -379,11 +379,19 @@ private:
 };
 
 inline ostream& operator<<(ostream& os, const symbolic_config& c) {
-	os << "<" << c.get_state() << "\n";
-	for (uint i = 0; i < c.get_automata().size(); ++i) {
-		os << "A" << i << "\n" << c.get_automata()[i];
+	os << "<" << c.get_state() << "|";
+	if (c.get_automata().size() > 0) {
+		for (uint i = 0; i < c.get_automata().size() - 1; ++i) {
+			os << "A" << i << ",";
+		}
+		os << "A" << c.get_automata().size() - 1 << ">\n";
+		for (uint i = 0; i < c.get_automata().size(); ++i) {
+
+			os << "A" << i << ": " << c.get_automata()[i] << "\n";
+		}
+	} else {
+		os << ">" << endl;
 	}
-	os << ">" << endl;
 	return os;
 }
 /**
