@@ -14,10 +14,10 @@ namespace cuba {
  */
 processor::processor(const string& initl, const string& final,
 		const string& filename) :
-		initl_c(0, 1), final_c(0, 1), cfsm() {
+		initl_c(0, 1), final_c(0, 1), CFSM() {
 	initl_c = top_mapping(parser::parse_input_cfg(initl));
 	final_c = top_mapping(parser::parse_input_cfg(final));
-	cfsm = parser::parse_input_cfsm(filename);
+	CFSM = parser::parse_input_cfsm(filename);
 }
 
 /**
@@ -27,8 +27,8 @@ processor::processor(const string& initl, const string& final,
  * @param filename
  */
 processor::processor(const concrete_config& initl, const string& filename) :
-		initl_c(top_mapping(initl)), final_c(0, 1), cfsm() {
-	cfsm = parser::parse_input_cfsm(filename);
+		initl_c(top_mapping(initl)), final_c(0, 1), CFSM() {
+	CFSM = parser::parse_input_cfsm(filename);
 }
 
 /**
@@ -105,8 +105,8 @@ deque<top_config> processor::step(const top_config& c,
 	deque<top_config> successors;
 	for (uint i = 0; i < c.get_local().size(); ++i) {
 		thread_state src(c.get_state(), c.get_local()[i]);
-		auto ifind = cfsm[i].find(src);
-		if (ifind == cfsm[i].end())
+		auto ifind = CFSM[i].find(src);
+		if (ifind == CFSM[i].end())
 			continue;
 		for (const auto& trans : ifind->second) {
 			const auto& dst = trans.get_dst();

@@ -137,7 +137,7 @@ public:
 private:
 	top_config initl_c;
 	top_config final_c;
-	vector<finite_machine> cfsm;
+	vector<finite_machine> CFSM;
 
 	vector<set<top_config>> standard_FWS();
 	deque<top_config> step(const top_config& c,
