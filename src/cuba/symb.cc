@@ -78,13 +78,14 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 	/// as { <q_I, (A1_I, ..., An_I)> }.
 	deque<symbolic_config> currLevel;
 	currLevel.emplace_back(c_I);
-	size_k k = 0; /// k = 0 represents the initial configuration c_I
-	/// 1.2 <explored>: the set of reachable aggregate configurations
-	/// Initialization: empty set
-	/// 1.3 <topped_R>: the set of reachable tops of configurations.
+	/// 1.2 contexts, k = 0 represents the initial configuration c_I
+	size_k k = 0;
+	/// 1.3 <global_R>: the set of reachable global configurations.
 	/// We obtain this by computing the symbolic configurations.
 	vector<deque<symbolic_config>> global_R(k_bound + 1);
 	global_R[k] = {c_I};
+	/// 1.4 <topped_R>: the set of reachable tops of configurations.
+	/// We obtain this by computing the symbolic configurations.
 
 	/// Step 2: compute all reachable configurations with up to k_bound
 	/// contexts.
@@ -106,15 +107,15 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 					continue;
 				const auto& _A = post_kleene(automata[i], CPDA[i]);
 				for (const auto& _q : project_Q(_A)) {
-					const auto& _c = compose(_q, _A, automata, i);
-					nextLevel.push_back(_c);
+					nextLevel.push_back(compose(_q, _A, automata, i));
 				}
 			}
 		}
 
-		/// 2.2 check if all elements in currLevel has been processed.
+		/// 2.2 if all elements in currLevel has been processed, then move
+		///     to k + 1 contexts.
 		currLevel.swap(nextLevel), ++k;
-		/// store R_{k+1} and the tops of configurations
+		/// 2.3 store R_{k+1} and the tops of configurations
 		global_R[k] = currLevel;
 	}
 	return !converge(global_R);
