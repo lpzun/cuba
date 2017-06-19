@@ -23,6 +23,7 @@ public:
 	static bool OPT_PRINT_ADJ;
 
 	static bool OPT_PROB_REACHABILITY;
+	static bool OPT_PARAMETERIZED;
 	static bool OPT_SEQ_ATM;
 
 	static const string COMMENT;

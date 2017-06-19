@@ -19,11 +19,15 @@ namespace cuba {
  * @param R: active transitions
  */
 explicit_cuba::explicit_cuba(const string& initl, const string& final,
-		const string& filename) :
+		const string& filename, const size_t n) :
 		initl_c(0, 1), final_c(0, 1), CPDA(), approx_X(), reachable_T() {
-	initl_c = parser::parse_input_cfg(initl);
-	final_c = parser::parse_input_cfg(final);
-	CPDA = parser::parse_input_cpds(filename);
+	if (prop::OPT_PARAMETERIZED) {
+
+	} else {
+		initl_c = parser::parse_input_cfg(initl);
+		final_c = parser::parse_input_cfg(final);
+		CPDA = parser::parse_input_cpds(filename);
+	}
 
 	/// set up overapproximation of reachable top configurations
 	processor proc(initl_c, filename);
@@ -42,7 +46,7 @@ explicit_cuba::~explicit_cuba() {
  * @param n: the number of threads
  * @param k: the number of context switches
  */
-void explicit_cuba::context_bounded_analysis(const size_k& k, const size_t& n) {
+void explicit_cuba::context_bounded_analysis(const size_k& k) {
 	bool cycle = false;
 	for (size_t tid = 0; tid < CPDA.size(); ++tid) {
 		if (is_cyclic(tid)) {
@@ -187,7 +191,7 @@ bool explicit_cuba::converge(const vector<vector<antichain>>& R) {
 				// cout << c << " .... " << cbar << endl; // todo deleting -------------
 				const auto& ret = topped_R[c.get_state()].emplace(top_c);
 				if (ret.second) {
-					cout << " | " << top_c;
+					cout << " : " << top_c;
 					/// find a new top configuration
 					++cnt_new_top_cfg;
 					/// updating approx_X

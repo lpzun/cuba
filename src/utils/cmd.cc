@@ -320,8 +320,8 @@ void cmd_line::create_argument_list() {
 			"an initial configuration", "0|0,0");
 	this->add_option(get_opt_index(opt_type::PROB), "-a", "--target",
 			"a target configuration", "0|0,0");
-	this->add_switch(get_opt_index(opt_type::PROB), "-p", "--pushdown",
-			"show the pushdown system");
+	this->add_switch(get_opt_index(opt_type::PROB), "-l", "--list-input",
+			"show the input pushdown system");
 	this->add_option(get_opt_index(opt_type::PROB), "-m", "--mode",
 			(string("input program mode (default = C):\n") //
 			+ string(27, ' ') + " \"S\": sequential mode\n" //
@@ -337,11 +337,13 @@ void cmd_line::create_argument_list() {
 
 	/// concurrent mode
 	this->add_option(get_opt_index(opt_type::CON), "-k", "--ctx-bound",
-			"the bound of contexts", "1");
+			"the bound of contexts", "0");
 	this->add_option(get_opt_index(opt_type::CON), "-n", "--threads",
-			"the number of threads (used only for parameterized systems)", "1");
+			"the number of threads (used only for parameterized systems)", "0");
 	this->add_switch(get_opt_index(opt_type::CON), "-x", "--explicit",
 			"an explicit forward search (may not terminate)");
+	this->add_switch(get_opt_index(opt_type::CON), "-p", "--parameterized",
+			"the input is a parameterized pushdown system");
 
 	/// other options
 	this->add_switch(get_opt_index(opt_type::OTHER), "-cmd", "--cmd-line",
@@ -357,7 +359,7 @@ void cmd_line::create_argument_list() {
  */
 string cmd_line::create_version_info() {
 	string info = ""; ///
-	info ///
+	info ///.append("-----------------------------------------------------------\n") ///
 	.append("* *       _/_/_/    _/    _/    _/_/_/_/      _/_/_/    * *\n") ///
 	.append("* *     _/         _/    _/    _/     _/    _/    _/    * *\n") ///
 	.append("* *    _/         _/    _/    _/_/_/_/     _/_/_/_/     * *\n") ///
@@ -366,7 +368,7 @@ string cmd_line::create_version_info() {
 			+ " * *\n") ///
 	.append("-----------------------------------------------------------\n") ///
 	.append("* *           Context-Unbounded Analysis for            * *\n") ///
-	.append("* *                Concurrent Software                  * *\n") ///
+	.append("* *                Concurrent Programs                  * *\n") ///
 	.append("* *          Peizun Liu @ Thomas Wahl's Group           * *\n") ///
 	.append("* *       Northeastern University, United States        * *\n") ///
 	.append("* *                            Build Date @ ").append(

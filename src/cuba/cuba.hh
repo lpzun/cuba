@@ -22,10 +22,10 @@ namespace cuba {
 class symbolic_cuba {
 public:
 	symbolic_cuba(const string& initl, const string& final,
-			const string& filename);
+			const string& filename, const size_t n = 0);
 	~symbolic_cuba();
 
-	void context_bounded_analysis(const size_k& k, const size_t& n = 0);
+	void context_bounded_analysis(const size_k k = 0);
 
 private:
 	concrete_config initl_c;
@@ -93,11 +93,11 @@ using concurrent_finite_machine = vector<finite_machine>;
 class explicit_cuba {
 public:
 	explicit_cuba(const string& initl, const string& final,
-			const string& filename);
+			const string& filename, const size_t n = 0);
 
 	~explicit_cuba();
 
-	void context_bounded_analysis(const size_k& k, const size_t& n = 0);
+	void context_bounded_analysis(const size_k& k);
 private:
 	///  Part 1: parse a pushdown system (PDS)
 	concrete_config initl_c;

@@ -16,7 +16,7 @@ namespace cuba {
  * @param final
  */
 symbolic_cuba::symbolic_cuba(const string& initl, const string& final,
-		const string& filename) :
+		const string& filename, const size_t n) :
 		initl_c(0, 1), final_c(0, 1), CPDA(), approx_X() {
 	initl_c = parser::parse_input_cfg(initl);
 	final_c = parser::parse_input_cfg(final);
@@ -43,8 +43,7 @@ symbolic_cuba::~symbolic_cuba() {
  * @param n: the number of threads
  * @param k: the number of context switches
  */
-void symbolic_cuba::context_bounded_analysis(const size_k& k_bound,
-		const size_t& n) {
+void symbolic_cuba::context_bounded_analysis(const size_k k_bound) {
 	/// step 1: set up the initial configurations
 	vector<store_automaton> W;
 	for (uint i = 0; i < CPDA.size(); ++i) {

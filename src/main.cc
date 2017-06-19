@@ -42,7 +42,7 @@ int main(const int argc, const char * const * const argv) {
 				cmd_line::get_opt_index(opt_type::PROB), "--mode");
 
 		prop::OPT_PRINT_ADJ = cmd.arg_bool(
-				cmd_line::get_opt_index(opt_type::PROB), "--pushdown");
+				cmd_line::get_opt_index(opt_type::PROB), "--list-input");
 		prop::OPT_PROB_REACHABILITY = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::PROB), "--reachability");
 
@@ -57,6 +57,8 @@ int main(const int argc, const char * const * const argv) {
 				"--threads");
 		const bool is_explicit = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::CON), "--explicit");
+		prop::OPT_PARAMETERIZED = cmd.arg_bool(
+				cmd_line::get_opt_index(opt_type::CON), "--parameterized");
 
 		/// Other Options
 		prop::OPT_PRINT_CMD = cmd.arg_bool(
@@ -75,14 +77,18 @@ int main(const int argc, const char * const * const argv) {
 			cout << "sequential computation is not set up yet! \n";
 		} else {
 			cout << "concurrent mode......\n";
+			if (prop::OPT_PARAMETERIZED && std::stoul(n) == 0) {
+				throw cuba_runtime_error(
+						"Please specify the number of threads!");
+			}
 			if (is_explicit) {
 				cout << "explicit exploration......\n";
-				explicit_cuba ecuba(initl, final, filename);
-				ecuba.context_bounded_analysis(std::stoul(k), std::stoul(n));
+				explicit_cuba ecuba(initl, final, filename, std::stoul(n));
+				ecuba.context_bounded_analysis(std::stoul(k));
 			} else {
 				cout << "symbolic exploration......\n";
-				symbolic_cuba scuba(initl, final, filename);
-				scuba.context_bounded_analysis(std::stoul(k), std::stoul(n));
+				symbolic_cuba scuba(initl, final, filename, std::stoul(n));
+				scuba.context_bounded_analysis(std::stoul(k));
 			}
 		}
 
