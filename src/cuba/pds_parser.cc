@@ -214,13 +214,6 @@ finite_machine parser::parse_input_fsm(const set<pda_state>& states,
 			fsm[src].emplace_back(src, dst, type_stack_operation::POP);
 		}
 	}
-
-	// delete ------------------------------------
-//	for (const auto& p : fsm) {
-//		for (const auto& dst : p.second) {
-//			cout << p.first << "->" << dst << "\n";
-//		}
-//	}
 	return fsm;
 }
 
@@ -317,48 +310,6 @@ void parser::remove_comments(istream& in, const string& filename,
 }
 
 /**
- * parse the type of stack operation
- * +: push op
- * -: pop op
- * !: overwrite op
- * @param c
- * @return type_stack_operation
- */
-type_stack_operation parser::parse_type_stack_operation(const char& c) {
-	switch (c) {
-	case '+':
-		return type_stack_operation::PUSH;
-	case '-':
-		return type_stack_operation::POP;
-	case '!':
-		return type_stack_operation::OVERWRITE;
-	default:
-		throw cuba_runtime_error("illegal transition!");
-	}
-}
-
-/**
- * parse the type of synchronization
- * +: fork a new thread
- * ~: broadcast
- * -: normal transition, no synchronization
- * @param c
- * @return type_synchronization
- */
-type_synchronization parser::parse_type_synchronization(const char& c) {
-	switch (c) {
-	case '+':
-		return type_synchronization::FORK;
-	case '~':
-		return type_synchronization::BRCT;
-	case '-':
-		return type_synchronization::NORM;
-	default:
-		throw cuba_runtime_error("illegal transition!");
-	}
-}
-
-/**
  * @brief remove the comments of .ttd files
  * @param in
  * @param out
@@ -417,5 +368,4 @@ deque<string> parser::split(const string &s, const char& delim) {
 	}
 	return elems;
 }
-
 } /* namespace cuba */
