@@ -189,7 +189,12 @@ private:
  * @return ostream
  */
 inline ostream& operator<<(ostream& os, const thread_state& t) {
-	os << "(" << t.get_state() << "," << t.get_alpha() << ")";
+	os << "(" << t.get_state() << ",";
+	if (t.get_alpha() == alphabet::EPSILON)
+		os << alphabet::OPT_EPSILON;
+	else
+		os << t.get_alpha();
+	os << ")";
 	return os;
 }
 

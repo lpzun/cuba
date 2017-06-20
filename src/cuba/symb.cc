@@ -24,7 +24,7 @@ symbolic_cuba::symbolic_cuba(const string& initl, const string& final,
 
 	/// set up the over-approximation of reachable top configurations
 	processor proc(initl_c, filename);
-	approx_X = proc.over_approx_top_R();
+	approx_X = proc.get_approx_X();
 }
 
 /**

@@ -132,21 +132,28 @@ private:
 
 class processor {
 public:
-	processor(const string& initl, const string& final, const string& filename);
+	processor(const string& initl, const string& filename);
 	processor(const concrete_config& initl, const string& filename);
 	~processor();
 
-	vector<set<top_config>> over_approx_top_R();
+	vector<set<top_config>> context_insensitive(const top_config& initl_c,
+			const vector<finite_machine>& CFSM);
+
+	const vector<set<top_config> >& get_approx_X() const {
+		return approx_X;
+	}
 
 private:
-	top_config initl_c;
-	top_config final_c;
-	vector<finite_machine> CFSM;
+	/// 1.1 <approx_X>: the overapproximation of the set of reachable
+	///     popped top configurations
+	vector<set<top_config>> approx_X;
 
-	vector<set<top_config>> standard_FWS();
+	vector<set<top_config>> standard_FWS(const top_config& initl_c,
+			const vector<finite_machine>& CFSM);
 	deque<top_config> step(const top_config& c,
-			vector<set<top_config>>& approx_X);
+			const vector<finite_machine>& CFSM);
 	top_config top_mapping(const concrete_config& tau);
+	void print_approximation(const vector<set<top_config>>& approx_R);
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -157,13 +164,9 @@ class parser {
 public:
 	static concurrent_pushdown_automata parse_input_cpds(
 			const string& filename);
-
-	static concurrent_finite_machine parse_input_cfsm(const string& filename);
-
+	static concurrent_finite_machine parse_input_cfsm(const string& filename,
+			const bool no_pop = false);
 	static concrete_config parse_input_cfg(const string& s);
-
-	static type_stack_operation parse_type_stack_operation(const char& c);
-	static type_synchronization parse_type_synchronization(const char& c);
 
 private:
 	static vector<vector<string>> read_input_cpds(const string& filename,
@@ -172,6 +175,7 @@ private:
 			const vector<string>& sPDA);
 	static finite_machine parse_input_fsm(const set<pda_state>& states,
 			const vector<string>& sPDA);
+	static finite_machine parse_input_fsm_no_pop(const vector<string>& sPDA);
 
 	static void remove_comments(istream& in, ostream& out,
 			const string& comment);
@@ -193,7 +197,6 @@ private:
 			const char& delim = prop::SHARED_LOCAL_DELIMITER);
 	static global_state create_global_state_from_str(const string& s_ts,
 			const char& delim = prop::SHARED_LOCAL_DELIMITER);
-
 };
 }
 /* namespace cuba */

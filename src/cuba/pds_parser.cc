@@ -30,13 +30,20 @@ concurrent_pushdown_automata parser::parse_input_cpds(const string& filename) {
  * @param filename
  * @return concurrent finite machine
  */
-concurrent_finite_machine parser::parse_input_cfsm(const string& filename) {
+concurrent_finite_machine parser::parse_input_cfsm(const string& filename,
+		const bool no_pop) {
 	/// build concurrent finite machine
 	concurrent_finite_machine CFSM;
 	set<pda_state> states;
 	const auto& sCPDA = read_input_cpds(filename, states);
-	for (auto pda : sCPDA) {
-		CFSM.emplace_back(parse_input_fsm(states, pda));
+	if (no_pop) {
+		for (auto pda : sCPDA) {
+			CFSM.emplace_back(parse_input_fsm_no_pop(pda));
+		}
+	} else {
+		for (auto pda : sCPDA) {
+			CFSM.emplace_back(parse_input_fsm(states, pda));
+		}
 	}
 	return CFSM;
 }
@@ -215,6 +222,51 @@ finite_machine parser::parse_input_fsm(const set<pda_state>& states,
 		}
 	}
 	return fsm;
+}
+
+finite_machine parser::parse_input_fsm_no_pop(const vector<string>& sPDA) {
+
+	if (sPDA.size() == 0)
+		return finite_machine();
+	{
+		istringstream iss(sPDA[0]);
+		string pda_mark;
+		pda_alpha start, end;
+		iss >> pda_mark >> start >> end;
+		if (pda_mark != "PDA")
+			throw cuba_runtime_error("PDA input format error!");
+	}
+
+	finite_machine fsm;
+	for (uint i = 1; i < sPDA.size(); ++i) {
+		/// three types of transition:
+		///   PUSH: (s1, l1) -> (s2, l2l3)
+		///   POP : (s1, l1) -> (s2, )
+		///   OVERWRITE: (s1, l1) -> (s2, l2)
+		pda_state s1;  /// source state
+		pda_alpha l1;  /// source alpha
+		string sep;    /// separator ->
+		pda_state s2;  /// destination state
+		string l2, l3; /// destination alphabets. Note: using string here
+
+		istringstream iss(sPDA[i]);
+		iss >> s1 >> l1 >> sep >> s2 >> l2 >> l3;
+
+		/// source thread state
+		thread_state src(s1, l1);
+		/// destination thread configuration
+		if (l3 != "") { /// push operation
+			thread_state dst(s2, std::stoi(l2));
+			fsm[src].emplace_back(src, dst, type_stack_operation::PUSH);
+		} else if (l2 != "") { /// overwrite operation
+			thread_state dst(s2, std::stoi(l2));
+			fsm[src].emplace_back(src, dst, type_stack_operation::OVERWRITE);
+		} else { /// pop operation
+			/// do noting
+		}
+	}
+	return fsm;
+
 }
 
 /**
