@@ -262,7 +262,8 @@ finite_machine parser::parse_input_fsm_no_pop(const vector<string>& sPDA) {
 			thread_state dst(s2, std::stoi(l2));
 			fsm[src].emplace_back(src, dst, type_stack_operation::OVERWRITE);
 		} else { /// pop operation
-			/// do noting
+			thread_state dst(s2, alphabet::EPSILON);
+			fsm[src].emplace_back(src, dst, type_stack_operation::OVERWRITE);
 		}
 	}
 	return fsm;

@@ -1,0 +1,45 @@
+bool increment_flag = 0;
+bool stopping_flag = 0;
+bool stopping_event= 0;
+bool stopped = 0;
+/**
+ * adder: add a new IO device
+ */
+void adder() {
+    bool status = increment();
+    if (status)
+        assert(!stopped);
+    decrement();
+}
+
+void stopper() {
+    stopping_flag = 1;
+    increment();
+    assume (stopping_event);
+    stopped = 1;
+}
+
+bool increment() {
+    if (stopped)
+        return 0;
+    atomic { pending_IO++ };
+    return 1;
+}
+
+void decrement() {
+    int _pending_IO;
+    atomic {
+        pending_IO--;
+        _pending_IO = pending_IO;
+    }
+    if (_pending_IO == 0)
+        stopping_event = 1;
+}
+
+void counter() {
+    if (increment_flag) {
+        increment_flag = false;
+        counter();
+    }
+    return;
+}
