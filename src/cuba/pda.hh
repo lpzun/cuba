@@ -312,8 +312,12 @@ template<typename T> inline ostream& operator<<(ostream& os,
 	if (a.size() == 0) {
 		os << alphabet::OPT_EPSILON;
 	} else {
-		for (const T& s : a.get_worklist())
-			os << s;
+		for (const T& s : a.get_worklist()) {
+			if (s == alphabet::EPSILON)
+				os << alphabet::OPT_EPSILON;
+			else
+				os << s;
+		}
 	}
 	return os;
 }

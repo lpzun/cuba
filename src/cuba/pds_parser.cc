@@ -309,7 +309,10 @@ concrete_config parser::create_global_config_from_str(const string& s_ts,
 	for (uint i = 0; i < stacks.size(); ++i) {
 		const auto& symbols = split(stacks[i], prop::STACK_DELIMITER);
 		for (const auto& s : symbols) {
-			W[i].push(std::stoi(s));
+			if (s.front() == alphabet::OPT_EPSILON)
+				W[i].push(alphabet::EPSILON);
+			else
+				W[i].push(std::stoi(s));
 		}
 	}
 	return concrete_config(std::stoi(vs_cfg[0]), W);
