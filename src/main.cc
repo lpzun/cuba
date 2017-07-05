@@ -6,10 +6,10 @@
 // Description : Hello World in C++, Ansi-style
 //============================================================================
 
-#include <cuba.hh>
 #include <iostream>
 
 #include "utils/cmd.hh"
+#include "cuba/cuba.hh"
 
 using namespace std;
 using namespace cmd;

@@ -5,7 +5,7 @@
  * @author: Peizun Liu
  */
 
-#include <cuba.hh>
+#include "cuba.hh"
 
 namespace cuba {
 
