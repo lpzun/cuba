@@ -14,7 +14,7 @@ void adder() {
 
 void stopper() {
 9     stopping_flag = 1;
-10    increment();
+10    decrement();
 11    assume (stopping_event);
 12    stopped = 1;
 }
