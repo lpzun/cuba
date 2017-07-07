@@ -337,11 +337,11 @@ void cmd_line::create_argument_list() {
 
 	/// concurrent mode
 	this->add_option(get_opt_index(opt_type::CON), "-k", "--ctx-bound",
-			"the bound of contexts", "0");
+			"the bound of contexts, perform CUBA if specify nothing", "0");
 	this->add_option(get_opt_index(opt_type::CON), "-n", "--threads",
 			"the number of threads (used only for parameterized systems)", "0");
 	this->add_switch(get_opt_index(opt_type::CON), "-x", "--explicit",
-			"an explicit forward search (may not terminate)");
+			"an explicit CUBA working with finite context reachability");
 	this->add_switch(get_opt_index(opt_type::CON), "-p", "--parameterized",
 			"the input is a parameterized pushdown system");
 
@@ -366,14 +366,14 @@ string cmd_line::create_version_info() {
 	.append("* *    _/        _/    _/    _/     _/    _/    _/      * *\n") ///
 	.append("* *    _/_/_/    _/_/_/     _/_/_/_/     _/    _/  " + VERSION  ///
 			+ " * *\n") ///
-	.append("-----------------------------------------------------------\n") ///
-	.append("* *           Context-Unbounded Analysis for            * *\n") ///
-	.append("* *                Concurrent Programs                  * *\n") ///
-	.append("* *          Peizun Liu @ Thomas Wahl's Group           * *\n") ///
-	.append("* *       Northeastern University, United States        * *\n") ///
-	.append("* *                            Build Date @ ").append(
-	__DATE__).append(" * *\n").append(
-			"-----------------------------------------------------------\n");
+//	.append("-----------------------------------------------------------\n") ///
+//	.append("* *           Context-Unbounded Analysis for            * *\n") ///
+//	.append("* *                Concurrent Programs                  * *\n") ///
+//	.append("* *          Peizun Liu @ Thomas Wahl's Group           * *\n") ///
+//	.append("* *       Northeastern University, United States        * *\n") ///
+//	.append("* *                            Build Date @ ").append(
+//	__DATE__).append(" * *\n")
+	.append("-----------------------------------------------------------\n");
 	return info;
 }
 }

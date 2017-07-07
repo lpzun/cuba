@@ -101,7 +101,6 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		///           one by one
 		const auto& images = step(tau, k_bound);
 		for (const auto& _tau : images) {
-			//cout << string(3, ' ') << _tau << "\n"; // todo deleting ---------------------
 			worklist.emplace_back(_tau);
 		}
 		/// step 3.4: add current configuration to global_R set
@@ -188,7 +187,6 @@ bool explicit_cuba::converge(const vector<vector<antichain>>& R) {
 			for (const auto& c : R[k][q]) {
 				cout << string(2, ' ') << c;
 				const auto& top_c = top_mapping(c);
-				// cout << c << " .... " << cbar << endl; // todo deleting -------------
 				const auto& ret = topped_R[c.get_state()].emplace(top_c);
 				if (ret.second) {
 					cout << " : " << top_c;
