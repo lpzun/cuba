@@ -32,7 +32,6 @@ explicit_cuba::explicit_cuba(const string& initl, const string& final,
 	/// set up overapproximation of reachable top configurations
 	processor proc(initl_c, filename);
 	approx_X = proc.get_approx_X();
-	cout << "after------------------------------------\n";
 }
 
 /**
@@ -48,17 +47,17 @@ explicit_cuba::~explicit_cuba() {
  * @param k: the number of context switches
  */
 void explicit_cuba::context_bounded_analysis(const size_k& k) {
-	/*bool cycle = false;
-	 for (size_t tid = 0; tid < CPDA.size(); ++tid) {
-	 if (is_cyclic(tid)) {
-	 cycle = true;
-	 cout << "PDA " << tid << " contains cycles. Simulator exits...\n";
-	 break;
-	 }
-	 }
-	 cout<<"Acycle.......\n";
-	 if (cycle)
-	 return;*/
+	bool cycle = false;
+//	for (size_t tid = 0; tid < CPDA.size(); ++tid) {
+//		if (is_cyclic(tid)) {
+//			cycle = true;
+//			cout << "PDA " << tid << " contains cycles. Simulator exits...\n";
+//			break;
+//		}
+//	}
+//	cout << "Acycle.......\n";
+//	if (cycle)
+//		return;
 	const auto is_reachable = k_bounded_reachability(k, initl_c);
 	if (prop::OPT_PROB_REACHABILITY && is_reachable) {
 		cout << final_c << " is reachable!" << endl;
