@@ -32,7 +32,7 @@ explicit_cuba::explicit_cuba(const string& initl, const string& final,
 	/// set up overapproximation of reachable top configurations
 	processor proc(initl_c, filename);
 	approx_X = proc.get_approx_X();
-	cout<<"after------------------------------------\n";
+	cout << "after------------------------------------\n";
 }
 
 /**
@@ -49,16 +49,16 @@ explicit_cuba::~explicit_cuba() {
  */
 void explicit_cuba::context_bounded_analysis(const size_k& k) {
 	/*bool cycle = false;
-	for (size_t tid = 0; tid < CPDA.size(); ++tid) {
-		if (is_cyclic(tid)) {
-			cycle = true;
-			cout << "PDA " << tid << " contains cycles. Simulator exits...\n";
-			break;
-		}
-	}
-	cout<<"Acycle.......\n";
-	if (cycle)
-		return;*/
+	 for (size_t tid = 0; tid < CPDA.size(); ++tid) {
+	 if (is_cyclic(tid)) {
+	 cycle = true;
+	 cout << "PDA " << tid << " contains cycles. Simulator exits...\n";
+	 break;
+	 }
+	 }
+	 cout<<"Acycle.......\n";
+	 if (cycle)
+	 return;*/
 	const auto is_reachable = k_bounded_reachability(k, initl_c);
 	if (prop::OPT_PROB_REACHABILITY && is_reachable) {
 		cout << final_c << " is reachable!" << endl;
@@ -92,12 +92,9 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		/// step 3.1: remove an element from currLevel
 		const auto tau = worklist.front();
 		worklist.pop_front();
-		// cout << tau << "\n"; /// deleting ---------------------
-
 		/// step 3.2: discard it if tau is already explored
 		if (is_reachable(tau, global_R))
 			continue;
-		//cout << tau << "\n"; /// deleting ---------------------
 
 		/// step 3.3: compute its successors and process them
 		///           one by one
@@ -126,7 +123,6 @@ antichain explicit_cuba::step(const global_config& tau, const size_k k_bound) {
 
 	/// step 2: iterate over all threads
 	for (uint tid = 0; tid < W.size(); ++tid) {
-		// cout << tid << "\\\\\\\\\\\\\\\\\\\\\\\\\n";
 		if (W[tid].empty() || (k == k_bound && tid != tau.get_thread_id())) {
 			continue;
 		}
@@ -135,7 +131,6 @@ antichain explicit_cuba::step(const global_config& tau, const size_k k_bound) {
 		auto _k = (tid == tau.get_thread_id() ? k : k + 1);
 		/// step 2.2: iterator over all successor of current thread state
 
-		//cout << q << "," << W[tid].top() << "\\\\\\\\\\\\\\\\\\\\\\\\\n";
 		const auto& ifind = CPDA[tid].get_pda().find(
 				thread_state(q, W[tid].top()));
 		if (ifind == CPDA[tid].get_pda().end())
@@ -233,7 +228,7 @@ bool explicit_cuba::is_convergent() {
  * It returns true if any of above conditions satisfies. Otherwise, it returns
  * false.
  *
- * One special case is that: there exists c \in explored such that
+ *  (3) One special case is that: there exists c \in explored such that
  *    c.id == tau.id /\ c.s == tau.s /\ c.W == tau.W /\ c.k > tau.k,
  * then, the procedure replaces c by tau except returning false.
  *
@@ -244,19 +239,24 @@ bool explicit_cuba::is_convergent() {
 bool explicit_cuba::is_reachable(const global_config& tau,
 		vector<vector<antichain>>& R) {
 	bool flag = false;
-	for (uint k = 0; k <= tau.get_context_k(); k++) {
-		for (const auto& c : R[k][tau.get_state()]) {
-			if (c == tau) {
+
+	const auto& q = tau.get_state();
+	/// step 1: check condition (1) and (2)
+	for (uint k = 0; k <= tau.get_context_k(); ++k) {
+		for (uint i = 0; i < R[k][q].size(); ++i) {
+			if (R[k][q][i] == tau) {
 				flag = true;
-				break;
+				break; /// break out the inner loop
 			}
 		}
+		if (flag) /// break out the outer loop
+			break;
 	}
-
+	/// step 2: check condition 3
 	for (uint k = tau.get_context_k() + 1; k < R.size(); ++k) {
-		for (auto it = R[k][tau.get_state()].begin();
-				it != R[k][tau.get_state()].end(); ++it) {
-			R[k][tau.get_state()].erase(it);
+		for (uint i = 0; i < R[k][q].size(); ++i) {
+			if (R[k][q][i] == tau)
+				R[k][q].erase(R[k][q].begin() + i);
 		}
 	}
 	return flag;
