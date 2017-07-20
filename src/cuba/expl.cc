@@ -67,9 +67,50 @@ void explicit_cuba::context_bounded_analysis(const size_k& k) {
 /**
  * This procedure is to compute the set of reachable thread/global states
  * of a program P running by n threads and with up to k context switches.
- * @param n: the number of threads
- * @param k: the upper bound of context switches
- * @return the number of reachable thread/global states
+ * @param c_I: the initial concrete configuration
+ * @return whether the target is reachable or not
+ */
+bool explicit_cuba::unbounded_reachability(const concrete_config& c_I) {
+	/// step 1: build the initial  global configuration
+	///         Here we build the set of initial stacks
+
+	/// step 2: set the data structures that used in the exploration
+	///         procedure
+	/// the set of unexplored global configurations
+	antichain worklist;
+	/// set the initial global configuration
+	worklist.emplace_back(CPDA.size(), 0, c_I.get_state(), c_I.get_stacks());
+	/// the set of reachable global configurations
+	vector<vector<antichain>> global_R;
+
+	size_k k_bound = 0;
+	/// step 3: the exploration procedure: it is based on BFS
+	while (!worklist.empty()) {
+		/// step 3.1: remove an element from currLevel
+		const auto tau = worklist.front();
+		worklist.pop_front();
+		/// step 3.2: discard it if tau is already explored
+		if (is_reachable(tau, global_R))
+			continue;
+
+		/// step 3.3: compute its successors and process them
+		///           one by one
+		const auto& images = step(tau, k_bound);
+		for (const auto& _tau : images) {
+			worklist.emplace_back(_tau);
+		}
+		/// step 3.4: add current configuration to global_R set
+		global_R[tau.get_context_k()][tau.get_state()].emplace_back(tau);
+	}
+	return converge(global_R); /// return the number of reachable thread states
+}
+
+/**
+ * This procedure is to compute the observation sequences of a concurrent
+ * program P running by n threads and with up to k contexts.
+ * @param k_bound: the upper bound of context switches
+ * @param c_I    : the initial concrete configuration
+ * @return whether the target is reachable or not
  */
 bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		const concrete_config& c_I) {

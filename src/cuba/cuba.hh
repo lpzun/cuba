@@ -106,6 +106,8 @@ private:
 	vector<set<top_config>> approx_X;
 	vector<vector<bool>> reachable_T;
 
+	bool unbounded_reachability(const concrete_config& c_I);
+
 	bool k_bounded_reachability(const size_k k_bound,
 			const concrete_config& c_I);
 	antichain step(const global_config& tau, const size_k k_bound);
