@@ -68,7 +68,8 @@ private:
 	store_automaton cross_product(const vector<store_automaton>& W);
 
 	/// determine bar(R_k) = bar(R_{k+1})s
-	bool converge(const vector<deque<symbolic_config>>& R);
+	bool converge(const vector<deque<symbolic_config>>& R, const size_k k,
+			vector<set<top_config>>& top_R);
 	bool is_convergent();
 	uint top_mapping(const deque<symbolic_config>& R,
 			vector<set<top_config>>& topped_R);

@@ -93,7 +93,7 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 	/// sequence from R directly.
 	vector<set<top_config>> top_R(thread_state::S);
 	/// step 2: compute all reachable configurations with up to k_bound contexts.
-	while (k < k_bound) {
+	while (k_bound == 0 || k <= k_bound) {
 		/// step 2.0 <nextLevel> = R_{k+1} \ R_{k}: the set of explicit
 		/// configurations reached in the (k+1)st context. It's initialized
 		/// as empty.
@@ -125,13 +125,15 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		/// step 2.2: convergence detection
 		/// 2.2.1: OS1 collapses
 		if (nextLevel.size() == 0) {
-			cout << "=> sequence R collapses at " << k << "\n";
+			cout << "=> sequence R collapses at " << (k == 0 ? k : k - 1)
+					<< "\n";
 			cout << "======================================" << endl;
 			return true;
 		}
 
 		if (converge(global_R[k], k, top_R)) {
-			cout << "=> sequence top_R collapses at " << k << "\n";
+			cout << "=> sequence top_R collapses at " << (k == 0 ? k : k - 1)
+					<< "\n";
 			cout << "======================================" << endl;
 			return true;
 		}
@@ -244,7 +246,6 @@ bool explicit_cuba::update_R(vector<vector<antichain>>& R, const size_k k,
  */
 bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
 		vector<set<top_config>>& top_R) {
-	bool convergent = false;
 	cout << "======================================\n";
 	cout << "context " << k << "\n";
 	/// the number of new reachable top configurations
@@ -260,17 +261,19 @@ bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
 				++cnt_new_top_cfg;
 				/// updating approx_X
 				auto ifind = approx_X[top_c.get_state()].find(top_c);
-				if (ifind != approx_X[top_c.get_state()].end()) {
+				if (ifind != approx_X[top_c.get_state()].end())
 					approx_X[top_c.get_state()].erase(ifind);
-				}
 			}
 			cout << "\n";
 		}
-
-		if (cnt_new_top_cfg == 0 && !convergent && is_convergent())
-			convergent = true;
 	}
-	return convergent;
+	if (cnt_new_top_cfg == 0) {
+		if (is_convergent()) {
+			return true;
+		}
+		cout << "=> sequence top_R plateaus at " << k << "\n";
+	}
+	return false;
 }
 
 /**

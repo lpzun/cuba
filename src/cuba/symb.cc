@@ -53,12 +53,10 @@ void symbolic_cuba::context_bounded_analysis(const size_k k_bound) {
 
 	/// step 2: perform context-unbounded analysis
 	cout << "\n" << "Initial configuration: " << cfg_I << endl;
-	cout << "======================================\n";
 	auto is_reachable = context_bounded_analysis(k_bound, cfg_I);
 	if (prop::OPT_PROB_REACHABILITY && is_reachable) {
 		cout << final_c << " is reachable!" << endl;
 	}
-	cout << "======================================" << endl;
 }
 
 /// a pair of configuration used in QR algorithm
@@ -78,22 +76,26 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 	/// as { <q_I|(A1_I, ..., An_I)> }.
 	deque<symbolic_config> currLevel;
 	currLevel.emplace_back(c_I);
-	/// 1.2 contexts, k = 0 represents the initial configuration c_I
+	/// 1.2 <k>: contexts, k = 0 represents the initial configuration c_I
 	size_k k = 0;
 	/// 1.3 <global_R>: the set of reachable global configurations.
 	/// We obtain this by computing the symbolic configurations.
-	vector<deque<symbolic_config>> global_R(k_bound + 1);
-	global_R[k] = {c_I};
-	/// 1.4 <topped_R>: the set of reachable tops of configurations.
+	vector<deque<symbolic_config>> global_R;
+	global_R.reserve(k_bound + 1);
+	global_R.emplace_back(deque<symbolic_config> { c_I });
+	/// 1.4 <top_R>: the set of reachable tops of configurations.
 	/// We obtain this by computing the symbolic configurations.
-
+	vector<set<top_config>> top_R(thread_state::S);
+	/// Compute top_R_0
+	converge(global_R, k, top_R);
 	/// Step 2: compute all reachable configurations with up to k_bound
-	/// contexts.
-	while (k < k_bound) {
+	/// contexts. If k_bound = 0, the procedure will either loops until R/top_R
+	/// collapses or forever.
+	while (k_bound == 0 || k < k_bound) {
 		/// <nextLevel> = S_{k+1} \ S_{k}: the set of symbolic configurations
 		/// reached in the (k+1)st context. It's initialized as empty.
 		deque<symbolic_config> nextLevel;
-		/// 2.1 compute nextLevel, or S_{k+1}: iterate over all elements
+		/// step 2.1 compute nextLevel, or S_{k+1}: iterate over all elements
 		/// in the currLevel. This is a BFS-like procedure.
 		while (!currLevel.empty()) {
 			/// 2.1.1 remove a aggregate configuration from currLevel.
@@ -106,19 +108,26 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 				if (automata[i].empty())
 					continue;
 				const auto& _A = post_kleene(automata[i], CPDA[i]);
-				for (const auto& _q : project_Q(_A)) {
+				for (const auto& _q : project_Q(_A))
 					nextLevel.push_back(compose(_q, _A, automata, i));
-				}
 			}
 		}
 
-		/// 2.2 if all elements in currLevel has been processed, then move
+		/// step 2.2 if all elements in currLevel has been processed, then move
 		/// onto the (k + 1)st context.
 		currLevel.swap(nextLevel), ++k;
-		/// 2.3 store R_{k+1} and the tops of configurations
-		global_R[k] = currLevel;
+		/// step 2.3 store R_{k+1}: the set of global configurations
+		global_R.emplace_back(currLevel); /// k + 1 now
+		/// step 2.4 convergence detection for top_R
+		if (converge(global_R, k, top_R)) {
+			cout << "=> sequence top_R collapses at " << (k == 0 ? k : k - 1)
+					<< "\n";
+			cout << "======================================" << endl;
+			return true;
+		}
 	}
-	return !converge(global_R);
+	cout << "======================================" << endl;
+	return false;
 }
 
 /**
@@ -363,10 +372,6 @@ set<fsa_state> symbolic_cuba::project_Q(const store_automaton& A) {
 set<fsa_state> symbolic_cuba::BFS_visit(const fsa_state& root,
 		const unordered_map<fsa_state, deque<fsa_state>>& adj,
 		const fsa_state_set& initials) {
-//	cout << "accept s" << root << endl;
-//	for (const auto q : initials) {
-//		cout << "initial q" << q << endl;
-//	}
 	set<fsa_state> Q;
 
 	/// Mark whether a state is already visited or not:
@@ -536,18 +541,19 @@ store_automaton symbolic_cuba::anonymize_by_rename(const store_automaton& A,
 /**
  * Determine whether top configuration converges or not
  * @param R
- * @return bool
+ * @param k
+ * @param top_R
+ * @return
  */
-bool symbolic_cuba::converge(const vector<deque<symbolic_config>>& R) {
-	bool convergent = false;
-	vector<set<top_config>> topped_R(thread_state::S);
-	for (uint k = 0; k < R.size(); ++k) {
-		cout << "context " << k << "\n";
-		auto cnt_new_top_cfg = top_mapping(R[k], topped_R);
-		if (cnt_new_top_cfg == 0 && !convergent && is_convergent()) {
-			cout << "=> OS3 converges at k = " << k - 1 << "\n";
-			convergent = true;
-		}
+bool symbolic_cuba::converge(const vector<deque<symbolic_config>>& R,
+		const size_k k, vector<set<top_config>>& top_R) {
+	cout << "======================================\n";
+	cout << "context " << k << "\n";
+	const auto cnt_new_top_cfg = top_mapping(R[k], top_R);
+	if (cnt_new_top_cfg == 0) {
+		if (is_convergent())
+			return true;
+		cout << "=> sequence top_R plateaus at " << k << "\n";
 	}
 	return false;
 }
