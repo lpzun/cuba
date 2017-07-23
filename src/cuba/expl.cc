@@ -113,39 +113,75 @@ bool explicit_cuba::unbounded_reachability(const concrete_config& c_I) {
  * @return whether the target is reachable or not
  */
 bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
-		const concrete_config& c_I) {
-	/// step 1: build the initial  global configuration
-	///         Here we build the set of initial stacks
-
-	/// step 2: set the data structures that used in the exploration
+		const explicit_config& c_I) {
+	/// step 1: set the data structures that used in the explicit exploration
 	///         procedure
-	/// the set of unexplored global configurations
-	antichain worklist;
-	/// set the initial global configuration
-	worklist.emplace_back(CPDA.size(), 0, c_I.get_state(), c_I.get_stacks());
-	/// the set of reachable global configurations
-	vector<vector<antichain>> global_R(k_bound + 1,
-			vector<antichain>(thread_state::S));
-
-	/// step 3: the exploration procedure: it is based on BFS
-	while (!worklist.empty()) {
-		/// step 3.1: remove an element from currLevel
-		const auto tau = worklist.front();
-		worklist.pop_front();
-		/// step 3.2: discard it if tau is already explored
-		if (is_reachable(tau, global_R))
-			continue;
-
-		/// step 3.3: compute its successors and process them
-		///           one by one
-		const auto& images = step(tau, k_bound);
-		for (const auto& _tau : images) {
-			worklist.emplace_back(_tau);
+	/// 1.1 <currLevel> = R_{k} \ R_{k-1}: the set of unexplored global conf-
+	/// igurations which are reached in the kth context for processing. It's
+	/// initialized as { <q_I | (w1_I, ..., wn_I> }
+	antichain currLevel;
+	currLevel.emplace_back(CPDA.size(), c_I.get_state(), c_I.get_stacks());
+	/// 1.2 <k>: contexts, k = 0 represented the initial configurations c_I
+	size_k k = 0;
+	/// 1.3 <global_R>: the sequences of reachable global configurations.
+	/// We obtain this via a BWS based explicit exploration.
+	vector<vector<antichain>> global_R;
+	global_R.reserve(k_bound + 1);
+	global_R.emplace_back(vector<antichain>(thread_state::S));
+	global_R[k][c_I.get_state()].emplace_back(CPDA.size(), c_I.get_state(),
+			c_I.get_stacks());
+	/// 1.4 <top_R>: the sequences of top configurations. We obtained the
+	/// sequence from R directly.
+	vector<set<top_config>> top_R(thread_state::S);
+	/// step 2: compute all reachable configurations with up to k_bound contexts.
+	while (k < k_bound) {
+		/// step 2.0 <nextLevel> = R_{k+1} \ R_{k}: the set of explicit
+		/// configurations reached in the (k+1)st context. It's initialized
+		/// as empty.
+		antichain nextLevel;
+		/// step 2.1: compute nextLevel, or R_{k+1}: iterate over all elements
+		/// in the currLevel. This is a BFS-like procedure.
+		while (!currLevel.empty()) {
+			/// 2.1.1: remove an element from currLevel
+			const auto c = currLevel.front();
+			currLevel.pop_front();
+			/// 2.1.3: compute its successors and process them one by one
+			const auto& k_images = step(c, false);
+			for (const auto& _c : k_images) {
+				/// 2.1.4: skip _c if it's already been reached
+				if (!update_R(global_R, k, _c))
+					continue;
+				/// 2.1.5: add _c to worklist if it's unreachable
+				currLevel.emplace_back(_c);
+			}
+			const auto& k_plus_images = step(c, true);
+			for (const auto& _c : k_plus_images) {
+				/// 2.1.4: skip _c if it's already been reached
+				if (!update_R(global_R, k + 1, _c))
+					continue;
+				/// 2.1.5: add _c to worklist if it's unreachable
+				nextLevel.emplace_back(_c);
+			}
 		}
-		/// step 3.4: add current configuration to global_R set
-		global_R[tau.get_context_k()][tau.get_state()].emplace_back(tau);
+		/// step 2.2: convergence detection
+		/// 2.2.1: OS1 collapses
+		if (nextLevel.size() == 0) {
+			cout << "=> sequence R collapses at " << k << "\n";
+			cout << "======================================" << endl;
+			return true;
+		}
+
+		if (converge(global_R[k], k, top_R)) {
+			cout << "=> sequence top_R collapses at " << k << "\n";
+			cout << "======================================" << endl;
+			return true;
+		}
+		/// step 2.3: if all elements in currLevel has been processed, then
+		/// move onto the (k+1)st contexts.
+		currLevel.swap(nextLevel), ++k;
 	}
-	return converge(global_R); /// return the number of reachable thread states
+
+	return false; /// return the number of reachable thread states
 }
 
 /**
@@ -153,58 +189,93 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
  * @param tau: a global configuration
  * @return a list of successors, aka. global configurations
  */
-antichain explicit_cuba::step(const global_config& tau, const size_k k_bound) {
+antichain explicit_cuba::step(const global_config& tau, const bool is_switch) {
 	antichain successors;
-	const auto& k = tau.get_context_k(); /// the context switches to tau
-
 	/// step 1: if context switches already reach to the upper bound
-	const auto& q = tau.get_state();     /// the control state of tau
-	const auto& W = tau.get_stacks();    /// the stacks of tau
-
-	/// step 2: iterate over all threads
-	for (uint tid = 0; tid < W.size(); ++tid) {
-		if (W[tid].empty() || (k == k_bound && tid != tau.get_thread_id())) {
-			continue;
-		}
-		/// step 2.1: set context switches
-		///           if context switch occurs, then k = k + 1;
-		auto _k = (tid == tau.get_thread_id() ? k : k + 1);
-		/// step 2.2: iterator over all successor of current thread state
-
-		const auto& ifind = CPDA[tid].get_pda().find(
-				thread_state(q, W[tid].top()));
-		if (ifind == CPDA[tid].get_pda().end())
-			continue;
-		for (const auto& rid : ifind->second) { /// rid: transition id
-			const auto& r = CPDA[tid].get_actions()[rid];
-			const auto& dst = r.get_dst();
-
-			auto _W = W; /// duplicate the stacks in current global conf.
-
-			switch (r.get_oper_type()) {
-			case type_stack_operation::PUSH: { /// push operation
-				_W[tid].pop();
-				for (auto is = dst.get_stack().get_worklist().rbegin();
-						is != dst.get_stack().get_worklist().rend(); ++is) {
-					_W[tid].push(*is);
-				}
-				successors.emplace_back(tid, _k, dst.get_state(), _W);
-			}
-				break;
-			case type_stack_operation::POP: { /// pop operation
-				if (_W[tid].pop())
-					successors.emplace_back(tid, _k, dst.get_state(), _W);
-			}
-				break;
-			default: { /// overwrite operation
-				if (_W[tid].overwrite(dst.get_stack().top()))
-					successors.emplace_back(tid, _k, dst.get_state(), _W);
-			}
-				break;
-			}
+	const auto& q = tau.get_state(); /// the control state of tau
+	const auto& W = tau.get_stacks(); /// the stacks of tau
+	/// step 2:
+	if (!is_switch) {
+		/// step 2.1: Obtain the successors without any context switch
+		step(q, W, tau.get_thread_id(), successors);
+	} else {
+		/// step 2.2: Obtain the successors with any context switch. So, the
+		/// algorithm iterates over all threads but the one producing tau
+		for (uint tid = 0; tid < W.size(); ++tid) {
+			/// step 2.2.1: deal with the situation of the thread whose index
+			/// ID = tid is "dead".
+			/// @WARNING: this means we don't allow an action whose source
+			/// is empty. Need to revisit
+			if (tid == tau.get_thread_id())
+				continue;
+			/// step 2.2.2: add successors obtained by performing thread tid
+			step(q, W, tid, successors);
 		}
 	}
 	return successors; /// the set of successors of tau
+}
+
+/**
+ *
+ * @param q
+ * @param W
+ * @param tid
+ * @param successors
+ */
+void explicit_cuba::step(const pda_state& q, const stack_vec& W, const uint tid,
+		antichain& successors) {
+	if (tid >= CPDA.size() || W[tid].empty())
+		return;
+	/// step 2.2: iterator over all successor of current thread state
+	const auto& ifind = CPDA[tid].get_pda().find(thread_state(q, W[tid].top()));
+	if (ifind == CPDA[tid].get_pda().end())
+		return;
+	for (const auto& rid : ifind->second) { /// rid: transition id
+		const auto& r = CPDA[tid].get_actions()[rid];
+		const auto& dst = r.get_dst();
+
+		auto _W = W; /// duplicate the stacks in current global conf.
+
+		switch (r.get_oper_type()) {
+		case type_stack_operation::PUSH: { /// push operation
+			_W[tid].pop();
+			for (auto is = dst.get_stack().get_worklist().rbegin();
+					is != dst.get_stack().get_worklist().rend(); ++is) {
+				_W[tid].push(*is);
+			}
+			successors.emplace_back(tid, dst.get_state(), _W);
+		}
+			break;
+		case type_stack_operation::POP: { /// pop operation
+			if (_W[tid].pop())
+				successors.emplace_back(tid, dst.get_state(), _W);
+		}
+			break;
+		default: { /// overwrite operation
+			if (_W[tid].overwrite(dst.get_stack().top()))
+				successors.emplace_back(tid, dst.get_state(), _W);
+		}
+			break;
+		}
+	}
+}
+
+/**
+ *
+ * @param R
+ * @param k
+ * @param c
+ * @return
+ */
+bool explicit_cuba::update_R(vector<vector<antichain>>& R, const size_k k,
+		const global_config& c) {
+	/// step 2.1.2: discard it if tau is already explored
+	if (is_reachable(c, k, R))
+		return false;
+	if (k >= R.size())
+		R.emplace_back(vector<antichain>(thread_state::S));
+	R[k][c.get_state()].emplace_back(c);
+	return true;
 }
 
 /**
@@ -212,38 +283,34 @@ antichain explicit_cuba::step(const global_config& tau, const size_k k_bound) {
  * @param R
  * @return
  */
-bool explicit_cuba::converge(const vector<vector<antichain>>& R) {
+bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
+		vector<set<top_config>>& top_R) {
 	bool convergent = false;
-	vector<set<top_config>> topped_R(thread_state::S);
 	cout << "======================================\n";
-	for (uint k = 0; k < R.size(); ++k) {
-		cout << "context " << k << "\n";
-		/// the number of new reachable top configurations
-		uint cnt_new_top_cfg = 0;
-		for (uint q = 0; q < R[k].size(); ++q) {
-			for (const auto& c : R[k][q]) {
-				cout << string(2, ' ') << c;
-				const auto& top_c = top_mapping(c);
-				const auto& ret = topped_R[c.get_state()].emplace(top_c);
-				if (ret.second) {
-					cout << " : " << top_c;
-					/// find a new top configuration
-					++cnt_new_top_cfg;
-					/// updating approx_X
-					auto ifind = approx_X[top_c.get_state()].find(top_c);
-					if (ifind != approx_X[top_c.get_state()].end()) {
-						approx_X[top_c.get_state()].erase(ifind);
-					}
+	cout << "context " << k << "\n";
+	/// the number of new reachable top configurations
+	uint cnt_new_top_cfg = 0;
+	for (uint q = 0; q < thread_state::S; ++q) {
+		for (const auto& c : R_k[q]) {
+			cout << string(2, ' ') << c;
+			const auto& top_c = top_mapping(c);
+			const auto& ret = top_R[c.get_state()].emplace(top_c);
+			if (ret.second) {
+				cout << " : " << top_c;
+				/// find a new top configuration
+				++cnt_new_top_cfg;
+				/// updating approx_X
+				auto ifind = approx_X[top_c.get_state()].find(top_c);
+				if (ifind != approx_X[top_c.get_state()].end()) {
+					approx_X[top_c.get_state()].erase(ifind);
 				}
-				cout << "\n";
 			}
+			cout << "\n";
 		}
-		if (cnt_new_top_cfg == 0 && !convergent && is_convergent()) {
-			cout << "=> OS3 converges at k = " << k - 1 << "\n";
+
+		if (cnt_new_top_cfg == 0 && !convergent && is_convergent())
 			convergent = true;
-		}
 	}
-	cout << "======================================" << endl;
 	return convergent;
 }
 
@@ -263,26 +330,27 @@ bool explicit_cuba::is_convergent() {
 
 /**
  * This procedure is to determine whether there exists c \in R such that
- *  (1) c == tau;
- *  (2) c.id == tau.id /\ c.s == c.s /\ c.W == tau.W /\ c.k < tau.k.
- * It returns true if any of above conditions satisfies. Otherwise, it returns
- * false.
+ * (1) c == tau;
+ * (2) c.id == tau.id /\ c.s == c.s /\ c.W == tau.W /\ c.k < tau.k.
+ * It returns true if any of above conditions satisfies. Otherwise, it
+ * returns false.
  *
- *  (3) One special case is that: there exists c \in explored such that
- *    c.id == tau.id /\ c.s == tau.s /\ c.W == tau.W /\ c.k > tau.k,
+ * (3) One special case is that: there exists c \in explored such that
+ * c.id == tau.id /\ c.s == tau.s /\ c.W == tau.W /\ c.k > tau.k,
  * then, the procedure replaces c by tau except returning false.
  *
  * @param tau
+ * @param curr_k
  * @param R
  * @return bool
  */
-bool explicit_cuba::is_reachable(const global_config& tau,
+bool explicit_cuba::is_reachable(const global_config& tau, const size_k curr_k,
 		vector<vector<antichain>>& R) {
 	bool flag = false;
 
 	const auto& q = tau.get_state();
 	/// step 1: check condition (1) and (2)
-	for (uint k = 0; k <= tau.get_context_k(); ++k) {
+	for (uint k = 0; k <= curr_k && k < R.size(); ++k) {
 		for (uint i = 0; i < R[k][q].size(); ++i) {
 			if (R[k][q][i] == tau) {
 				flag = true;
@@ -293,7 +361,7 @@ bool explicit_cuba::is_reachable(const global_config& tau,
 			break;
 	}
 	/// step 2: check condition 3
-	for (uint k = tau.get_context_k() + 1; k < R.size(); ++k) {
+	for (uint k = curr_k + 1; k < R.size(); ++k) {
 		for (uint i = 0; i < R[k][q].size(); ++i) {
 			if (R[k][q][i] == tau)
 				R[k][q].erase(R[k][q].begin() + i);

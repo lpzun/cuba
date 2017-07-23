@@ -116,7 +116,7 @@ global_state::~global_state() {
  * @param s
  * @param n
  */
-concrete_config::concrete_config(const pda_state& s, const size_t& n) :
+explicit_config::explicit_config(const pda_state& s, const size_t& n) :
 		s(s), W(n) {
 }
 
@@ -128,7 +128,7 @@ concrete_config::concrete_config(const pda_state& s, const size_t& n) :
  * @param s
  * @param W
  */
-concrete_config::concrete_config(const pda_state& s, const stack_vec& W) :
+explicit_config::explicit_config(const pda_state& s, const stack_vec& W) :
 		s(s), W(W) {
 
 }
@@ -137,14 +137,14 @@ concrete_config::concrete_config(const pda_state& s, const stack_vec& W) :
  * A constructor with a global configuration
  * @param g
  */
-concrete_config::concrete_config(const concrete_config& c) :
+explicit_config::explicit_config(const explicit_config& c) :
 		s(c.get_state()), W(c.get_stacks()) {
 }
 
 /**
  * destructor
  */
-concrete_config::~concrete_config() {
+explicit_config::~explicit_config() {
 
 }
 
@@ -152,7 +152,7 @@ concrete_config::~concrete_config() {
  * return a top configuration
  * @return a global state
  */
-global_state concrete_config::top() const {
+global_state explicit_config::top() const {
 	vector<pda_alpha> L(W.size());
 	for (uint i = 0; i < W.size(); ++i) {
 		L[i] = W[i].top();
@@ -164,7 +164,7 @@ global_state concrete_config::top() const {
  * return a top configuration
  * @return a global state
  */
-global_state concrete_config::top() {
+global_state explicit_config::top() {
 	vector<pda_alpha> L(W.size());
 	for (uint i = 0; i < W.size(); ++i) {
 		L[i] = W[i].top();
@@ -172,25 +172,56 @@ global_state concrete_config::top() {
 	return global_state(s, L);
 }
 
+/**
+ *
+ * @param s
+ * @param n
+ */
 global_config::global_config(const pda_state& s, const size_t& n) :
-		concrete_config(s, n), id(0), k(0) {
+		explicit_config(s, n), id(0), k(0) {
 
 }
 
+/**
+ *
+ * @param id
+ * @param k
+ * @param s
+ * @param n
+ */
 global_config::global_config(const id_thread& id, const ctx_bound& k,
 		const pda_state& s, const size_t& n) :
-		concrete_config(s, n), id(id), k(k) {
+		explicit_config(s, n), id(id), k(k) {
 
 }
 
+/**
+ * Constructor with thread id, PDA state and the vector of stacks
+ * @param id
+ * @param s
+ * @param W
+ */
+global_config::global_config(const id_thread& id, const pda_state& s,
+		const stack_vec& W) :
+		explicit_config(s, W), id(id), k(0) {
+
+}
+
+/**
+ *
+ * @param id
+ * @param k
+ * @param s
+ * @param W
+ */
 global_config::global_config(const id_thread& id, const ctx_bound& k,
 		const pda_state& s, const stack_vec& W) :
-		concrete_config(s, W), id(id), k(k) {
+		explicit_config(s, W), id(id), k(k) {
 
 }
 
 global_config::global_config(const global_config& c) :
-		concrete_config(c.get_state(), c.get_stacks()), id(c.get_thread_id()), k(
+		explicit_config(c.get_state(), c.get_stacks()), id(c.get_thread_id()), k(
 				c.get_context_k()) {
 
 }
@@ -205,7 +236,7 @@ global_config::~global_config() {
 /////////////////////////////////////////////////////////////////////////
 
 /**
- * constructor with control state g and a list of finite automaton W
+ * Constructor with control state g and a list of finite automaton W
  * @param g
  * @param W
  */
