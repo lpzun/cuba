@@ -27,7 +27,7 @@ processor::processor(const string& initl, const string& filename) :
 	this->print_approximation(approx_Z);
 	cout << "Approximation Y:\n";
 	this->print_approximation(approx_Y);
-	cout << "Approximation X:\n";
+	cout << "G intersects Z:\n";
 	this->print_approximation(approx_X);
 }
 
@@ -36,7 +36,7 @@ processor::processor(const string& initl, const string& filename) :
  * @param initl
  * @param filename
  */
-processor::processor(const concrete_config& initl, const string& filename) :
+processor::processor(const explicit_config& initl, const string& filename) :
 		approx_X(thread_state::S) {
 	const auto& initl_c = top_mapping(initl);
 	const auto& CFSM = parser::parse_input_cfsm(filename);
@@ -45,7 +45,7 @@ processor::processor(const concrete_config& initl, const string& filename) :
 
 	cout << "Approximation Z:\n";
 	this->print_approximation(approx_Z);
-	cout << "Approximation X:\n";
+	cout << "G intersects Z:\n";
 	this->print_approximation(approx_X);
 
 	if (prop::OPT_PRINT_ALL) {
@@ -127,7 +127,7 @@ deque<top_config> processor::step(const top_config& c,
  * @param tau
  * @return
  */
-top_config processor::top_mapping(const concrete_config& tau) {
+top_config processor::top_mapping(const explicit_config& tau) {
 	vector<pda_alpha> L(tau.get_stacks().size());
 	for (size_t i = 0; i < tau.get_stacks().size(); ++i) {
 		if (tau.get_stacks()[i].empty())

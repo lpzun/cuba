@@ -275,7 +275,7 @@ finite_machine parser::parse_input_fsm_no_pop(const vector<string>& sPDA) {
  * @param s
  * @return thread state
  */
-concrete_config parser::parse_input_cfg(const string& s) {
+explicit_config parser::parse_input_cfg(const string& s) {
 	if (s.find('|') == std::string::npos) { /// s is store in a file
 		ifstream in(s.c_str());
 		if (in.good()) {
@@ -297,7 +297,7 @@ concrete_config parser::parse_input_cfg(const string& s) {
  * @param delim
  * @return concrete configuration
  */
-concrete_config parser::create_global_config_from_str(const string& s_ts,
+explicit_config parser::create_global_config_from_str(const string& s_ts,
 		const char& delim) {
 	const auto& vs_cfg = split(s_ts, delim);
 	if (vs_cfg.size() != 2) {
@@ -315,7 +315,7 @@ concrete_config parser::create_global_config_from_str(const string& s_ts,
 				W[i].push(std::stoi(s));
 		}
 	}
-	return concrete_config(std::stoi(vs_cfg[0]), W);
+	return explicit_config(std::stoi(vs_cfg[0]), W);
 }
 
 /**

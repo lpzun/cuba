@@ -75,7 +75,7 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 	///
 	/// 1.1 <currLevel> = S_{k} \ S_{k-1}: the set of symbolic configurations
 	/// which are reached in the kth context for processing. It's initialized
-	/// as { <q_I, (A1_I, ..., An_I)> }.
+	/// as { <q_I|(A1_I, ..., An_I)> }.
 	deque<symbolic_config> currLevel;
 	currLevel.emplace_back(c_I);
 	/// 1.2 contexts, k = 0 represents the initial configuration c_I
@@ -93,7 +93,7 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 		/// <nextLevel> = S_{k+1} \ S_{k}: the set of symbolic configurations
 		/// reached in the (k+1)st context. It's initialized as empty.
 		deque<symbolic_config> nextLevel;
-		/// 2.1 compute nextLevel, or R_{k+1}: iterate over all elements
+		/// 2.1 compute nextLevel, or S_{k+1}: iterate over all elements
 		/// in the currLevel. This is a BFS-like procedure.
 		while (!currLevel.empty()) {
 			/// 2.1.1 remove a aggregate configuration from currLevel.
@@ -113,7 +113,7 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 		}
 
 		/// 2.2 if all elements in currLevel has been processed, then move
-		///     to k + 1 contexts.
+		/// onto the (k + 1)st context.
 		currLevel.swap(nextLevel), ++k;
 		/// 2.3 store R_{k+1} and the tops of configurations
 		global_R[k] = currLevel;

@@ -28,8 +28,8 @@ public:
 	void context_bounded_analysis(const size_k k = 0);
 
 private:
-	concrete_config initl_c;
-	concrete_config final_c;
+	explicit_config initl_c;
+	explicit_config final_c;
 	concurrent_pushdown_automata CPDA;
 	vector<set<top_config>> approx_X;
 
@@ -87,8 +87,7 @@ using finite_machine = map<thread_state, deque<transition<thread_state, thread_s
 using concurrent_finite_machine = vector<finite_machine>;
 
 /**
- * The class of explore:
- *     define a tool like explore in CAV'10 dynamic cutoff tool
+ * The class of explicit CUBA
  */
 class explicit_cuba {
 public:
@@ -100,20 +99,26 @@ public:
 	void context_bounded_analysis(const size_k& k);
 private:
 	///  Part 1: parse a pushdown system (PDS)
-	concrete_config initl_c;
-	concrete_config final_c;
+	explicit_config initl_c;
+	explicit_config final_c;
 	concurrent_pushdown_automata CPDA;
 	vector<set<top_config>> approx_X;
 	vector<vector<bool>> reachable_T;
 
 	bool k_bounded_reachability(const size_k k_bound,
-			const concrete_config& c_I);
-	antichain step(const global_config& tau, const size_k k_bound);
+			const explicit_config& c_I);
+	antichain step(const global_config& tau, const bool is_switch);
+	void step(const pda_state& q, const stack_vec& W, const uint tid,
+			antichain& successors);
+	bool update_R(vector<vector<antichain>>& R, const size_k k,
+			const global_config& c);
 
 	/// determine convergence, reachability of a target and so on
-	bool converge(const vector<vector<antichain>>& R);
+	bool converge(const vector<antichain>& R, const size_k k,
+			vector<set<top_config>>& top_R);
 	bool is_convergent();
-	bool is_reachable(const global_config& tau, vector<vector<antichain>>& R);
+	bool is_reachable(const global_config& tau, const size_k k,
+			vector<vector<antichain>>& R);
 	void marking(const pda_state& s, const pda_alpha& l);
 
 	top_config top_mapping(const global_config& tau);
@@ -133,7 +138,7 @@ private:
 class processor {
 public:
 	processor(const string& initl, const string& filename);
-	processor(const concrete_config& initl, const string& filename);
+	processor(const explicit_config& initl, const string& filename);
 	~processor();
 
 	vector<set<top_config>> context_insensitive(const top_config& initl_c,
@@ -152,7 +157,7 @@ private:
 			const vector<finite_machine>& CFSM);
 	deque<top_config> step(const top_config& c,
 			const vector<finite_machine>& CFSM);
-	top_config top_mapping(const concrete_config& tau);
+	top_config top_mapping(const explicit_config& tau);
 	void print_approximation(const vector<set<top_config>>& approx_R);
 };
 
@@ -166,7 +171,7 @@ public:
 			const string& filename);
 	static concurrent_finite_machine parse_input_cfsm(const string& filename,
 			const bool no_pop = false);
-	static concrete_config parse_input_cfg(const string& s);
+	static explicit_config parse_input_cfg(const string& s);
 
 private:
 	static vector<vector<string>> read_input_cpds(const string& filename,
@@ -190,7 +195,7 @@ private:
 
 	static thread_config create_thread_config_from_str(const string& s_ts,
 			const char& delim = prop::SHARED_LOCAL_DELIMITER);
-	static concrete_config create_global_config_from_str(const string& s_ts,
+	static explicit_config create_global_config_from_str(const string& s_ts,
 			const char& delim = prop::SHARED_LOCAL_DELIMITER);
 
 	static thread_state create_thread_state_from_str(const string& s_ts,

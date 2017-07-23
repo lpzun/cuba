@@ -149,12 +149,12 @@ inline bool operator!=(const global_state& g1, const global_state& g2) {
 /**
  * A configuration (s|w1,...,wn) of a CPDS is an element of Qx(L*)^n
  */
-class concrete_config {
+class explicit_config {
 public:
-	concrete_config(const pda_state& s, const size_t& n);
-	concrete_config(const pda_state& s, const stack_vec& W);
-	concrete_config(const concrete_config& c);
-	~concrete_config();
+	explicit_config(const pda_state& s, const size_t& n);
+	explicit_config(const pda_state& s, const stack_vec& W);
+	explicit_config(const explicit_config& c);
+	~explicit_config();
 
 	pda_state get_state() const {
 		return s;
@@ -178,7 +178,7 @@ private:
  * @param c
  * @return ostream
  */
-inline ostream& operator<<(ostream& os, const concrete_config& c) {
+inline ostream& operator<<(ostream& os, const explicit_config& c) {
 	os << "(" << c.get_state() << prop::SHARED_LOCAL_DELIMITER;
 	if (c.get_stacks().size() > 0)
 		os << c.get_stacks()[0];
@@ -194,7 +194,7 @@ inline ostream& operator<<(ostream& os, const concrete_config& c) {
  * @param g2
  * @return bool
  */
-inline bool operator<(const concrete_config& g1, const concrete_config& g2) {
+inline bool operator<(const explicit_config& g1, const explicit_config& g2) {
 	return g1.top() < g2.top();
 }
 
@@ -204,7 +204,7 @@ inline bool operator<(const concrete_config& g1, const concrete_config& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator>(const concrete_config& g1, const concrete_config& g2) {
+inline bool operator>(const explicit_config& g1, const explicit_config& g2) {
 	return g2 < g1;
 }
 
@@ -214,7 +214,7 @@ inline bool operator>(const concrete_config& g1, const concrete_config& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator==(const concrete_config& g1, const concrete_config& g2) {
+inline bool operator==(const explicit_config& g1, const explicit_config& g2) {
 	if (g1.get_state() == g2.get_state()) {
 		auto iw1 = g1.get_stacks().cbegin();
 		auto iw2 = g2.get_stacks().cbegin();
@@ -234,18 +234,19 @@ inline bool operator==(const concrete_config& g1, const concrete_config& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator!=(const concrete_config& g1, const concrete_config& g2) {
+inline bool operator!=(const explicit_config& g1, const explicit_config& g2) {
 	return !(g1 == g2);
 }
 
 /**
  *
  */
-class global_config: public concrete_config {
+class global_config: public explicit_config {
 public:
 	global_config(const pda_state& s, const size_t& n);
 	global_config(const id_thread& id, const ctx_bound& k, const pda_state& s,
 			const size_t& n);
+	global_config(const id_thread& id, const pda_state& s, const stack_vec& W);
 	global_config(const id_thread& id, const ctx_bound& k, const pda_state& s,
 			const stack_vec& W);
 	global_config(const global_config& c);
