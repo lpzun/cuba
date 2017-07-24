@@ -33,7 +33,7 @@ explicit_cuba::~explicit_cuba() {
  * @param k: the number of context switches
  */
 void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
-	bool cycle = false;
+//	bool cycle = false;
 //	for (size_t tid = 0; tid < CPDA.size(); ++tid) {
 //		if (is_cyclic(tid)) {
 //			cycle = true;
@@ -246,9 +246,9 @@ bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
 				/// find a new top configuration
 				++cnt_new_top_cfg;
 				/// updating approx_X
-				auto ifind = approx_X[top_c.get_state()].find(top_c);
-				if (ifind != approx_X[top_c.get_state()].end())
-					approx_X[top_c.get_state()].erase(ifind);
+				auto ifind = generators[top_c.get_state()].find(top_c);
+				if (ifind != generators[top_c.get_state()].end())
+					generators[top_c.get_state()].erase(ifind);
 			}
 			cout << "\n";
 		}
@@ -269,7 +269,7 @@ bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
  *         false: otherwise
  */
 bool explicit_cuba::is_convergent() {
-	for (const auto& s : approx_X) {
+	for (const auto& s : generators) {
 		if (!s.empty())
 			return false;
 	}
@@ -334,14 +334,14 @@ void explicit_cuba::marking(const pda_state& s, const pda_alpha& l) {
  * @return
  */
 top_config explicit_cuba::top_mapping(const global_config& tau) {
-	vector<pda_alpha> L(tau.get_stacks().size());
+	vector<pda_alpha> W(tau.get_stacks().size());
 	for (size_t i = 0; i < tau.get_stacks().size(); ++i) {
 		if (tau.get_stacks()[i].empty())
-			L[i] = alphabet::EPSILON;
+			W[i] = alphabet::EPSILON;
 		else
-			L[i] = tau.get_stacks()[i].top();
+			W[i] = tau.get_stacks()[i].top();
 	}
-	return top_config(tau.get_state(), L);
+	return top_config(tau.get_state(), W);
 }
 
 /**

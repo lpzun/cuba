@@ -8,34 +8,6 @@
 #include "cuba.hh"
 
 namespace cuba {
-
-/**
- * constructor
- * @param initl initial global state
- * @param final final global state
- * @param filename: input CPDs
- * @param n: the number of threads, for parameterized system only
- */
-base_cuba::base_cuba(const string& initl, const string& final,
-		const string& filename, const size_t n) :
-		initl_c(0, 1), final_c(0, 1), CPDA(), approx_X(), reachable_T() {
-	if (prop::OPT_PARAMETERIZED) {
-
-	} else {
-		initl_c = parser::parse_input_cfg(initl);
-		final_c = parser::parse_input_cfg(final);
-		CPDA = parser::parse_input_cpds(filename);
-	}
-
-	/// set up overapproximation of reachable top configurations
-	processor proc(initl_c, filename);
-	approx_X = proc.get_approx_X();
-}
-
-base_cuba::~base_cuba() {
-
-}
-
 /**
  * constructor
  * @param initl initial global state
@@ -586,7 +558,7 @@ bool symbolic_cuba::converge(const vector<deque<symbolic_config>>& R,
  *         false: otherwise
  */
 bool symbolic_cuba::is_convergent() {
-	for (const auto& s : approx_X) {
+	for (const auto& s : generators) {
 		if (!s.empty())
 			return false;
 	}
@@ -610,10 +582,10 @@ uint symbolic_cuba::top_mapping(const deque<symbolic_config>& R,
 				cout << string(2, ' ') << top_c << "\n";
 				++cnt_new_top_cfg;
 				/// updating approx_X
-				auto ifind = approx_X[top_c.get_state()].find(top_c);
-				if (ifind != approx_X[top_c.get_state()].end()) {
+				auto ifind = generators[top_c.get_state()].find(top_c);
+				if (ifind != generators[top_c.get_state()].end()) {
 					//cout << "----------------" << top_c << endl;
-					approx_X[top_c.get_state()].erase(ifind);
+					generators[top_c.get_state()].erase(ifind);
 				}
 			}
 		}

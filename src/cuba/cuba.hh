@@ -14,8 +14,12 @@
 #include "fsa.hh"
 
 namespace cuba {
+using antichain = deque<global_config>;
+using finite_machine = map<thread_state, deque<transition<thread_state, thread_state>>>;
+using concurrent_finite_machine = vector<finite_machine>;
+
 /////////////////////////////////////////////////////////////////////////
-/// PART 0. The following are the base class for context-unbounded
+/// PART 1. The following are the base class for context-unbounded
 /// analysis.
 /////////////////////////////////////////////////////////////////////////
 class base_cuba {
@@ -24,16 +28,32 @@ public:
 			const size_t n);
 	virtual ~base_cuba();
 	virtual void context_unbounded_analysis(const size_k k_bound = 0) = 0;
+
+	void context_insensitive(const string& initl, const string& filename);
+	void context_insensitive(const explicit_config& initl,
+			const string& filename);
 protected:
 	explicit_config initl_c;
 	explicit_config final_c;
 	concurrent_pushdown_automata CPDA;
-	vector<set<top_config>> approx_X;
+	/// 1.1 <generators>: the overapproximation of the set of reachable
+	///     popped top configurations
+	vector<set<top_config>> generators;
 	vector<vector<bool>> reachable_T;
+
+private:
+	vector<set<top_config>> context_insensitive(const top_config& initl_c,
+			const vector<finite_machine>& CFSM);
+	vector<set<top_config>> standard_FWS(const top_config& initl_c,
+			const vector<finite_machine>& CFSM);
+	deque<top_config> step(const top_config& c,
+			const vector<finite_machine>& CFSM);
+	top_config top_mapping(const explicit_config& tau);
+	void print_approximation(const vector<set<top_config>>& approx_R);
 };
 
 /////////////////////////////////////////////////////////////////////////
-/// PART 1. The following are the declarations for context-unbounded
+/// PART 2. The following are the declarations for context-unbounded
 /// analysis.
 /////////////////////////////////////////////////////////////////////////
 class symbolic_cuba: public base_cuba {
@@ -91,13 +111,9 @@ private:
 };
 
 /////////////////////////////////////////////////////////////////////////
-/// PART 2. The following are the utilities for explore.
+/// PART 3. The following are the utilities for explore.
 ///
 /////////////////////////////////////////////////////////////////////////
-
-using antichain = deque<global_config>;
-using finite_machine = map<thread_state, deque<transition<thread_state, thread_state>>>;
-using concurrent_finite_machine = vector<finite_machine>;
 
 /**
  * The class of explicit CUBA
@@ -136,37 +152,6 @@ private:
 			map<vertex, bool>& visit, map<vertex, bool>& trace);
 };
 
-/////////////////////////////////////////////////////////////////////////
-/// PART 3. A preprocessor, overapproximate the set of reachable top
-/// configurations
-///
-/////////////////////////////////////////////////////////////////////////
-
-class processor {
-public:
-	processor(const string& initl, const string& filename);
-	processor(const explicit_config& initl, const string& filename);
-	~processor();
-
-	vector<set<top_config>> context_insensitive(const top_config& initl_c,
-			const vector<finite_machine>& CFSM);
-
-	const vector<set<top_config> >& get_approx_X() const {
-		return approx_X;
-	}
-
-private:
-	/// 1.1 <approx_X>: the overapproximation of the set of reachable
-	///     popped top configurations
-	vector<set<top_config>> approx_X;
-
-	vector<set<top_config>> standard_FWS(const top_config& initl_c,
-			const vector<finite_machine>& CFSM);
-	deque<top_config> step(const top_config& c,
-			const vector<finite_machine>& CFSM);
-	top_config top_mapping(const explicit_config& tau);
-	void print_approximation(const vector<set<top_config>>& approx_R);
-};
 
 /////////////////////////////////////////////////////////////////////////
 /// PART 4. The following are the utilities for PDS file parser.
