@@ -83,11 +83,11 @@ int main(const int argc, const char * const * const argv) {
 			if (is_explicit) {
 				cout << "explicit exploration......\n";
 				explicit_cuba ecuba(initl, final, filename, std::stoul(n));
-				ecuba.context_bounded_analysis(std::stoul(k));
+				ecuba.context_unbounded_analysis(std::stoul(k));
 			} else {
 				cout << "symbolic exploration......\n";
 				symbolic_cuba scuba(initl, final, filename, std::stoul(n));
-				scuba.context_bounded_analysis(std::stoul(k));
+				scuba.context_unbounded_analysis(std::stoul(k));
 			}
 		}
 

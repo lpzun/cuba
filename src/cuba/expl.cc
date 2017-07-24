@@ -8,30 +8,16 @@
 #include "cuba.hh"
 
 namespace cuba {
-
 /**
  * constructor
- * @param k     context switch bound
- * @param initl initial thread state
- * @param final final thread state
- * @param mapping_Q: mapping a control state to its ID
- * @param Q: active control states
- * @param R: active transitions
+ * @param initl initial global state
+ * @param final final global state
+ * @param filename: input CPDs
+ * @param n: the number of threads, for parameterized system only
  */
 explicit_cuba::explicit_cuba(const string& initl, const string& final,
 		const string& filename, const size_t n) :
-		initl_c(0, 1), final_c(0, 1), CPDA(), approx_X(), reachable_T() {
-	if (prop::OPT_PARAMETERIZED) {
-
-	} else {
-		initl_c = parser::parse_input_cfg(initl);
-		final_c = parser::parse_input_cfg(final);
-		CPDA = parser::parse_input_cpds(filename);
-	}
-
-	/// set up overapproximation of reachable top configurations
-	processor proc(initl_c, filename);
-	approx_X = proc.get_approx_X();
+		base_cuba(initl, final, filename, n) {
 }
 
 /**
@@ -46,7 +32,7 @@ explicit_cuba::~explicit_cuba() {
  * @param n: the number of threads
  * @param k: the number of context switches
  */
-void explicit_cuba::context_bounded_analysis(const size_k& k) {
+void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
 	bool cycle = false;
 //	for (size_t tid = 0; tid < CPDA.size(); ++tid) {
 //		if (is_cyclic(tid)) {
@@ -58,7 +44,7 @@ void explicit_cuba::context_bounded_analysis(const size_k& k) {
 //	cout << "Acycle.......\n";
 //	if (cycle)
 //		return;
-	const auto is_reachable = k_bounded_reachability(k, initl_c);
+	const auto is_reachable = k_bounded_reachability(k_bound, initl_c);
 	if (prop::OPT_PROB_REACHABILITY && is_reachable) {
 		cout << final_c << " is reachable!" << endl;
 	}

@@ -2,7 +2,7 @@
  * @brief cuba.cc
  *
  * @date  : Aug 28, 2016
- * @author: lpzun
+ * @author: Peizun Liu
  */
 
 #include "cuba.hh"
@@ -10,21 +10,42 @@
 namespace cuba {
 
 /**
- * constructor of CUBA
- * @param filename
- * @param initl
- * @param final
+ * constructor
+ * @param initl initial global state
+ * @param final final global state
+ * @param filename: input CPDs
+ * @param n: the number of threads, for parameterized system only
+ */
+base_cuba::base_cuba(const string& initl, const string& final,
+		const string& filename, const size_t n) :
+		initl_c(0, 1), final_c(0, 1), CPDA(), approx_X(), reachable_T() {
+	if (prop::OPT_PARAMETERIZED) {
+
+	} else {
+		initl_c = parser::parse_input_cfg(initl);
+		final_c = parser::parse_input_cfg(final);
+		CPDA = parser::parse_input_cpds(filename);
+	}
+
+	/// set up overapproximation of reachable top configurations
+	processor proc(initl_c, filename);
+	approx_X = proc.get_approx_X();
+}
+
+base_cuba::~base_cuba() {
+
+}
+
+/**
+ * constructor
+ * @param initl initial global state
+ * @param final final global state
+ * @param filename: input CPDs
+ * @param n: the number of threads, for parameterized system only
  */
 symbolic_cuba::symbolic_cuba(const string& initl, const string& final,
 		const string& filename, const size_t n) :
-		initl_c(0, 1), final_c(0, 1), CPDA(), approx_X() {
-	initl_c = parser::parse_input_cfg(initl);
-	final_c = parser::parse_input_cfg(final);
-	CPDA = parser::parse_input_cpds(filename);
-
-	/// set up the over-approximation of reachable top configurations
-	processor proc(initl_c, filename);
-	approx_X = proc.get_approx_X();
+		base_cuba(initl, final, filename, n) {
 }
 
 /**
@@ -43,7 +64,7 @@ symbolic_cuba::~symbolic_cuba() {
  * @param n: the number of threads
  * @param k: the number of context switches
  */
-void symbolic_cuba::context_bounded_analysis(const size_k k_bound) {
+void symbolic_cuba::context_unbounded_analysis(const size_k k_bound) {
 	/// step 1: set up the initial configurations
 	vector<store_automaton> W;
 	for (uint i = 0; i < CPDA.size(); ++i) {
@@ -61,8 +82,8 @@ void symbolic_cuba::context_bounded_analysis(const size_k k_bound) {
 
 /// a pair of configuration used in QR algorithm
 /**
- * This is the main procedure to do the context-bounded analysis. It implements the
- * algorithm in QR'05 paper.
+ * This is the main procedure to do the context-bounded analysis. It implements
+ * the algorithm in QR'05 paper.
  * @param k  : the upper bound of context switches
  * @param c_I: the initial symbolic configuration
  * @return a set of reachable symbolic configuration

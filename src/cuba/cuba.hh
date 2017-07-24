@@ -14,24 +14,36 @@
 #include "fsa.hh"
 
 namespace cuba {
+/////////////////////////////////////////////////////////////////////////
+/// PART 0. The following are the base class for context-unbounded
+/// analysis.
+/////////////////////////////////////////////////////////////////////////
+class base_cuba {
+public:
+	base_cuba(const string& initl, const string& final, const string& filename,
+			const size_t n);
+	virtual ~base_cuba();
+	virtual void context_unbounded_analysis(const size_k k_bound = 0) = 0;
+protected:
+	explicit_config initl_c;
+	explicit_config final_c;
+	concurrent_pushdown_automata CPDA;
+	vector<set<top_config>> approx_X;
+	vector<vector<bool>> reachable_T;
+};
 
 /////////////////////////////////////////////////////////////////////////
 /// PART 1. The following are the declarations for context-unbounded
 /// analysis.
 /////////////////////////////////////////////////////////////////////////
-class symbolic_cuba {
+class symbolic_cuba: public base_cuba {
 public:
 	symbolic_cuba(const string& initl, const string& final,
 			const string& filename, const size_t n = 0);
 	~symbolic_cuba();
 
-	void context_bounded_analysis(const size_k k = 0);
-
+	virtual void context_unbounded_analysis(const size_k k_bound = 0);
 private:
-	explicit_config initl_c;
-	explicit_config final_c;
-	concurrent_pushdown_automata CPDA;
-	vector<set<top_config>> approx_X;
 
 	/// Post*(A): build pushdown store automaton
 	store_automaton create_store_automaton(const size_t i);
@@ -90,21 +102,15 @@ using concurrent_finite_machine = vector<finite_machine>;
 /**
  * The class of explicit CUBA
  */
-class explicit_cuba {
+class explicit_cuba: public base_cuba {
 public:
 	explicit_cuba(const string& initl, const string& final,
 			const string& filename, const size_t n = 0);
 
-	~explicit_cuba();
+	virtual ~explicit_cuba();
 
-	void context_bounded_analysis(const size_k& k);
+	virtual void context_unbounded_analysis(const size_k k_bound = 0);
 private:
-	///  Part 1: parse a pushdown system (PDS)
-	explicit_config initl_c;
-	explicit_config final_c;
-	concurrent_pushdown_automata CPDA;
-	vector<set<top_config>> approx_X;
-	vector<vector<bool>> reachable_T;
 
 	bool k_bounded_reachability(const size_k k_bound,
 			const explicit_config& c_I);
