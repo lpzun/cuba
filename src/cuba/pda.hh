@@ -33,8 +33,9 @@ public:
 	~alphabet() {
 	}
 
-	static pda_alpha EPSILON;
-	static char OPT_EPSILON;
+	const static pda_alpha EPSILON;
+	const static pda_alpha NULLPTR;
+	const static char OPT_EPSILON;
 };
 
 /**

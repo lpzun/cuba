@@ -9,8 +9,9 @@
 
 namespace cuba {
 
-int alphabet::EPSILON = -1;
-char alphabet::OPT_EPSILON = '-';
+const pda_alpha alphabet::EPSILON = -1;
+const pda_alpha alphabet::NULLPTR = -2;
+const char alphabet::OPT_EPSILON = '-';
 
 /**
  * constructor with default parameters

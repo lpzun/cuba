@@ -174,6 +174,8 @@ private:
 			const vector<string>& sPDA);
 	static finite_machine parse_input_fsm_no_pop(const vector<string>& sPDA);
 
+	static pda_alpha parse_input_alpha(const string& alpha);
+
 	static void remove_comments(istream& in, ostream& out,
 			const string& comment);
 	static bool getline(istream& in, string& line, const char& eol = '\n');
