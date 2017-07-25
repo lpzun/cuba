@@ -237,8 +237,8 @@ store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
 			continue;
 
 		if (a != alphabet::EPSILON) { /// if label != epsilon
-			auto ifind = P.get_pda().find(thread_state(p, a));
-			if (ifind != P.get_pda().end()) {
+			auto ifind = P.get_program().find(thread_state(p, a));
+			if (ifind != P.get_program().end()) {
 				for (const auto& rid : ifind->second) {
 
 					const auto& r = P.get_actions()[rid]; /// PDA transition

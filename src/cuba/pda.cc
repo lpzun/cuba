@@ -16,7 +16,7 @@ char alphabet::OPT_EPSILON = '-';
  * constructor with default parameters
  */
 pushdown_automaton::pushdown_automaton() :
-		states(), alphas(), actions(), PDA() {
+		states(), alphas(), actions(), program() {
 
 }
 
@@ -31,7 +31,7 @@ pushdown_automaton::pushdown_automaton() :
 pushdown_automaton::pushdown_automaton(const set<pda_state>& states,
 		const set<pda_alpha>& alphas, const vector<pda_action>& actions,
 		const adj_list& PDA) :
-		states(states), alphas(alphas), actions(actions), PDA(PDA) {
+		states(states), alphas(alphas), actions(actions), program(PDA) {
 }
 
 /**

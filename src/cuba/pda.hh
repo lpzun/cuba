@@ -483,9 +483,9 @@ inline bool operator!=(const thread_config& c1, const thread_config& c2) {
 ///
 /////////////////////////////////////////////////////////////////////////
 /// define the transition ID
-using id_transition = uint;
+using id_action = uint;
 using vertex = thread_state;
-using edge = id_transition;
+using edge = id_action;
 using adj_list = map<vertex, deque<edge>>;
 using pda_action = transition<vertex, thread_config>;
 
@@ -513,19 +513,15 @@ public:
 		return actions;
 	}
 
-	const adj_list& get_pda() const {
-		return PDA;
+	const adj_list& get_program() const {
+		return program;
 	}
 
 private:
-	/// the set of control states
-	set<pda_state> states;
-	/// the set of stack symbols
-	set<pda_alpha> alphas;
-	/// the set of actions
-	vector<pda_action> actions;
-	/// store PDA in adjacency list
-	adj_list PDA;
+	set<pda_state> states; /// the set of control states
+	set<pda_alpha> alphas; /// the set of stack symbols
+	vector<pda_action> actions; /// the set of actions
+	adj_list program; /// store PDA in adjacency list
 };
 
 /**

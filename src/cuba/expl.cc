@@ -33,17 +33,17 @@ explicit_cuba::~explicit_cuba() {
  * @param k: the number of context switches
  */
 void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
-//	bool cycle = false;
-//	for (size_t tid = 0; tid < CPDA.size(); ++tid) {
-//		if (is_cyclic(tid)) {
-//			cycle = true;
-//			cout << "PDA " << tid << " contains cycles. Simulator exits...\n";
-//			break;
-//		}
-//	}
-//	cout << "Acycle.......\n";
-//	if (cycle)
-//		return;
+	bool cycle = false;
+	for (size_t tid = 0; tid < CPDA.size(); ++tid) {
+		if (finite_context_reachability(tid)) {
+			cycle = true;
+			cout << "PDA " << tid << " contains cycles. Simulator exits...\n";
+			break;
+		}
+	}
+	cout << "Acycle.......\n";
+	if (cycle)
+		return;
 	const auto is_reachable = k_bounded_reachability(k_bound, initl_c);
 	if (prop::OPT_PROB_REACHABILITY && is_reachable) {
 		cout << final_c << " is reachable!" << endl;
@@ -174,8 +174,9 @@ void explicit_cuba::step(const pda_state& q, const stack_vec& W, const uint tid,
 	if (tid >= CPDA.size() || W[tid].empty())
 		return;
 	/// step 2.2: iterator over all successor of current thread state
-	const auto& ifind = CPDA[tid].get_pda().find(thread_state(q, W[tid].top()));
-	if (ifind == CPDA[tid].get_pda().end())
+	const auto& ifind = CPDA[tid].get_program().find(
+			thread_state(q, W[tid].top()));
+	if (ifind == CPDA[tid].get_program().end())
 		return;
 	for (const auto& rid : ifind->second) { /// rid: transition id
 		const auto& r = CPDA[tid].get_actions()[rid];
@@ -349,18 +350,19 @@ top_config explicit_cuba::top_mapping(const global_config& tau) {
  * @param tid
  * @return bool
  */
-bool explicit_cuba::is_cyclic(const size_t tid) {
+bool explicit_cuba::finite_context_reachability(const size_t tid) {
 	map<vertex, bool> visit;
 	map<vertex, bool> trace;
-	for (const auto& p : CPDA[tid].get_pda()) {
+	for (const auto& p : CPDA[tid].get_program()) {
 		visit[p.first] = false;
 		trace[p.first] = false;
 	}
 
-	for (const auto& p : CPDA[tid].get_pda()) {
+	for (const auto& p : CPDA[tid].get_program()) {
 		stack<pda_alpha> W;
 		W.push(p.first.get_alpha());
-		if (!visit[p.first] && is_cyclic(tid, p.first, W, visit, trace)) {
+		if (!visit[p.first]
+				&& finite_context_reachability(tid, p.first, W, visit, trace)) {
 			return true;
 		}
 	}
@@ -375,13 +377,13 @@ bool explicit_cuba::is_cyclic(const size_t tid) {
  * @param trace
  * @return
  */
-bool explicit_cuba::is_cyclic(const size_t tid, const thread_state& s,
-		stack<pda_alpha>& W, map<thread_state, bool>& visit,
-		map<thread_state, bool>& trace) {
+bool explicit_cuba::finite_context_reachability(const size_t tid,
+		const thread_state& s, stack<pda_alpha>& W,
+		map<thread_state, bool>& visit, map<thread_state, bool>& trace) {
 	visit[s] = true;
 	trace[s] = true;
-	auto ifind = CPDA[tid].get_pda().find(s);
-	if (ifind != CPDA[tid].get_pda().end()) {
+	auto ifind = CPDA[tid].get_program().find(s);
+	if (ifind != CPDA[tid].get_program().end()) {
 		for (const auto rid : ifind->second) {
 			const auto& r = CPDA[tid].get_actions()[rid];
 			const auto& dst = r.get_dst();
@@ -403,7 +405,8 @@ bool explicit_cuba::is_cyclic(const size_t tid, const thread_state& s,
 			if (W.empty())
 				continue;
 			thread_state t(dst.get_state(), W.top());
-			if (!visit[t] && is_cyclic(tid, t, W, visit, trace)) {
+			if (!visit[t]
+					&& finite_context_reachability(tid, t, W, visit, trace)) {
 				return true;
 			} else if (trace[t]) {
 				if (W.size() > 1)

@@ -30,8 +30,6 @@ public:
 	virtual void context_unbounded_analysis(const size_k k_bound = 0) = 0;
 
 	void context_insensitive(const string& initl, const string& filename);
-	void context_insensitive(const explicit_config& initl,
-			const string& filename);
 protected:
 	explicit_config initl_c;
 	explicit_config final_c;
@@ -42,6 +40,8 @@ protected:
 	vector<vector<bool>> reachable_T;
 
 private:
+	void context_insensitive(const explicit_config& initl,
+			const string& filename);
 	vector<set<top_config>> context_insensitive(const top_config& initl_c,
 			const vector<finite_machine>& CFSM);
 	vector<set<top_config>> standard_FWS(const top_config& initl_c,
@@ -146,12 +146,12 @@ private:
 
 	top_config top_mapping(const global_config& tau);
 
-	/// cycle detection
-	bool is_cyclic(const size_t tid);
-	bool is_cyclic(const size_t tid, const thread_state& s, stack<pda_alpha>& W,
-			map<vertex, bool>& visit, map<vertex, bool>& trace);
+	/// determine the finite context reachability
+	bool finite_context_reachability(const size_t tid);
+	bool finite_context_reachability(const size_t tid, const thread_state& s,
+			stack<pda_alpha>& W, map<vertex, bool>& visit,
+			map<vertex, bool>& trace);
 };
-
 
 /////////////////////////////////////////////////////////////////////////
 /// PART 4. The following are the utilities for PDS file parser.

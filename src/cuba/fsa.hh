@@ -167,12 +167,13 @@ public:
 	}
 
 private:
-	fsa_state_set states;    /// it represents state 0...|states|-1
-	fsa_alphabet alphas;   ///
-	fsa_delta transitions;   ///
-
-	fsa_state_set initials;  /// it represents state 0...|initials|-1
-	fsa_state accept;  /// accept state
+	fsa_state_set states;  /// the finite set of states
+	fsa_alphabet alphas;   /// the finite set of symbols
+	fsa_delta transitions; /// the finite set of transitions, organized
+	                       /// in adjacency list
+	fsa_state_set initials;  /// the set of initial states, it's a subset
+	                         /// of states
+	fsa_state accept;  /// the set of accepting states, it's a subset of states
 };
 
 /**

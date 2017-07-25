@@ -116,7 +116,7 @@ pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
 	/// step 2: current PDA's actions and adjacency list
 	vector<pda_action> actions;
 	adj_list PDA;
-	id_transition trans_id = 0;
+	id_action trans_id = 0;
 	for (uint i = 1; i < sPDA.size(); ++i) {
 		/// three types of transition:
 		///   PUSH: (s1, l1) -> (s2, l2l3)
