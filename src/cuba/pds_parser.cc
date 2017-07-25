@@ -115,7 +115,7 @@ pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
 
 	/// step 2: current PDA's actions and adjacency list
 	vector<pda_action> actions;
-	adj_list PDA;
+	adj_list program;
 	id_action trans_id = 0;
 	for (uint i = 1; i < sPDA.size(); ++i) {
 		/// three types of transition:
@@ -150,9 +150,9 @@ pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
 			actions.push_back(pda_action(src, dst, type_stack_operation::POP));
 		}
 
-		PDA[src].emplace_back(trans_id++); /// add transition id to src's map
+		program[src].emplace_back(trans_id++); /// add transition id to src's map
 	}
-	return pushdown_automaton(states, alphas, actions, PDA);
+	return pushdown_automaton(states, alphas, actions, program);
 }
 
 /**
