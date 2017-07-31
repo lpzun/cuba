@@ -260,7 +260,7 @@ finite_machine parser::parse_input_fsm_no_pop(const vector<string>& sPDA) {
 			fsm[src].emplace_back(src, dst, type_stack_operation::PUSH);
 		} else if (parse_input_alpha(l2) != alphabet::EPSILON) { /// overwrite operation
 			thread_state dst(s2,
-					parse_input_alpha(l2) != alphabet::EPSILON(l2));
+					parse_input_alpha(l2) != alphabet::EPSILON);
 			fsm[src].emplace_back(src, dst, type_stack_operation::OVERWRITE);
 		} else { /// pop operation
 			thread_state dst(s2, alphabet::EPSILON);

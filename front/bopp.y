@@ -19,8 +19,8 @@
 
 %code requires
 {
-# include "aide.hh"
-  using namespace iotf;
+//# include "aide.hh"
+//  using namespace iotf;
 }
 
  // tell Bison that yyparse should take an extra parameter paide

@@ -1,4 +1,4 @@
-/********************************************************************************
+/*******************************************************************************
  ** Name:    	BoPP: parser
  ** Authors: 	Peizun Liu
  ** Version: 	0.3
@@ -8,7 +8,7 @@
  *		parse (SatAbs format) Boolean programs and build its control 
  *		flow graph and the corresponding weakest precondition formula
  *              for each statement.
- *******************************************************************************/
+ ******************************************************************************/
 
 1. BoPP:
 
@@ -61,4 +61,5 @@ NOTE: the input should be the SatAbs format file.
  
 	2. taf file: to store target thread states.
 
-NOTE: the default cfg file name is "bp.cfg", while the default target file is "bp.taf".
+NOTE: the default cfg file name is "bp.cfg", while the default target file is 
+"bp.taf".

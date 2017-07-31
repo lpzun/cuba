@@ -52,7 +52,7 @@ CEXPORT 	= *.h *.cfg *.loc *.taf
 all:
 	$(FLEXCOMP) -o $(FEXPORT) $(FLEXOBJ)
 	$(BISONCOMP) $(BISONFLAG) $(BISONOBJ)
-	#$(CCOMP) $(LFLAGS) $(CCOBJS) -o $(CBASE)
+	$(CCOMP) $(LFLAGS) $(CCOBJS) -o $(CBASE)
 
 #========================================
 # Cleaning 		#
