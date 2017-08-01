@@ -111,7 +111,7 @@ ostream& operator <<(ostream& out, const assignment& s) {
  * @brief default constructor
  */
 edge::edge() :
-		src(0), dest(0), st() {
+		src(0), dest(0), stmt() {
 
 }
 
@@ -121,8 +121,8 @@ edge::edge() :
  * @param dest
  * @param stmt
  */
-edge::edge(const size_pc& src, const size_pc& dest, const stmt& s) :
-		src(src), dest(dest), st(s) {
+edge::edge(const size_pc& src, const size_pc& dest, const statement& s) :
+		src(src), dest(dest), stmt(s) {
 
 }
 
@@ -133,7 +133,7 @@ edge::edge(const size_pc& src, const size_pc& dest, const stmt& s) :
  * @param type
  */
 edge::edge(const size_pc& src, const size_pc& dest, const type_stmt& type) :
-		src(src), dest(dest), st(type) {
+		src(src), dest(dest), stmt(type) {
 
 }
 
@@ -146,7 +146,7 @@ edge::edge(const size_pc& src, const size_pc& dest, const type_stmt& type) :
  */
 edge::edge(const size_pc& src, const size_pc& dest, const type_stmt& type,
 		const expr& condition) :
-		src(src), dest(dest), st(type, condition) {
+		src(src), dest(dest), stmt(type, condition) {
 
 }
 
@@ -155,7 +155,7 @@ edge::edge(const size_pc& src, const size_pc& dest, const type_stmt& type,
  * @param e
  */
 edge::edge(const edge& e) :
-		src(e.get_src()), dest(e.get_dest()), st(e.get_stmt()) {
+		src(e.get_src()), dest(e.get_dest()), stmt(e.get_stmt()) {
 }
 
 /**
@@ -180,12 +180,12 @@ ostream& operator <<(ostream& out, const edge& e) {
 /**
  * @brief default constructor
  */
-stmt::stmt() :
+statement::statement() :
 		type(), condition() {
 
 }
 
-stmt::stmt(const type_stmt& type) :
+statement::statement(const type_stmt& type) :
 		type(type), condition() {
 
 }
@@ -195,7 +195,7 @@ stmt::stmt(const type_stmt& type) :
  * @param type
  * @param precondition
  */
-stmt::stmt(const type_stmt& type, const expr& condition) :
+statement::statement(const type_stmt& type, const expr& condition) :
 		type(type), condition(condition) {
 
 }
@@ -204,7 +204,7 @@ stmt::stmt(const type_stmt& type, const expr& condition) :
  * @brief copy constructor
  * @param s
  */
-stmt::stmt(const stmt& s) :
+statement::statement(const statement& s) :
 		type(s.get_type()), condition(s.get_condition()) {
 
 }
@@ -212,7 +212,7 @@ stmt::stmt(const stmt& s) :
 /**
  * @brief default destructor
  */
-stmt::~stmt() {
+statement::~statement() {
 }
 
 /**
@@ -222,7 +222,7 @@ stmt::~stmt() {
  * @return output stream:
  *         print statement
  */
-ostream& operator <<(ostream& out, const stmt& s) {
+ostream& operator <<(ostream& out, const statement& s) {
 	out << s.get_type() << " " << s.get_condition();
 	return out;
 }
@@ -259,7 +259,7 @@ expr::~expr() {
  * @param lv
  * @return value_v
  */
-const value_v expr::eval(const state_v& sv, const state_v& lv) const {
+const sool expr::eval(const state_v& sv, const state_v& lv) const {
 	bool is_exist_T = false, is_exist_F = false;
 	for (const auto& se : splited) {
 		const auto& val = solver::solve(se, sv, lv);
@@ -284,8 +284,8 @@ const value_v expr::eval(const state_v& sv, const state_v& lv) const {
  * @param lo
  * @return a valuation
  */
-value_v expr::eval(const state_v& sh, const state_v& lo) {
-	return static_cast<value_v>(static_cast<const expr&>(*this).eval(sh, lo));
+sool expr::eval(const state_v& sh, const state_v& lo) {
+	return static_cast<sool>(static_cast<const expr&>(*this).eval(sh, lo));
 }
 
 /**
@@ -297,8 +297,8 @@ value_v expr::eval(const state_v& sh, const state_v& lo) {
  * @param _lv
  * @return values after evaluation
  */
-const value_v expr::eval(const state_v& sv, const state_v& lv,
-		const state_v& _sv, const state_v& _lv) const {
+const sool expr::eval(const state_v& sv, const state_v& lv, const state_v& _sv,
+		const state_v& _lv) const {
 	bool is_exist_T = false, is_exist_F = false;
 	for (const auto& se : splited) {
 		const auto& val = solver::solve(se, sv, lv, _sv, _lv);
@@ -325,9 +325,9 @@ const value_v expr::eval(const state_v& sv, const state_v& lv,
  * @param _lv
  * @return values after evaluation
  */
-value_v expr::eval(const state_v& sh, const state_v& lo, const state_v& _sv,
+sool expr::eval(const state_v& sh, const state_v& lo, const state_v& _sv,
 		const state_v& _lv) {
-	return static_cast<value_v>(static_cast<const expr&>(*this).eval(sh, lo));
+	return static_cast<sool>(static_cast<const expr&>(*this).eval(sh, lo));
 }
 
 /**

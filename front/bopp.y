@@ -19,8 +19,8 @@
 
 %code requires
 {
-//# include "aide.hh"
-//  using namespace iotf;
+  #include "aide.hh"
+  using namespace bopp;
 }
 
  // tell Bison that yyparse should take an extra parameter paide
@@ -173,7 +173,7 @@ l_id: T_IDEN {
 ;
 
 ///////////// stmts /////////////////
-/// initialization
+/// initialization statments
 initistmt: T_IDEN T_ASSIGN T_NONDET ';' {
   aide.init_vars($1, sool::N);
   free($1);
@@ -183,7 +183,7 @@ initistmt: T_IDEN T_ASSIGN T_NONDET ';' {
   free($1);
  }
 ;
-/// labeling statement
+/// labeling statements
 labelstmt: T_INT { 
   ++aide.lineno; // counting the program counters
   aide.ipc = (int)($1); // obtain current pc
@@ -193,7 +193,7 @@ labelstmt: T_INT {
    cout << "TEST:: I am in statement " << $1 <<endl;
    }
 ;
-
+/// meta
 statement: metastmt
 | statement T_AND metastmt // multi-statements
 | statement T_OR metastmt

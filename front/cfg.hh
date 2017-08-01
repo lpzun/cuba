@@ -18,9 +18,6 @@
 
 namespace bopp {
 
-/// define the value of variables in Boolean programs
-using value_v = sool;
-
 /**
  * @brief data structure <type_stmt>: all of statement types
  *        SKIP = -1 : all other statement
@@ -102,7 +99,7 @@ inline ostream& operator <<(ostream& out, const type_stmt& t) {
 		out << (13);
 		break;
 	default:
-		out << (-14);
+		throw runtime_error("Illegal statement!");
 		break;
 	}
 	return out;
@@ -138,11 +135,11 @@ public:
 		return splited;
 	}
 
-	const value_v eval(const state_v& sv, const state_v& lv) const;
-	value_v eval(const state_v& sh, const state_v& lo);
-	const value_v eval(const state_v& sv, const state_v& lv, const state_v& _sv,
+	const sool eval(const state_v& sv, const state_v& lv) const;
+	sool eval(const state_v& sh, const state_v& lo);
+	const sool eval(const state_v& sv, const state_v& lv, const state_v& _sv,
 			const state_v& _lv) const;
-	value_v eval(const state_v& sh, const state_v& lo, const state_v& _sv,
+	sool eval(const state_v& sh, const state_v& lo, const state_v& _sv,
 			const state_v& _lv);
 private:
 	deque<symbol> sexpr;
@@ -156,13 +153,13 @@ private:
  *        the type and condition (if applicable) of a statement; it is
  *        labeled to a edge in a control flow graph.
  */
-class stmt {
+class statement {
 public:
-	stmt();
-	stmt(const type_stmt& type);
-	stmt(const type_stmt& type, const expr& condition);
-	stmt(const stmt& s);
-	~stmt();
+	statement();
+	statement(const type_stmt& type);
+	statement(const type_stmt& type, const expr& condition);
+	statement(const statement& s);
+	~statement();
 
 	/**
 	 * @brief return the precondition if computing the preimage, or
@@ -185,7 +182,7 @@ private:
 	type_stmt type; /// statement type
 	expr condition; /// precondition or postcondition
 
-	friend ostream& operator <<(ostream& out, const stmt& s);
+	friend ostream& operator <<(ostream& out, const statement& s);
 };
 
 /**
@@ -197,7 +194,7 @@ private:
 class edge {
 public:
 	edge();
-	edge(const size_pc& src, const size_pc& dest, const stmt& st);
+	edge(const size_pc& src, const size_pc& dest, const statement& st);
 	edge(const size_pc& src, const size_pc& dest, const type_stmt& type);
 	edge(const size_pc& src, const size_pc& dest, const type_stmt& type,
 			const expr& condition);
@@ -212,14 +209,14 @@ public:
 		return src;
 	}
 
-	const stmt& get_stmt() const {
-		return st;
+	const statement& get_stmt() const {
+		return stmt;
 	}
 
 private:
 	size_pc src;
 	size_pc dest;
-	stmt st;
+	statement stmt;
 
 	friend ostream& operator <<(ostream& out, const edge& e);
 };
