@@ -183,7 +183,7 @@ l_declstmt: T_DECL l_id_list ';' { }
 ;
 
 l_id_list: l_id
-| l_id_list ',' l_id {}
+| l_id_list ',' l_id { }
 ;
 
 l_id: T_IDEN {
@@ -219,11 +219,12 @@ initistmt: T_IDEN T_ASSIGN T_NONDET ';' {
 labelstmt: T_INT { 
   ++aide.lineno; // counting the program counters
   aide.ipc = (int)($1); // obtain current pc
-  if(!aide.is_pc_unique($1)) // pc's uniqueness
-    YYABORT; 
+  if(!aide.is_pc_unique($1)) { // pc's uniqueness
+    YYABORT;
+  }
  } ':' statement {
    cout << "TEST:: I am in statement " << $1 <<endl;
-   }
+  }
 ;
 /// the statements following labels
 statement: metastmt
@@ -235,21 +236,42 @@ statement: metastmt
 /// meta statments
 /// 
 //////////////////////////////////////////////////
-metastmt: T_SKIP ';' { // "skip" statement
+metastmt: skipstmt
+| gotostmt
+| callstmt
+| assgstmt
+| ifelstmt
+| assestmt
+| assustmt
+| nthrstmt
+| ethrstmt
+| atomstmt
+| eatmstmt
+| bcststmt
+| waitstmt
+;
+
+// "skip" statement
+skipstmt: T_SKIP ';' { 
   aide.add_edge(aide.ipc, aide.ipc+1, type_stmt::SKIP);	
  }
-| T_GOTO {} to_line_list ';' { // "goto" statement
+;
+
+// "goto" statement
+gotostmt: T_GOTO {} to_line_list ';' {
   aide.add_edge(aide.ipc, type_stmt::GOTO);
   aide.suc_pc_set.clear();
  }
-| funccall
-| iden_list T_ASSIGN expr_list ';' {// "parallel assignment" statement
+;
+
+// "parallel assignment" statement w & w/o constrain
+assgstmt: iden_list T_ASSIGN expr_list ';' {
   aide.add_edge(aide.ipc, aide.ipc+1, type_stmt::ASSG);	
   // reset containers
   aide.assg_stmt_lhs.clear();
   aide.assg_stmt_rhs.clear();
  }
-| iden_list T_ASSIGN expr_list T_CSTR expr ';' {// "PA with constrain" 
+| iden_list T_ASSIGN expr_list T_CSTR expr ';' {
   aide.add_edge(aide.ipc, aide.ipc+1, type_stmt::ASSG, true);
 
   // reset containers
@@ -257,11 +279,17 @@ metastmt: T_SKIP ';' { // "skip" statement
   aide.assg_stmt_lhs.clear();
   aide.assg_stmt_rhs.clear();
  }
-| T_IF expr T_THEN T_GOTO T_INT ';' T_FI ';' { // "if...then goto..." statement
+;
+
+// "if...then goto..." statement
+ifelstmt: T_IF expr T_THEN T_GOTO T_INT ';' T_FI ';' { 
   aide.add_edge(aide.ipc, $5, type_stmt::IFEL, true);
   aide.expr_in_list.clear();
  } 
-| T_ASSERT '(' expr ')' ';' { // "assert" statement
+;
+
+// "assert" statement
+assestmt: T_ASSERT '(' expr ')' ';' { 
   /// negate the expression in assertions
   aide.expr_in_list.emplace_back(solver::PAR);
   aide.expr_in_list.emplace_back(solver::NEG);
@@ -271,27 +299,53 @@ metastmt: T_SKIP ';' { // "skip" statement
   aide.add_edge(aide.ipc, aide.ipc+1, type_stmt::ASSE, true);		
   aide.expr_in_list.clear();
  }
-| T_ASSUME '(' expr ')' ';' { // "assume" statement
+;
+
+// "assume" statement
+assustmt: T_ASSUME '(' expr ')' ';' {
   aide.add_edge(aide.ipc, aide.ipc+1, type_stmt::ASSU, true);
   aide.expr_in_list.clear();
  }
-| T_START_THREAD T_GOTO T_INT ';' { // "thread creation" statement
+;
+
+ // "thread creation" statement
+nthrstmt: T_START_THREAD T_GOTO T_INT ';' {
   aide.add_edge(aide.ipc, $3, type_stmt::NTHR);
  }
-| T_END_THREAD ';' { // thread termination statement
+;
+// thread termination statement
+ethrstmt: T_END_THREAD ';' { 
   aide.add_edge(aide.ipc, aide.ipc+1, type_stmt::ETHR);
  }
-| T_ATOMIC_BEGIN ';' { // atomic section beginning
+;
+
+// atomic section beginning
+atomstmt: T_ATOMIC_BEGIN ';' { 
   aide.add_edge(aide.ipc, aide.ipc+1, type_stmt::ATOM);
  }
-| T_ATOMIC_END ';' { // atomic section ending
+;
+
+// atomic section ending
+eatmstmt: T_ATOMIC_END ';' { 
   aide.add_edge(aide.ipc, aide.ipc+1, type_stmt::EATM);
  }
-| T_BROADCAST ';' { // broadcast statement
+;
+
+// broadcast statement
+bcststmt: T_BROADCAST ';' { 
   aide.add_edge(aide.ipc, aide.ipc+1, type_stmt::BCST);
  }
-| T_WAIT ';' { // wait statement
+;
+
+// wait statement
+waitstmt: T_WAIT ';' { 
   aide.add_edge(aide.ipc, aide.ipc+1, type_stmt::WAIT);
+ }
+;
+
+// function call statement
+callstmt: T_CALL funcname '(' ')' ';' {
+  cout<<"I'm in a function call\n";
  }
 ;
 
@@ -318,12 +372,6 @@ expr_list: expr {
 | expr_list ',' expr { 
   aide.assg_stmt_rhs.emplace_back(aide.expr_in_list); 
   aide.expr_in_list.clear(); 
-  }
-;
-
-
-funccall: T_CALL funcname '(' ')' ';' {
-  cout<<"I'm in a function call\n";
   }
 ;
 

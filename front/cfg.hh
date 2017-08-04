@@ -47,7 +47,8 @@ enum class type_stmt {
 	EATM = 10,
 	BCST = 11,
 	WAIT = 12,
-	SIGN = 13
+	SIGN = 13,
+	CALL = 14
 };
 
 /**
@@ -97,6 +98,9 @@ inline ostream& operator <<(ostream& out, const type_stmt& t) {
 		break;
 	case type_stmt::SIGN:
 		out << (13);
+		break;
+	case type_stmt::CALL:
+		out << (14);
 		break;
 	default:
 		throw runtime_error("Illegal statement!");
