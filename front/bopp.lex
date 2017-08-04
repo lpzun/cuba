@@ -51,9 +51,8 @@
 "//"[^\n]+\n  
 
 "begin" 		 { return token::T_BEGIN; }
-"end"			 { return token::T_END; }
-
-"decl"			 { return token::T_DECL; }
+"end"		 { return token::T_END; }
+"decl"		 { return token::T_DECL; }
 "goto" 			 { return token::T_GOTO; }
 "skip" 			 { return token::T_SKIP; }
 "assume" 		 { return token::T_ASSUME; }
@@ -69,9 +68,10 @@
 "atomic_end"             { return token::T_ATOMIC_END; }
 "wait"                   { return token::T_WAIT; }
 "broadcast"              { return token::T_BROADCAST; }
+"call"                   { return token::T_CALL; }
 
 "*" 			 { return token::T_NONDET; }
-":=" 			 { return token::T_ASSIGN; }
+":="         { return token::T_ASSIGN; }
 "="			 { return token::T_EQ_OP; }
 "!="			 { return token::T_NE_OP; }
 "&"			 { return token::T_AND; }
@@ -88,10 +88,10 @@
 "!"			 { return ('!'); }
 "^"			 { return ('^'); }
 
-[0-9]+ 			  { yylval->t_val = atoi(yytext);   return token::T_INT; }
+[0-9]+ 		 { yylval->t_val = atoi(yytext);   return token::T_INT; }
 [a-zA-Z_\'][a-zA-Z0-9_$]* { yylval->t_str = strdup(yytext); return token::T_IDEN; }
 
-[ \t\n\v\f]		 { }
+[ \t\n\v\f]  { }
 . 			 { /* ignore bad characters */ }
 %%
 

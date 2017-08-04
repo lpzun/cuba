@@ -17,8 +17,8 @@ using namespace bopp;
  * @param option
  * @return a cmd
  */
-char* getCmdOption(char ** begin, char ** end, const std::string & option) {
-	char ** itr = std::find(begin, end, option);
+char* getCmdOption(char** begin, char** end, const string& option) {
+	auto itr = std::find(begin, end, option);
 	if (itr != end && ++itr != end) {
 		return *itr;
 	}
@@ -37,25 +37,29 @@ bool cmdOptionExists(char** begin, char** end, const std::string& option) {
 	return std::find(begin, end, option) != end;
 }
 
+/// declare yyin to let parser read from file
+/// NOTE: this is not an elegant way to do this
+extern FILE * yyin;
+
 int main(int argc, char *argv[]) {
 	try {
 		if (cmdOptionExists(argv, argv + argc, "-h")) {
 			printf("Usage: BoPP [-cfg file] [-taf file]\n");
 		}
-		auto cfg_file_name = getCmdOption(argv, argv + argc, "-cfg");
-		if (cfg_file_name == 0) {
-			cfg_file_name = "bp.cfg";
+		auto cfg_filename = getCmdOption(argv, argv + argc, "-cfg");
+		if (cfg_filename == 0) {
+			cfg_filename = "bp.cfg";
 		}
-		char* taf_file_name = getCmdOption(argv, argv + argc, "-taf");
-		if (taf_file_name == 0) {
-			taf_file_name = "bp.taf";
+		auto taf_filename = getCmdOption(argv, argv + argc, "-taf");
+		if (taf_filename == 0) {
+			taf_filename = "bp.taf";
 		}
-		char DEFAULT_CFG_FILE_NAME[100] = "bp.cfg";
-		char DEFAULT_TAF_FILE_NAME[100] = "bp.taf";
 		/// file list
-		FILE *yyin = fopen(cfg_file_name, "r");
+		auto filename = getCmdOption(argv, argv + argc, "-f");
+		cout << filename << endl;
+		yyin = fopen(filename, "r");
 		cout << "starting to parse Boolean programs...\n";
-		paide aide(mode::POST);
+		parser_aide aide(mode::POST);
 		yy::bp parser(aide);
 		/// step 4: run the parser to parse the input BP
 		int result = parser.parse();
@@ -73,6 +77,20 @@ int main(int argc, char *argv[]) {
 				<< "\n";
 		cout << "for testing: before...\n";
 		aide.print_control_flow_graph();
+
+		yyin = fopen(filename, "r");
+		parser_aide prev(mode::POST);
+		yy::bp prev_parser(prev);
+
+		/// step 5: output the parsing result...
+		cout << "shared, local, line\n";
+		refs::SV_NUM = prev.s_vars_num;
+		refs::LV_NUM = prev.l_vars_num;
+		refs::PC_NUM = prev.lineno;
+		cout << refs::SV_NUM << "," << refs::LV_NUM << "," << refs::PC_NUM
+				<< "\n";
+		cout << "for testing: before...\n";
+		prev.print_control_flow_graph();
 
 		return 0;
 	} catch (const runtime_error& e) {

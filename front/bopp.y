@@ -24,7 +24,7 @@
 }
 
  // tell Bison that yyparse should take an extra parameter paide
-%parse-param { paide &aide }
+%parse-param { parser_aide &aide }
 
 %define parser_class_name {bp} // define the parser's name
 %{
@@ -57,6 +57,7 @@
 %token T_ATOMIC_END "atomic_end"
 %token T_WAIT "wait"
 %token T_BROADCAST "broadcast"
+%token T_CALL "call" 
 
 %token T_NONDET "*"
 %token T_ASSIGN ":="
@@ -108,12 +109,33 @@ funclist: function
 | funclist function
 ;
 
-function: funchead funcend;
-|funchead funcbody funcend;
+//////////////////////////////////////////////////
+/// Function Declaration
+///
+//////////////////////////////////////////////////
+function: funchead funcbegin funcend {}
+|funchead funcbegin funcbody funcend {
+  
+}
+;
 
-funchead: T_VOID T_IDEN '(' ')' T_BEGIN;
+funchead: functype funcname {} '(' ')';
 
-funcend: T_END;
+funcbegin:  T_BEGIN
+| '{'
+;
+
+funcname: T_IDEN {
+  cout<<"function "<<($1)<<endl;
+  free($1);
+};
+
+functype: T_VOID
+| "bool"
+;
+
+funcend: T_END
+| '}';
 
 funcbody: funcstmt
 | funcbody funcstmt
@@ -124,7 +146,10 @@ funcstmt: l_declstmt
 | labelstmt
 ;
 
+//////////////////////////////////////////////////
 /// shared variables decls
+/// 
+//////////////////////////////////////////////////
 s_decllist: s_declstmt
 | s_decllist s_declstmt
 ;
@@ -138,19 +163,22 @@ s_id_list: s_id
 
 s_id: T_IDEN {
   aide.add_vars($1, sool::N, true);
-  free($1); // free it to avoid storage leaks
+  free($1); 
  }
 | T_IDEN T_ASSIGN T_NONDET {
   aide.add_vars($1, sool::N, true);
-  free($1); // free it to avoid storage leaks
+  free($1); 
  }
 | T_IDEN T_ASSIGN T_INT {
   aide.add_vars($1, $3 == 0 ? sool::F : sool::N, true);
-  free($1); // free it to avoid storage leaks
+  free($1); 
  }
 ;
 
-/* local decls */
+//////////////////////////////////////////////////
+/// local variables decls
+/// 
+//////////////////////////////////////////////////
 l_declstmt: T_DECL l_id_list ';' { }
 ;
 
@@ -172,8 +200,11 @@ l_id: T_IDEN {
  }
 ;
 
-///////////// stmts /////////////////
-/// initialization statments
+//////////////////////////////////////////////////
+/// statments
+/// 
+//////////////////////////////////////////////////
+/// initiliazation statements
 initistmt: T_IDEN T_ASSIGN T_NONDET ';' {
   aide.init_vars($1, sool::N);
   free($1);
@@ -183,6 +214,7 @@ initistmt: T_IDEN T_ASSIGN T_NONDET ';' {
   free($1);
  }
 ;
+
 /// labeling statements
 labelstmt: T_INT { 
   ++aide.lineno; // counting the program counters
@@ -193,12 +225,16 @@ labelstmt: T_INT {
    cout << "TEST:: I am in statement " << $1 <<endl;
    }
 ;
-/// meta
+/// the statements following labels
 statement: metastmt
 | statement T_AND metastmt // multi-statements
 | statement T_OR metastmt
 ;
 
+//////////////////////////////////////////////////
+/// meta statments
+/// 
+//////////////////////////////////////////////////
 metastmt: T_SKIP ';' { // "skip" statement
   aide.add_edge(aide.ipc, aide.ipc+1, type_stmt::SKIP);	
  }
@@ -206,6 +242,7 @@ metastmt: T_SKIP ';' { // "skip" statement
   aide.add_edge(aide.ipc, type_stmt::GOTO);
   aide.suc_pc_set.clear();
  }
+| funccall
 | iden_list T_ASSIGN expr_list ';' {// "parallel assignment" statement
   aide.add_edge(aide.ipc, aide.ipc+1, type_stmt::ASSG);	
   // reset containers
@@ -214,6 +251,7 @@ metastmt: T_SKIP ';' { // "skip" statement
  }
 | iden_list T_ASSIGN expr_list T_CSTR expr ';' {// "PA with constrain" 
   aide.add_edge(aide.ipc, aide.ipc+1, type_stmt::ASSG, true);
+
   // reset containers
   aide.expr_in_list.clear();
   aide.assg_stmt_lhs.clear();
@@ -280,6 +318,12 @@ expr_list: expr {
 | expr_list ',' expr { 
   aide.assg_stmt_rhs.emplace_back(aide.expr_in_list); 
   aide.expr_in_list.clear(); 
+  }
+;
+
+
+funccall: T_CALL funcname '(' ')' ';' {
+  cout<<"I'm in a function call\n";
   }
 ;
 

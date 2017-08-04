@@ -13,7 +13,7 @@ namespace bopp {
  * @brief default constructor
  * @param m
  */
-paide::paide(const mode& m) :
+parser_aide::parser_aide(const mode& m) :
         lineno(0), ipc(0), s_vars_num(0), l_vars_num(0), s_vars_list(),  ///
         l_vars_list(), s_vars_init(), l_vars_init(), suc_pc_set(),       ///
         expr_in_list(), assg_stmt_lhs(), assg_stmt_rhs(), asse_pc_set(), ///
@@ -23,7 +23,7 @@ paide::paide(const mode& m) :
 /**
  * @brief default destructor
  */
-paide::~paide() {
+parser_aide::~parser_aide() {
 }
 
 /**
@@ -32,7 +32,7 @@ paide::~paide() {
  * @param val
  * @param is_shared
  */
-void paide::add_vars(const string& var, const sool& val,
+void parser_aide::add_vars(const string& var, const sool& val,
         const bool& is_shared) {
     if (is_shared) {
         const auto& p = s_vars_list.emplace(var, s_vars_num + 1);
@@ -50,7 +50,7 @@ void paide::add_vars(const string& var, const sool& val,
  * @param var
  * @param val
  */
-void paide::init_vars(const string& var, const sool& val) {
+void parser_aide::init_vars(const string& var, const sool& val) {
     map<string, ushort>::iterator ifind;
     if ((ifind = s_vars_list.find(var)) != s_vars_list.end())
         s_vars_init[ifind->second] = val;
@@ -65,7 +65,7 @@ void paide::init_vars(const string& var, const sool& val) {
  *        This is a testing function. I will be removed in the future.
  * @param pc
  */
-bool paide::is_pc_unique(const size_pc& pc) {
+bool parser_aide::is_pc_unique(const size_pc& pc) {
     const auto& result = all_pc_set.emplace(pc);
     if (!result.second)
         throw runtime_error(
@@ -78,7 +78,7 @@ bool paide::is_pc_unique(const size_pc& pc) {
  * @param from
  * @param sp
  */
-void paide::add_edge(const size_pc& src, const type_stmt& type) {
+void parser_aide::add_edge(const size_pc& src, const type_stmt& type) {
     if (m == mode::POST) {
         for (const auto& dest : suc_pc_set)
             cfg_G.add_edge(src, dest, type);
@@ -95,7 +95,7 @@ void paide::add_edge(const size_pc& src, const type_stmt& type) {
  * @param type
  * @param is_condition
  */
-void paide::add_edge(const size_pc& src, const size_pc& dest,
+void parser_aide::add_edge(const size_pc& src, const size_pc& dest,
         const type_stmt& type, const bool& is_condition) {
     /// step 1: add edges to non-goto statements
     if (m == mode::POST) { /// postimage mode
@@ -124,7 +124,7 @@ void paide::add_edge(const size_pc& src, const size_pc& dest,
  * @brief build an assignment
  * @return the assignment that corresponds to the current statement
  */
-assignment paide::create_assignment() {
+assignment parser_aide::create_assignment() {
     assignment assg(this->s_vars_num, this->l_vars_num);
     auto il = assg_stmt_lhs.cbegin(), iend = assg_stmt_lhs.cend();
     auto ir = assg_stmt_rhs.cbegin(), eend = assg_stmt_rhs.cend();
@@ -145,7 +145,7 @@ assignment paide::create_assignment() {
  * @return index if find var
  *         throw an exception otherwise
  */
-symbol paide::encode(const string& var) {
+symbol parser_aide::encode(const string& var) {
     symbol idx = 2;
     if (var.front() != '\'') {
         auto ifind = s_vars_list.find(var);
@@ -179,7 +179,7 @@ symbol paide::encode(const string& var) {
  *         bool  : true if shared Boolean variable
  *                 false if local Boolean variable
  */
-pair<symbol, bool> paide::decode(const symbol& idx) {
+pair<symbol, bool> parser_aide::decode(const symbol& idx) {
     auto id = idx - 3;
     if (id < s_vars_num)
         return std::make_pair(id, true);
@@ -194,14 +194,14 @@ pair<symbol, bool> paide::decode(const symbol& idx) {
  * @brief output the control flow graph to the file
  * @param file
  */
-void paide::print_control_flow_graph() {
+void parser_aide::print_control_flow_graph() {
     cout << cfg_G << endl;
 }
 
 /**
  * @brief testing methods
  */
-void paide::print_parallel_assg_stmt() {
+void parser_aide::print_parallel_assg_stmt() {
     auto i_iter = assg_stmt_lhs.begin(), i_end = assg_stmt_lhs.end();
     auto e_iter = assg_stmt_rhs.begin(), e_end = assg_stmt_rhs.end();
     while (i_iter != i_end && e_iter != e_end) {
@@ -215,7 +215,7 @@ void paide::print_parallel_assg_stmt() {
 /**
  * @brief print vars list
  */
-void paide::print_vars_list() {
+void parser_aide::print_vars_list() {
     for (const auto& p : s_vars_list)
         cout << p.first << " " << p.second << " " << encode(p.first) << "\n";
     for (const auto& p : l_vars_list)

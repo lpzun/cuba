@@ -56,73 +56,73 @@ namespace bopp {
  *         state.
  */
 enum class mode {
-    PREV, POST
+	PREV, POST
 };
 
 /**
  * @brief this is auxiliary class for Boolean program parser
  *        paide: parser aide
  */
-class paide {
+class parser_aide {
 public:
-    paide(const mode& m);
-    ~paide();
+	parser_aide(const mode& m);
+	~parser_aide();
 
-    size_pc lineno; /// initialize the lineno
-    size_pc ipc; /// the source of cfg edge
-    ushort s_vars_num; /// the number of shared variables
-    ushort l_vars_num; /// the number of local variables
-    map<string, ushort> s_vars_list; /// store shared variables and indices
-    map<string, ushort> l_vars_list; /// store local  variables and indices
-    map<ushort, sool> s_vars_init; /// record values of initial shared states
-    map<ushort, sool> l_vars_init; /// record values of initial local  states
+	size_pc lineno; /// initialize the lineno
+	size_pc ipc; /// the source of cfg edge
+	ushort s_vars_num; /// the number of shared variables
+	ushort l_vars_num; /// the number of local variables
+	map<string, ushort> s_vars_list; /// store shared variables and indices
+	map<string, ushort> l_vars_list; /// store local  variables and indices
+	map<ushort, sool> s_vars_init; /// record values of initial shared states
+	map<ushort, sool> l_vars_init; /// record values of initial local  states
 
-    set<size_pc> suc_pc_set; /// store the succeeding pcs
-    deque<symbol> expr_in_list; /// the expression symbol list
+	set<size_pc> suc_pc_set; /// store the succeeding pcs
+	deque<symbol> expr_in_list; /// the expression symbol list
 
-    /// the following two containers are used to store the expression included
-    /// in the parallel assignment statements
-    deque<symbol> assg_stmt_lhs; /// the RHS of parallel assignment
-    deque<deque<symbol>> assg_stmt_rhs; /// the LHS of parallel assignment
+	/// the following two containers are used to store the expression included
+	/// in the parallel assignment statements
+	deque<symbol> assg_stmt_lhs; /// the RHS of parallel assignment
+	deque<deque<symbol>> assg_stmt_rhs; /// the LHS of parallel assignment
 
-    set<size_pc> asse_pc_set; /// record all of PCs associated with assertions
+	set<size_pc> asse_pc_set; /// record all of PCs associated with assertions
 
-    cfg cfg_G; /// store the control flow graph
+	cfg cfg_G; /// store the control flow graph
 
-    ////////////////// function list //////////////////
+	////////////////// function list //////////////////
 
-    /// initial states
-    void add_vars(const string& var, const sool& val, const bool& is_shared);
-    void init_vars(const string& var, const sool& val);
-    /// control flow graph function list
-    bool is_pc_unique(const size_pc& pc);
+	/// initial states
+	void add_vars(const string& var, const sool& val, const bool& is_shared);
+	void init_vars(const string& var, const sool& val);
+	/// control flow graph function list
+	bool is_pc_unique(const size_pc& pc);
 
-    void add_edge(const size_pc& src, const type_stmt& type);
-    void add_edge(const size_pc& src, const size_pc& dest,
-            const type_stmt& type, const bool& is_condition = false);
+	void add_edge(const size_pc& src, const type_stmt& type);
+	void add_edge(const size_pc& src, const size_pc& dest,
+			const type_stmt& type, const bool& is_condition = false);
 
-    /// expression
-    inline void add_to_expr_in_list(const symbol& s);
-    symbol encode(const string& var);
-    pair<symbol, bool> decode(const symbol& idx);
+	/// expression
+	inline void add_to_expr_in_list(const symbol& s);
+	symbol encode(const string& var);
+	pair<symbol, bool> decode(const symbol& idx);
 
-    ////////////////// unit test //////////////////
-    void print_control_flow_graph();
-    void print_parallel_assg_stmt();
-    void print_vars_list();
+	////////////////// unit test //////////////////
+	void print_control_flow_graph();
+	void print_parallel_assg_stmt();
+	void print_vars_list();
 
 private:
-    set<size_pc> all_pc_set; /// to determine if pc is unique or not
-    mode m;
-    assignment create_assignment();
+	set<size_pc> all_pc_set; /// to determine if pc is unique or not
+	mode m;
+	assignment create_assignment();
 };
 
 /**
  * @brief to add the expression symbols to a list
  * @param symbol
  */
-inline void paide::add_to_expr_in_list(const symbol& s) {
-    expr_in_list.emplace_back(s);
+inline void parser_aide::add_to_expr_in_list(const symbol& s) {
+	expr_in_list.emplace_back(s);
 }
 
 } /* namespace bopp */
