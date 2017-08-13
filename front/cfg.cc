@@ -12,7 +12,7 @@ namespace bopp {
 /**
  * @brief default constructor
  */
-cfg::cfg() :
+control_flow_graph::control_flow_graph() :
 		A(adj_list(256, deque<edge>())), assignments() {
 }
 
@@ -20,7 +20,7 @@ cfg::cfg() :
  * @brief constructor with max PC
  * @param max_PC
  */
-cfg::cfg(const size_pc& size_A) :
+control_flow_graph::control_flow_graph(const size_pc& size_A) :
 		A(adj_list(size_A)), assignments() {
 }
 
@@ -30,7 +30,7 @@ cfg::cfg(const size_pc& size_A) :
  * @param E
  * @param assigns
  */
-cfg::cfg(const adj_list& A, const unordered_map<size_pc, assignment>& as) :
+control_flow_graph::control_flow_graph(const adj_list& A, const unordered_map<size_pc, assignment>& as) :
 		A(A), assignments(as) {
 
 }
@@ -38,14 +38,14 @@ cfg::cfg(const adj_list& A, const unordered_map<size_pc, assignment>& as) :
 /**
  * @brief default destructor
  */
-cfg::~cfg() {
+control_flow_graph::~control_flow_graph() {
 }
 
 /**
  * @brief append an edge to E in CFG
  * @param e
  */
-void cfg::add_edge(const size_pc& src, const size_pc& dest,
+void control_flow_graph::add_edge(const size_pc& src, const size_pc& dest,
 		const type_stmt& type) {
 	if (src >= this->A.size()) {
 		A.resize((src > dest ? src : dest) + 1, deque<edge>());
@@ -57,7 +57,7 @@ void cfg::add_edge(const size_pc& src, const size_pc& dest,
  * @brief append an edge to E in CFG
  * @param e
  */
-void cfg::add_edge(const size_pc& src, const size_pc& dest,
+void control_flow_graph::add_edge(const size_pc& src, const size_pc& dest,
 		const type_stmt& type, const expr& condition) {
 	if (src >= this->A.size()) {
 		A.resize((src > dest ? src : dest) + 1, deque<edge>());
@@ -70,7 +70,7 @@ void cfg::add_edge(const size_pc& src, const size_pc& dest,
  * @param pc: location
  * @param a : assignment
  */
-void cfg::add_assignment(const size_pc& pc, const assignment& a) {
+void control_flow_graph::add_assignment(const size_pc& pc, const assignment& a) {
 	this->assignments.emplace(pc, a);
 }
 
@@ -80,11 +80,12 @@ void cfg::add_assignment(const size_pc& pc, const assignment& a) {
  * @param g
  * @return ostream
  */
-ostream& operator <<(ostream& out, const cfg& g) {
+ostream& operator <<(ostream& out, const control_flow_graph& g) {
 	for (const auto& successors : g.get_A()) {
 		for (const auto& e : successors)
 			out << e << "\n";
 	}
+
 	for (const auto& a : g.get_assignments()) {
 		cout << a.first << " " << a.second << "\n";
 	}

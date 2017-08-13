@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
 	} catch (const runtime_error& e) {
 		e.what();
 	} catch (...) {
-
+		cerr << "Exception occurs" << endl;
 	}
 }
 

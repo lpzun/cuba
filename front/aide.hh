@@ -87,7 +87,9 @@ public:
 
 	set<size_pc> asse_pc_set; /// record all of PCs associated with assertions
 
-	cfg cfg_G; /// store the control flow graph
+	control_flow_graph cfg_G; /// store the control flow graph
+	size_pc callee_pc;
+	bool is_callee_pc;
 
 	////////////////// function list //////////////////
 

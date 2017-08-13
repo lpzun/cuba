@@ -254,12 +254,13 @@ struct assignment {
 ///            pre-/post-images. This is the most important data structure.
 ///            A CFG is built in parsing a Boolean program via a Parser.
 ///////////////////////////////////////////////////////////////////////////////
-class cfg {
+class control_flow_graph {
 public:
-	cfg();
-	cfg(const size_pc& size_A);
-	cfg(const adj_list& A, const unordered_map<size_pc, assignment>& as);
-	~cfg();
+	control_flow_graph();
+	control_flow_graph(const size_pc& size_A);
+	control_flow_graph(const adj_list& A,
+			const unordered_map<size_pc, assignment>& as);
+	~control_flow_graph();
 
 	const adj_list& get_A() const {
 		return A;
@@ -279,7 +280,7 @@ private:
 	adj_list A;
 	unordered_map<size_pc, assignment> assignments;
 
-	friend ostream& operator <<(ostream& out, const cfg& g);
+	friend ostream& operator <<(ostream& out, const control_flow_graph& g);
 };
 
 } /* namespace bopp */

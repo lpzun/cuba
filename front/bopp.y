@@ -345,7 +345,8 @@ waitstmt: T_WAIT ';' {
 
 // function call statement
 callstmt: T_CALL funcname '(' ')' ';' {
-  cout<<"I'm in a function call\n";
+  cout<<"I'm in a function call"<<endl;
+  aide.print_control_flow_graph();
  }
 ;
 
