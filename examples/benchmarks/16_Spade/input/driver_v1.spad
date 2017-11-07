@@ -1,0 +1,129 @@
+(** Bluetooth driver.
+ *)
+
+Ops
+(** Operators. **)
+  seq:2 par:2 idle:0
+
+(** process Counter **)
+  one:0 zero:0
+
+(** process Stopping_flag **)
+  false_stop_flag:0 true_stop_flag:0
+
+(** process Stopping_event **)
+  false_stop_event:0 true_stop_event:0
+
+(** process Stop_d **)
+  Stop:0 Stop_n1:0 Stop_release:0
+
+(** process Add_w **)
+  Add:0 Add_n1:0 Add_endWork:0 ABORT:0
+
+(** procedure Increment **)
+  Increment:0 Increment_n1:0 r0:0 r_1:0 
+
+(** procedure Decrement **)
+  Decrement:0 Decrement_n1:0 Decrement_n2:0
+
+
+Acts
+  incr decr notzero iszero 
+  stopF is_stoppedF not_stoppedF
+  stopE is_stoppedE not_stoppedE
+
+SPAD
+
+(* process Counter *)
+
+one  -> seq(one,one) : incr?
+zero -> seq(one,zero) : incr?
+one  -> idle : decr?
+one  -> one  : notzero!
+zero -> zero : iszero!
+
+
+(* process Stopping_flag *)
+
+false_stop_flag -> true_stop_flag : stopF?
+true_stop_flag  -> true_stop_flag : is_stoppedF!
+false_stop_flag -> false_stop_flag : not_stoppedF!
+
+
+(* process Stopping_event *)
+
+false_stop_event -> true_stop_event : stopE?
+true_stop_event -> true_stop_event : is_stoppedE!
+false_stop_event -> false_stop_event : not_stoppedE!
+
+
+(* process Stop *)
+
+Stop -> seq(Decrement, Stop_n1) : stopF!
+Stop_n1 -> Stop_release : is_stoppedE?
+
+
+(* process Add *)
+
+Add -> seq(Increment, Add_n1) : Tau
+seq(r0, Add_n1) -> Add_endWork : Tau
+seq(r_1, Add_n1) -> Decrement : Tau
+Add_endWork -> ABORT : is_stoppedE?
+Add_endWork -> Decrement : not_stoppedE?
+
+
+(* function Increment *)
+
+Increment -> r_1 : is_stoppedF?
+Increment -> Increment_n1 : not_stoppedF?
+Increment_n1 -> r0 : incr!
+
+
+(* function Decrement *)
+
+Decrement -> Decrement_n1 : decr!
+Decrement_n1 -> idle : notzero?
+Decrement_n1 -> Decrement_n2 : iszero?
+Decrement_n2 -> idle : stopE!
+ 
+
+Automaton init
+States qAdd qStop qCounter qCounter0 qCounter1 qFlag qEvent 
+       q1 q2 q3 qinit
+Final States qinit
+Transitions
+  zero -> qCounter0
+  one -> qCounter1
+  seq(qCounter1,qCounter0) -> qCounter
+  false_stop_flag -> qFlag
+  false_stop_event -> qEvent
+  Add -> qAdd
+  (* par(qAdd,qAdd) -> qAdd *)
+  Stop -> qStop 
+  (* par(qStop,qStop) -> qStop *)
+  par(qFlag,qAdd) -> q1
+  par(qEvent,qStop) -> q2
+  par (q1,q2) -> q3
+  par (qCounter,q3) -> qinit
+
+
+Automaton bad
+States s1 serr
+Final States serr
+Transitions
+  ABORT -> serr
+  par (s1, serr) -> serr
+  par (serr, s1) -> serr
+  par (serr, serr) -> serr
+
+  zero -> s1
+  one -> s1
+  false_stop_flag -> s1
+  false_stop_event -> s1
+  true_stop_flag -> s1
+  true_stop_event -> s1
+  Stop_release -> s1
+
+  seq(s1,s1) -> s1
+  par(s1,s1) -> s1
+

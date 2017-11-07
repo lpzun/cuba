@@ -1,0 +1,130 @@
+Description of examples
+=======================
+
+Java Vector finite
+------------------
+File: array_err.spad
+Source: java.util.Vector (Java Standard Collection Framework)
+Biblio: Wang and Stoller [Tech. Report DAR-04-14]
+        Vaziri-Tip-Dolby POPL'06
+Descripton: 
+	High-level data race between vector access and its removal.
+	Only two processes are considered.
+Experiments:
+	alpha = 2 The "BAD" configuration is accessible.
+
+Java Vector finite
+------------------
+File: array_corr.spad
+Source: Vaziri-Tip-Dolby POPL'06
+Biblio: Vaziri-Tip-Dolby POPL'06
+Descripton: 
+	Locked access to vector from 1 copying process and 1 removal process.
+Experiments:
+	alpha = 2 The "BAD" configuration is not accessible.
+	alpha = 4 The "BAD" configuration is not accessible.
+
+Java Vector infinite
+--------------------
+File: array_par_err.spad
+Source: java.util.Vector (Java Standard Collection Framework)
+Biblio: Wang and Stoller [Tech. Report DAR-04-14]
+        Vaziri-Tip-Dolby POPL'06
+Descripton: 
+	High-level data race between vector access at it removal.
+	Infinite number of processes for vector access and removal.
+Experiments:
+	alpha = 2 The "BAD" configuration is accessible.
+
+BlueTooth v1
+------------
+File: driver_v1.spad
+Source: KISS
+Biblio: KISS
+Description:
+	BlueTooth driver as published in the paper KISS of Quadeer.
+	The counter is abstracted to keep trace of processes present 
+        at two states: zero or notzero.
+ 	Version with a finite number of processes.
+Experiments:
+	alpha=5 BAD configuration is accessible. (take 361 min)
+
+BlueTooth v1 
+-------------------------------
+File: driver_v1_par.spad 
+Source: none
+Biblio: none
+Description:
+	Same as previous file but with an infinite number of processes.
+Experiments:
+	alpha=5 BAD configuration is accessible. (take 1630 min)
+
+
+BlueTooth v2
+------------
+File: driver_v2[_par].spad
+Source: Quadeer
+Biblio: S. Chaki, E. Clarke, N. Kidd, T. Reps, and T. Touili, TACAS 06
+Description:
+	BlueTooth driver modified and sent by email by Quadeer.
+	Finite or infinite number of processes are considered.
+Experiments:
+	alpha=5 BAD configuration is accessible (takes 1400min)
+
+Tree concurrent insertion 1
+---------------------------
+File: lock_unlock_1.spad
+Source: Touili
+Biblio: S. Chaki, E. Clarke, N. Kidd, T. Reps, and T. Touili, TACAS 06
+Description:
+	Concurrent insertion of nodes in a tree. 
+	Only one process is considered.
+Experiments:
+	alpha in {2,4,6,8} gives that BAD configuration is nor reachable
+
+
+Tree concurrent insertion parallel
+----------------------------------
+File: lock_unlock_all.spad
+Source: Touili
+Biblio: S. Chaki, E. Clarke, N. Kidd, T. Reps, and T. Touili, TACAS 06
+Description:
+	Concurrent insertion of nodes in a tree. 
+	Several processes are trying to do insertion.
+Experiments:
+	alpha in {2,4} gives that BAD configuration is not reachable
+
+
+Tree concurrent insertion parallel
+----------------------------------
+File: lock_unlock_err_all.spad
+Source: Touili
+Biblio: S. Chaki, E. Clarke, N. Kidd, T. Reps, and T. Touili, TACAS 06
+Description:
+	Concurrent insertion of nodes in a tree. 
+	Several processes are trying to do insertion.
+	Version with an bug inserted (forgot to release the lock).
+Experiments:
+	alpha = 4 gives that BAD configuration is reachable
+	(alpha = 2 says that BAD is not reachable)
+
+
+Par neutrality
+--------------
+Files: par_idle_idle.spad, par_idle.spad, par_tau.spad
+Source:
+Biblio:
+Description:
+	Tests about semantics of parallel composition.
+	par_eps:	reachable (alpha=1)
+	par_idle_idle:	reachable (alpha=1)
+	par_idle:	reachable (alpha=1)
+	par_tau:	reachable (alpha=1)
+
+Seq and par combination
+-----------------------
+Files: seq_par_*
+Description:
+	Tests for combination of par and seq operators.
+	seq_par_1.spad	notR (alpha=1)
+	seq_par_2.spad	reachable (alpha=3)

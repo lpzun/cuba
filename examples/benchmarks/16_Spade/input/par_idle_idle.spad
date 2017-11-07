@@ -1,0 +1,33 @@
+(* Test of SPAD reachability analysis.
+   Expected result: REACHABLE alpha=1
+ *)
+
+Ops
+	seq:2 par:2 idle:0
+	n0:0 
+	m0:0
+	x:0
+
+Acts
+	b 
+
+SPAD
+	n0 -> idle : b!
+	m0 -> idle : b?
+	x  -> par(n0,m0) : Tau
+
+Automaton init
+States p
+Final States p
+Transitions
+	x -> p
+
+Automaton bad
+States q1 q
+Final States	q1
+Transitions
+	idle -> q
+	idle -> q
+	par (q,q) -> q1
+
+
