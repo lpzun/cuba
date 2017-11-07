@@ -37,7 +37,19 @@ This is a multi-threaded java program that takes a filepath and recursively goes
 
 ### 14. JavaXT Directory Search
 ##### Description
-Used to represent a directory on a file system. In many ways, this class is an extension of the java.io.File class. However, unlike the java.io.File class, this object provides functions that are relevant and specific to directories. For example, this class provides a mechanism to move and copy directories - something not offered by the java.io.File class. In addition, this class provides a mechanism to retrieve files and folders found in a directory AND any subdirectories. This is accomplished via a multi-threaded recursive search. Finally, this class provides a powerful tool to monitor changes made to the directory (e.g. getEvents).
+**Project**: 
+JavaXT is a collection of Java libraries and utilities that provide a number of functions 
+not available in the standard JDK. It is an extension of the Java core, written to simplify 
+Java development. 
+
+**Class Directory**: Used to represent a directory on a file system. In many ways, this 
+class is an extension of the java.io.File class. However, unlike the java.io.File class,
+this object provides functions that are relevant and specific to directories. For example, 
+this class provides a mechanism to move and copy directories - something not offered by 
+the java.io.File class. In addition, this class provides a mechanism to retrieve files 
+and folders found in a directory AND any subdirectories. This is accomplished via a 
+multi-threaded recursive search. Finally, this class provides a powerful tool to monitor 
+changes made to the directory (e.g. getEvents).
 
 
 ##### URL
