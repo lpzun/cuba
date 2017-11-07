@@ -1,5 +1,13 @@
 # Multithreaded Recrusive programs
 
+### 11. QuickSort
+##### Description
+Concurrent QuickSort shows one important concurrency paradigm: dynamic multithreading. 
+
+But as we discussed, dynamic multithreading does not fit our requirement very well. 
+
+For us, thread pool is a better scenario. 
+
 ### 12. Concurrent BST
 ##### Description
 This repository contains SnapTree, a concurrent AVL tree with fast
@@ -20,9 +28,18 @@ This is a multi-threaded java program that takes a filepath and recursively goes
 
 
 ##### URL
-[http://amac4.blogspot.com/2013/07/java-multi-threaded-hierarchical-file.html](http://amac4.blogspot.com/2013/07/java-multi-threaded-hierarchical-file.html)
+
+**Paper**: [http://amac4.blogspot.com/2013/07/java-multi-threaded-hierarchical-file.html](http://amac4.blogspot.com/2013/07/java-multi-threaded-hierarchical-file.html)
+
+**Source code**: [https://github.com/nbronson/snaptree](https://github.com/nbronson/snaptree)
+
+
 
 ### 14. JavaXT Directory Search
+##### Description
+Used to represent a directory on a file system. In many ways, this class is an extension of the java.io.File class. However, unlike the java.io.File class, this object provides functions that are relevant and specific to directories. For example, this class provides a mechanism to move and copy directories - something not offered by the java.io.File class. In addition, this class provides a mechanism to retrieve files and folders found in a directory AND any subdirectories. This is accomplished via a multi-threaded recursive search. Finally, this class provides a powerful tool to monitor changes made to the directory (e.g. getEvents).
+
+
 ##### URL
 [http://www.javaxt.com/documentation/?jar=javaxt-core.jar&class=Directory&package=javaxt.io](http://www.javaxt.com/documentation/?jar=javaxt-core.jar&class=Directory&package=javaxt.io)
 

@@ -4,7 +4,6 @@ import java.util.*;
 
 public class WorkQueue {
 
-    //
 // since we are providing the concurrency control, can use non-thread-safe
 // linked list
 //
