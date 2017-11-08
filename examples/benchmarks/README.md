@@ -4,9 +4,15 @@
 ##### Description
 Concurrent QuickSort shows one important concurrency paradigm: dynamic multithreading. 
 
-But as we discussed, dynamic multithreading does not fit our requirement very well. 
+Dynamic multithreading does not fit our requirements very well because of the presence 
+of dynamic thread creation. 
 
-For us, thread pool is a better scenario. 
+But, we 
+
+For us, **thread pool** is a better option. 
+
+Another example is mergesort: a multithreaded recursive mergesort. Please see here for an implementation:
+[https://github.com/zakrywilson/multithreaded-recursive-merge-sort](https://github.com/zakrywilson/multithreaded-recursive-merge-sort).
 
 ### 12. Concurrent BST
 ##### Description
@@ -24,7 +30,8 @@ iteration has snapshot isolation.  For more details see
 
 ### 13. Files and Folder Crawler
 ##### Description
-This is a multi-threaded java program that takes a filepath and recursively goes through each folder and displays the contents of each 
+This is a multi-threaded java program that takes a filepath and recursively 
+goes through each folder and displays the contents of each folder. 
 
 
 ##### URL
@@ -64,10 +71,15 @@ changes made to the directory (e.g. getEvents).
 [https://www.liafa.jussieu.fr/~sighirea/spade/](https://www.liafa.jussieu.fr/~sighirea/spade/)
 
 
-#Some Resources for Dynamic Multhreaded Recursive Programs
+# Resources for Dynamic Multhreaded Recursive Programs
 ### 1. Slides from UTA
 
 
 ### 2. Minicourse
 [http://supertech.csail.mit.edu/papers/minicourse.pdf](http://supertech.csail.mit.edu/papers/minicourse.pdf)
 
+# Other Pushdown benchmarks
+
+1. 
+##### URL
+[http://www.cs.ox.ac.uk/people/matthew.hague/pdsolver.html](http://www.cs.ox.ac.uk/people/matthew.hague/pdsolver.html).
