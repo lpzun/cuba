@@ -1,5 +1,5 @@
 ===========================================================================
-#TODO list
+# TODO list
 
 1. redesign the DS for CPDS:
 P^n = { Q = set<pds_state> 
@@ -12,7 +12,7 @@ P^n = { Q = set<pds_state>
 3. add state elimination
 
 ===========================================================================
-#Some comments
+# Some comments
 
 In the help output, what is the diff between "source.pds" and "--input-file" ?
 

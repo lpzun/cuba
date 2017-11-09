@@ -69,7 +69,6 @@ int main(const int argc, const char * const * const argv) {
 		if (mode == "O") {
 			cout << "Overapproximation mode\n";
 			cout << filename << " " << initl << "\n";
-			//processor proc(initl, filename);
 		} else if (mode == "S") {
 			cout << "sequential mode\n";
 			cout << filename << " " << initl << " " << final << "\n";

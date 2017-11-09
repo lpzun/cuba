@@ -71,6 +71,7 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 	/// 1.3 <global_R>: the sequences of reachable global configurations.
 	/// We obtain this via a BWS based explicit exploration.
 	vector<vector<antichain>> global_R;
+
 	global_R.reserve(k_bound + 1);
 	global_R.emplace_back(vector<antichain>(thread_state::S));
 	global_R[k][c_I.get_state()].emplace_back(CPDA.size(), c_I.get_state(),
