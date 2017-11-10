@@ -26,6 +26,7 @@ for root, dirnames, filenames in os.walk('benchmarks'):
                         if len(ll) is 4:
                             ll.append('-')
                         print(' '.join(str(x) for x in ll))
-                        out.write(' '.join(str(x) for x in ll)+'\n')
+                        out.write(' '.join(str(x) for x in ll))
+                        out.write("\r\n")
                     line = ins.readline()
         # remove the old file
