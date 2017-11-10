@@ -66,15 +66,16 @@ void base_cuba::context_insensitive(const string& initl,
 
 /**
  * A constructor with initial top configuration and a concurrent finite machine
- * @param initl
- * @param filename
+ *
+ * @param initl   : initial configuration
+ * @param filename: the file name for CPDS
  */
 void base_cuba::context_insensitive(const explicit_config& initl,
 		const string& filename) {
-	const auto& initl_c = top_mapping(initl);
+	const auto& top_initl = top_mapping(initl);
 	const auto& CFSM = parser::parse_input_cfsm(filename);
 	generators = vector<set<top_config>>(thread_state::S);
-	const auto& approx_Z = context_insensitive(initl_c, CFSM);
+	const auto& approx_Z = context_insensitive(top_initl, CFSM);
 
 	cout << "Approximation Z:\n";
 	this->print_approximation(approx_Z);
@@ -89,9 +90,15 @@ void base_cuba::context_insensitive(const explicit_config& initl,
 	}
 }
 
+/**
+ *
+ * @param top_initl
+ * @param CFSM
+ * @return
+ */
 vector<set<top_config>> base_cuba::context_insensitive(
-		const top_config& initl_c, const vector<finite_machine>& CFSM) {
-	return standard_FWS(initl_c, CFSM);
+		const top_config& top_initl, const vector<finite_machine>& CFSM) {
+	return standard_FWS(top_initl, CFSM);
 }
 
 /**
@@ -114,9 +121,8 @@ vector<set<top_config>> base_cuba::standard_FWS(const top_config& initl_c,
 		const auto& ret = approx_Z[c.get_state()].emplace(c);
 		if (!ret.second)
 			continue;
-		for (const auto& _c : step(c, CFSM)) {
+		for (const auto& _c : step(c, CFSM))
 			worklist.emplace(_c);
-		}
 	}
 	return approx_Z;
 }

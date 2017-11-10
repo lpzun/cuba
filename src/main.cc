@@ -79,6 +79,7 @@ int main(const int argc, const char * const * const argv) {
 				throw cuba_runtime_error(
 						"Please specify the number of threads!");
 			}
+
 			if (is_explicit) {
 				cout << "explicit exploration......\n";
 				explicit_cuba ecuba(initl, final, filename, std::stoul(n));
