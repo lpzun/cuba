@@ -14,7 +14,7 @@ MergeSort(A, l, r) {
 
 ### 2. Pseudo code for multithreaded quick sort:
 
-##### Dynamic multithreading
+##### Approach 1: Dynamic multithreading
 
 ```c++
 QuickSort(A, l, r) {
@@ -27,8 +27,7 @@ QuickSort(A, l, r) {
 }
 ```
 
-##### Thread pool
-
+##### Approach 2: Thread pool
 
 ```c++
 ParallelQuickSort(A, l, r) {
@@ -39,6 +38,7 @@ ParallelQuickSort(A, l, r) {
     sync();
   }
 }
+
 // Normal quicksort procedure
 QuickSort(A, l, r) {
   if (l < r) {
