@@ -17,6 +17,6 @@ for file in $(find . -name '*.pds'); do
    echo "${file}"
    echo "${file%.pds}.init"
    echo "0|0,0" > ${file%.pds}.init
-   echo "${file%.pds}.prop"
+   echo "${file%.pds}.spec"
    echo "0|0,0" > ${file%.pds}.spec
 done
