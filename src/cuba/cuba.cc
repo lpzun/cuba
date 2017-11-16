@@ -77,12 +77,12 @@ void base_cuba::context_insensitive(const explicit_config& initl,
 	generators = vector<set<top_config>>(thread_state::S);
 	const auto& approx_Z = context_insensitive(top_initl, CFSM);
 
-	cout << "Approximation Z:\n";
-	this->print_approximation(approx_Z);
-	cout << "G intersects Z:\n";
-	this->print_approximation(generators);
-
 	if (prop::OPT_PRINT_ALL) {
+		cout << "Approximation Z:\n";
+		this->print_approximation(approx_Z);
+		cout << "G intersects Z:\n";
+		this->print_approximation(generators);
+
 		for (const auto& fsm : CFSM)
 			for (const auto& adjlist : fsm)
 				for (const auto& r : adjlist.second)

@@ -41,6 +41,10 @@ void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
 			// cout << "PDA " << tid << " contains cycles. ECUBA exits...\n";
 			break;
 		}
+		if (prop::OPT_PARAMETERIZED) {
+			cout << "Parameterized CPDS, only test one PDA...\n";
+			break;
+		}
 		++tid;
 	}
 	if (cycle) {
@@ -115,14 +119,14 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		/// step 2.2: convergence detection
 		/// 2.2.1: OS1 collapses
 		if (nextLevel.size() == 0) {
-			cout << "=> sequence R collapses at " << (k == 0 ? k : k - 1)
+			cout << "=> sequence R and T(R) collapses at " << (k == 0 ? k : k - 1)
 					<< "\n";
 			cout << "======================================" << endl;
 			return true;
 		}
 
 		if (converge(global_R[k], k, top_R)) {
-			cout << "=> sequence top_R collapses at " << (k == 0 ? k : k - 1)
+			cout << "=> sequence T(R) collapses at " << (k == 0 ? k : k - 1)
 					<< "\n";
 			cout << "======================================" << endl;
 			return true;
@@ -241,13 +245,15 @@ bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
 	cout << "context " << k << "\n";
 	/// the number of new reachable top configurations
 	uint cnt_new_top_cfg = 0;
-	for (uint q = 0; q < thread_state::S; ++q) {
+	for (uint q = 0; q < (uint) thread_state::S; ++q) {
 		for (const auto& c : R_k[q]) {
-			cout << string(2, ' ') << c;
+			if (prop::OPT_PRINT_ALL)
+				cout << string(2, ' ') << c;
 			const auto& top_c = top_mapping(c);
 			const auto& ret = top_R[c.get_state()].emplace(top_c);
 			if (ret.second) {
-				cout << " : " << top_c;
+				if (prop::OPT_PRINT_ALL)
+					cout << " : " << top_c;
 				/// find a new top configuration
 				++cnt_new_top_cfg;
 				/// updating approx_X
@@ -255,14 +261,16 @@ bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
 				if (ifind != generators[top_c.get_state()].end())
 					generators[top_c.get_state()].erase(ifind);
 			}
-			cout << "\n";
+			if (prop::OPT_PRINT_ALL)
+				cout << "\n";
 		}
 	}
+	cout << "the number of new visible states: " << cnt_new_top_cfg << "\n";
 	if (cnt_new_top_cfg == 0) {
 		if (is_convergent()) {
 			return true;
 		}
-		cout << "=> sequence top_R plateaus at " << k << "\n";
+		cout << "=> sequence T(R) plateaus at " << k << "\n";
 	}
 	return false;
 }
