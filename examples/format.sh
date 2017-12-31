@@ -11,7 +11,7 @@
 #   mv $file "${file%.tmp}"
 #done
 
-# # build input initial stats
+# # build input initial states
 # # build input specifications
 for file in $(find . -name '*.pds'); do
    echo "${file}"

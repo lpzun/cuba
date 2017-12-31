@@ -1,6 +1,6 @@
 /Debug/
 /.settings/
-/bin/
+/build/
 .DS_Store
 /examples/.DS_Store
 /examples/benchmarks/.DS_Store
