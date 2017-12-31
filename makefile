@@ -23,7 +23,7 @@ IINCLUDE     =-I $(SATDIR)/utils/# $(SATDIR)/cuba/#
 #ISTD	     = -std=c++0x                                                 # for old cpp standard
 ISTD	     = -std=c++11
 
-BINDIR       = bin
+BINDIR       = build
 OBJDIR       = obj
 SRCDIR       = src
 SRCDIRS      = $(shell find $(SRCDIR) -name '*.$(CSUFF)' -exec dirname {} \; | uniq)

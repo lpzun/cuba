@@ -366,11 +366,11 @@ string cmd_line::create_version_info() {
 	.append("* *    _/        _/    _/    _/     _/    _/    _/      * *\n") ///
 	.append("* *    _/_/_/    _/_/_/     _/_/_/_/     _/    _/  " + VERSION  ///
 			+ " * *\n") ///
-//	.append("-----------------------------------------------------------\n") ///
-//	.append("* *           Context-Unbounded Analysis for            * *\n") ///
-//	.append("* *                Concurrent Programs                  * *\n") ///
-//	.append("* *          Peizun Liu @ Thomas Wahl's Group           * *\n") ///
-//	.append("* *       Northeastern University, United States        * *\n") ///
+	.append("-----------------------------------------------------------\n") ///
+	.append("* *    Interprocedural Context-Unbounded Analysis for   * *\n") ///
+	.append("* *               Concurrent Programs                   * *\n") ///
+	.append("* *          Peizun Liu @ Thomas Wahl's Group           * *\n") ///
+	.append("* *       Northeastern University, United States        * *\n") ///
 //	.append("* *                            Build Date @ ").append(
 //	__DATE__).append(" * *\n")
 	.append("-----------------------------------------------------------\n");
