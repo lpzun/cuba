@@ -13,11 +13,11 @@
  * each i, (Q, L, Di) is a PDS.
  ******************************************************************************/
 
-#ifndef CUBA_CPDA_HH_
-#define CUBA_CPDA_HH_
+#ifndef DS_CPDA_HH_
+#define DS_CPDA_HH_
 
-#include "pda.hh"
-#include "fsa.hh"
+#include "../ds/fsa.hh"
+#include "../ds/pda.hh"
 
 namespace cuba {
 
@@ -399,8 +399,11 @@ inline ostream& operator<<(ostream& os, const symbolic_config& c) {
  * Defining the top of configuration, which is a global state
  */
 using top_config = global_state;
+using antichain = deque<global_config>;
+using finite_machine = map<thread_state, deque<transition<thread_state, thread_state>>>;
+using concurrent_finite_machine = vector<finite_machine>;
 
 }
 /* namespace cuba */
 
-#endif /* CUBA_CPDA_HH_ */
+#endif /* DS_CPDA_HH_ */

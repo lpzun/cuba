@@ -5,10 +5,10 @@
  * @author: lpzun
  */
 
-#ifndef CUBA_FSA_HH_
-#define CUBA_FSA_HH_
+#ifndef DS_FSA_HH_
+#define DS_FSA_HH_
 
-#include "pda.hh"
+#include "../ds/pda.hh"
 
 namespace cuba {
 using fsa_state = pda_state;
@@ -239,4 +239,4 @@ inline ostream& operator<<(ostream& os, const finite_automaton& fsa) {
 
 } /* namespace cuba */
 
-#endif /* CUBA_FSA_HH_ */
+#endif /* DS_FSA_HH_ */

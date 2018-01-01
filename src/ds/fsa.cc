@@ -5,7 +5,7 @@
  * @author: lpzun
  */
 
-#include "fsa.hh"
+#include "../ds/fsa.hh"
 
 namespace cuba {
 

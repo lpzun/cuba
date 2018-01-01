@@ -5,8 +5,8 @@
  * @author: lpzun
  */
 
-#ifndef CUBA_PDA_HH_
-#define CUBA_PDA_HH_
+#ifndef DS_PDA_HH_
+#define DS_PDA_HH_
 
 #include "utilities.hh"
 #include "prop.hh"
@@ -545,4 +545,4 @@ inline ostream& operator<<(ostream& os, const pushdown_automaton& PDA) {
 
 } /* namespace cuba */
 
-#endif /* CUBA_PDA_HH_ */
+#endif /* DS_PDA_HH_ */

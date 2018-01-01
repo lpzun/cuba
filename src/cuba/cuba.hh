@@ -10,13 +10,10 @@
 
 #include "prop.hh"
 
-#include "cpda.hh"
-#include "fsa.hh"
+#include "../ds/cpda.hh"
+#include "../ds/fsa.hh"
 
 namespace cuba {
-using antichain = deque<global_config>;
-using finite_machine = map<thread_state, deque<transition<thread_state, thread_state>>>;
-using concurrent_finite_machine = vector<finite_machine>;
 
 /////////////////////////////////////////////////////////////////////////
 /// PART 1. The following are the base class for context-unbounded
