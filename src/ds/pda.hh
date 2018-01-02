@@ -11,7 +11,7 @@
 #include "utilities.hh"
 #include "prop.hh"
 
-namespace cuba {
+namespace ruba {
 
 /// define the control state of PDSs
 using pda_state = int;
@@ -543,6 +543,6 @@ inline ostream& operator<<(ostream& os, const pushdown_automaton& PDA) {
 	return os;
 }
 
-} /* namespace cuba */
+} /* namespace ruba */
 
 #endif /* DS_PDA_HH_ */

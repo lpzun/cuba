@@ -16,19 +16,19 @@
 #ifndef DS_CPDA_HH_
 #define DS_CPDA_HH_
 
-#include "../ds/fsa.hh"
-#include "../ds/pda.hh"
+#include "fsa.hh"
+#include "pda.hh"
 
-namespace cuba {
+namespace ruba {
 
 /// the size of threads
-using size_t = ushort;
+using size_n = ushort;
 /// the size of context switches
 using size_k = ushort;
 
 using id_thread_state = uint;
 
-using id_thread = size_t;
+using id_thread = size_n;
 using ctx_bound = size_k;
 
 /////////////////////////////////////////////////////////////////////////
@@ -58,7 +58,7 @@ using stack_vec = vector<pda_stack>;
 
 class global_state {
 public:
-	global_state(const pda_state& s, const size_t& n);
+	global_state(const pda_state& s, const size_n& n);
 	global_state(const pda_state& s, const vector<pda_state>& L);
 	~global_state();
 
@@ -151,7 +151,7 @@ inline bool operator!=(const global_state& g1, const global_state& g2) {
  */
 class explicit_config {
 public:
-	explicit_config(const pda_state& s, const size_t& n);
+	explicit_config(const pda_state& s, const size_n& n);
 	explicit_config(const pda_state& s, const stack_vec& W);
 	explicit_config(const explicit_config& c);
 	~explicit_config();
@@ -241,16 +241,16 @@ inline bool operator!=(const explicit_config& g1, const explicit_config& g2) {
 /**
  *
  */
-class global_config: public explicit_config {
+class explicit_config_tid: public explicit_config {
 public:
-	global_config(const pda_state& s, const size_t& n);
-	global_config(const id_thread& id, const ctx_bound& k, const pda_state& s,
-			const size_t& n);
-	global_config(const id_thread& id, const pda_state& s, const stack_vec& W);
-	global_config(const id_thread& id, const ctx_bound& k, const pda_state& s,
+	explicit_config_tid(const pda_state& s, const size_n& n);
+	explicit_config_tid(const id_thread& id, const ctx_bound& k, const pda_state& s,
+			const size_n& n);
+	explicit_config_tid(const id_thread& id, const pda_state& s, const stack_vec& W);
+	explicit_config_tid(const id_thread& id, const ctx_bound& k, const pda_state& s,
 			const stack_vec& W);
-	global_config(const global_config& c);
-	~global_config();
+	explicit_config_tid(const explicit_config_tid& c);
+	~explicit_config_tid();
 
 	ctx_bound get_context_k() const {
 		return k;
@@ -275,7 +275,7 @@ private:
  * @param c
  * @return ostream
  */
-inline ostream& operator<<(ostream& os, const global_config& c) {
+inline ostream& operator<<(ostream& os, const explicit_config_tid& c) {
 	// os << "k=" << c.get_context_k() << " ";
 	if (c.get_thread_id() == c.get_stacks().size())
 		os << "t=" << "* ";
@@ -296,7 +296,7 @@ inline ostream& operator<<(ostream& os, const global_config& c) {
  * @param g2
  * @return bool
  */
-inline bool operator<(const global_config& g1, const global_config& g2) {
+inline bool operator<(const explicit_config_tid& g1, const explicit_config_tid& g2) {
 	return g1.top() < g2.top();
 }
 
@@ -306,7 +306,7 @@ inline bool operator<(const global_config& g1, const global_config& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator>(const global_config& g1, const global_config& g2) {
+inline bool operator>(const explicit_config_tid& g1, const explicit_config_tid& g2) {
 	return g2 < g1;
 }
 
@@ -316,7 +316,7 @@ inline bool operator>(const global_config& g1, const global_config& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator==(const global_config& g1, const global_config& g2) {
+inline bool operator==(const explicit_config_tid& g1, const explicit_config_tid& g2) {
 	if (g1.get_state() == g2.get_state()) {
 		auto iw1 = g1.get_stacks().cbegin();
 		auto iw2 = g2.get_stacks().cbegin();
@@ -336,7 +336,7 @@ inline bool operator==(const global_config& g1, const global_config& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator!=(const global_config& g1, const global_config& g2) {
+inline bool operator!=(const explicit_config_tid& g1, const explicit_config_tid& g2) {
 	return !(g1 == g2);
 }
 
@@ -362,7 +362,7 @@ using store_automaton = finite_automaton;
 class symbolic_config {
 public:
 	symbolic_config(const pda_state& q, const vector<store_automaton>& W);
-	symbolic_config(const pda_state& q, const size_t&n,
+	symbolic_config(const pda_state& q, const size_n&n,
 			const store_automaton& A);
 	~symbolic_config();
 
@@ -399,11 +399,14 @@ inline ostream& operator<<(ostream& os, const symbolic_config& c) {
  * Defining the top of configuration, which is a global state
  */
 using top_config = global_state;
-using antichain = deque<global_config>;
 using finite_machine = map<thread_state, deque<transition<thread_state, thread_state>>>;
 using concurrent_finite_machine = vector<finite_machine>;
 
+enum class sequence {
+	CONVERGENT, DIVERGENT, REACHABLE, UNKNOWN
+};
+
 }
-/* namespace cuba */
+/* namespace ruba */
 
 #endif /* DS_CPDA_HH_ */

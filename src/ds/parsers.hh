@@ -9,8 +9,9 @@
 #define DS_PARSERS_HH_
 
 #include "cpda.hh"
+#include "fsa.hh"
 
-namespace cuba {
+namespace ruba {
 /////////////////////////////////////////////////////////////////////////
 /// PART 4. The following are the utilities for PDS file parser.
 ///
@@ -56,6 +57,6 @@ private:
 			const char& delim = prop::SHARED_LOCAL_DELIMITER);
 };
 }
-/* namespace cuba */
+/* namespace ruba */
 
 #endif /* DS_PARSERS_HH_ */

@@ -5,17 +5,14 @@
  * @author: lpzun
  */
 
-#include "../utils/prop.hh"
+#include "prop.hh"
 
-namespace cuba {
+namespace ruba {
 
 prop::prop() {
-	// TODO Auto-generated constructor stub
-
 }
 
 prop::~prop() {
-	// TODO Auto-generated destructor stub
 }
 
 bool prop::OPT_PRINT_ADJ = false;
@@ -33,4 +30,4 @@ const char prop::SHARED_LOCAL_DELIMITER = '|';
 const char prop::STACK_DELIMITER = '.';
 const char prop::THREAD_DELIMITER = ',';
 
-} /* namespace cuba */
+} /* namespace ruba */

@@ -1,5 +1,5 @@
 /**
- * @brief cuba.cc
+ * cuba.cc
  *
  * @date  : Aug 28, 2016
  * @author: Peizun Liu
@@ -16,7 +16,7 @@ namespace cuba {
  * @param n: the number of threads, for parameterized system only
  */
 symbolic_cuba::symbolic_cuba(const string& initl, const string& final,
-		const string& filename, const size_t n) :
+		const string& filename, const size_n n) :
 		base_cuba(initl, final, filename, n) {
 }
 
@@ -127,7 +127,7 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
  * The procedure of building the reachability automaton FSA for a PDA
  * @return a finite automaton
  */
-store_automaton symbolic_cuba::create_store_automaton(const size_t i) {
+store_automaton symbolic_cuba::create_store_automaton(const size_n i) {
 	auto fsa = create_init_automaton(i);
 	cout << "Initial automaton: \n";
 	cout << fsa << endl;
@@ -141,7 +141,7 @@ store_automaton symbolic_cuba::create_store_automaton(const size_t i) {
  * @param PDA
  * @return
  */
-store_automaton symbolic_cuba::create_init_automaton(const size_t i) {
+store_automaton symbolic_cuba::create_init_automaton(const size_n i) {
 	/// step 0: set up the accept state
 	const auto& P = CPDA[i];
 	const auto& q_I = initl_c.get_state();
@@ -409,7 +409,7 @@ set<fsa_state> symbolic_cuba::BFS_visit(const fsa_state& root,
  */
 symbolic_config symbolic_cuba::compose(const pda_state& q_I,
 		const store_automaton& Ai, const vector<store_automaton>& automata,
-		const size_t& i) {
+		const size_n& i) {
 	vector<store_automaton> W;
 	W.reserve(automata.size());
 	for (uint j = 0; j < automata.size(); ++j) {

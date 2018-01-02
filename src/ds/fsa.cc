@@ -5,9 +5,9 @@
  * @author: lpzun
  */
 
-#include "../ds/fsa.hh"
+#include "fsa.hh"
 
-namespace cuba {
+namespace ruba {
 
 /**
  * default constructor

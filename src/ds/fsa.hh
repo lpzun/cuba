@@ -8,9 +8,9 @@
 #ifndef DS_FSA_HH_
 #define DS_FSA_HH_
 
-#include "../ds/pda.hh"
+#include "pda.hh"
 
-namespace cuba {
+namespace ruba {
 using fsa_state = pda_state;
 /// a set of fsa_state
 using fsa_state_set = set<fsa_state>;
@@ -237,6 +237,6 @@ inline ostream& operator<<(ostream& os, const finite_automaton& fsa) {
 	return os;
 }
 
-} /* namespace cuba */
+} /* namespace ruba */
 
 #endif /* DS_FSA_HH_ */

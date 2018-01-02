@@ -5,9 +5,9 @@
  * @author: lpzun
  */
 
-#include "../ds/pda.hh"
+#include "pda.hh"
 
-namespace cuba {
+namespace ruba {
 
 const pda_alpha alphabet::EPSILON = -1;
 const pda_alpha alphabet::NULLPTR = -2;
@@ -41,4 +41,4 @@ pushdown_automaton::pushdown_automaton(const set<pda_state>& states,
 pushdown_automaton::~pushdown_automaton() {
 }
 
-} /* namespace cuba */
+} /* namespace ruba */

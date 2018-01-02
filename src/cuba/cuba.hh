@@ -2,18 +2,20 @@
  * @brief cuba.hh
  *
  * @date  : Aug 28, 2016
- * @author: lpzun
+ * @author: Peizun Liu
  */
 
 #ifndef CUBA_CUBA_HH_
 #define CUBA_CUBA_HH_
 
 #include "prop.hh"
+#include "parsers.hh"
 
-#include "../ds/cpda.hh"
-#include "../ds/fsa.hh"
+using namespace ruba;
 
 namespace cuba {
+
+using antichain = deque<explicit_config_tid>;
 
 /////////////////////////////////////////////////////////////////////////
 /// PART 1. The following are the base class for context-unbounded
@@ -22,7 +24,7 @@ namespace cuba {
 class base_cuba {
 public:
 	base_cuba(const string& initl, const string& final, const string& filename,
-			const size_t n);
+			const size_n n);
 	virtual ~base_cuba();
 	virtual void context_unbounded_analysis(const size_k k_bound = 0) = 0;
 
@@ -50,21 +52,21 @@ private:
 };
 
 /////////////////////////////////////////////////////////////////////////
-/// PART 2. The following are the declarations for context-unbounded
-/// analysis.
+/// PART 2. The following class is the symbolic version for
+/// context-unbounded analysis.
 /////////////////////////////////////////////////////////////////////////
 class symbolic_cuba: public base_cuba {
 public:
 	symbolic_cuba(const string& initl, const string& final,
-			const string& filename, const size_t n = 0);
+			const string& filename, const size_n n = 0);
 	~symbolic_cuba();
 
 	virtual void context_unbounded_analysis(const size_k k_bound = 0);
 private:
 
 	/// Post*(A): build pushdown store automaton
-	store_automaton create_store_automaton(const size_t i);
-	store_automaton create_init_automaton(const size_t i);
+	store_automaton create_store_automaton(const size_n i);
+	store_automaton create_init_automaton(const size_n i);
 	fsa_state create_accept_state(const fsa_state_set& states);
 	fsa_state create_interm_state(const fsa_state_set& states);
 	store_automaton post_kleene(const store_automaton& A,
@@ -77,7 +79,7 @@ private:
 			const unordered_map<fsa_state, deque<fsa_state>>& adj,
 			const fsa_state_set& initials);
 	symbolic_config compose(const pda_state& _q, const store_automaton& Ai,
-			const vector<store_automaton>& automata, const size_t& idx);
+			const vector<store_automaton>& automata, const size_n& idx);
 	store_automaton rename(const store_automaton& A, const pda_state& q_I);
 	store_automaton anonymize(const store_automaton& A, const pda_state& q_I,
 			const bool& is_rename = false);
@@ -108,8 +110,8 @@ private:
 };
 
 /////////////////////////////////////////////////////////////////////////
-/// PART 3. The following are the utilities for explore.
-///
+/// PART 3. The following class is the explicit version for
+/// context-unbounded analysis.
 /////////////////////////////////////////////////////////////////////////
 
 /**
@@ -118,7 +120,7 @@ private:
 class explicit_cuba: public base_cuba {
 public:
 	explicit_cuba(const string& initl, const string& final,
-			const string& filename, const size_t n = 0);
+			const string& filename, const size_n n = 0);
 
 	virtual ~explicit_cuba();
 
@@ -127,72 +129,27 @@ private:
 
 	bool k_bounded_reachability(const size_k k_bound,
 			const explicit_config& c_I);
-	antichain step(const global_config& tau, const bool is_switch);
+	antichain step(const explicit_config_tid& tau, const bool is_switch);
 	void step(const pda_state& q, const stack_vec& W, const uint tid,
 			antichain& successors);
 	bool update_R(vector<vector<antichain>>& R, const size_k k,
-			const global_config& c);
+			const explicit_config_tid& c);
 
 	/// determine convergence, reachability of a target and so on
 	bool converge(const vector<antichain>& R, const size_k k,
 			vector<set<top_config>>& top_R);
 	bool is_convergent();
-	bool is_reachable(const global_config& tau, const size_k k,
+	bool is_reachable(const explicit_config_tid& tau, const size_k k,
 			vector<vector<antichain>>& R);
 	void marking(const pda_state& s, const pda_alpha& l);
 
-	top_config top_mapping(const global_config& tau);
+	top_config top_mapping(const explicit_config_tid& tau);
 
 	/// determine the finite context reachability
-	bool finite_context_reachability(const size_t tid);
-	bool finite_context_reachability(const size_t tid, const thread_state& s,
+	bool finite_context_reachability(const size_n tid);
+	bool finite_context_reachability(const size_n tid, const thread_state& s,
 			stack<pda_alpha>& W, map<vertex, bool>& visit,
 			map<vertex, bool>& trace);
-};
-
-/////////////////////////////////////////////////////////////////////////
-/// PART 4. The following are the utilities for PDS file parser.
-///
-/////////////////////////////////////////////////////////////////////////
-class parser {
-public:
-	static concurrent_pushdown_automata parse_input_cpds(
-			const string& filename);
-	static concurrent_finite_machine parse_input_cfsm(const string& filename,
-			const bool no_pop = false);
-	static explicit_config parse_input_cfg(const string& s);
-
-private:
-	static vector<vector<string>> read_input_cpds(const string& filename,
-			set<pda_state>& states);
-	static pushdown_automaton parse_input_pda(const set<pda_state>& states,
-			const vector<string>& sPDA);
-	static finite_machine parse_input_fsm(const set<pda_state>& states,
-			const vector<string>& sPDA);
-	static finite_machine parse_input_fsm_no_pop(const vector<string>& sPDA);
-
-	static pda_alpha parse_input_alpha(const string& alpha);
-
-	static void remove_comments(istream& in, ostream& out,
-			const string& comment);
-	static bool getline(istream& in, string& line, const char& eol = '\n');
-
-	static deque<string> split(const string &s, const char& delim);
-
-	static void remove_comments(istream& in, const string& filename,
-			const string& comment);
-	static void remove_comments(const string& in, string& out,
-			const string& comment);
-
-	static thread_config create_thread_config_from_str(const string& s_ts,
-			const char& delim = prop::SHARED_LOCAL_DELIMITER);
-	static explicit_config create_global_config_from_str(const string& s_ts,
-			const char& delim = prop::SHARED_LOCAL_DELIMITER);
-
-	static thread_state create_thread_state_from_str(const string& s_ts,
-			const char& delim = prop::SHARED_LOCAL_DELIMITER);
-	static global_state create_global_state_from_str(const string& s_ts,
-			const char& delim = prop::SHARED_LOCAL_DELIMITER);
 };
 }
 /* namespace cuba */

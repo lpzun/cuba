@@ -5,9 +5,9 @@
  * @author: Peizun Liu
  */
 
-#include "../ds/cpda.hh"
+#include "cpda.hh"
 
-namespace cuba {
+namespace ruba {
 
 pda_state thread_state::S = 0;
 pda_alpha thread_state::L = 0;
@@ -88,7 +88,7 @@ thread_config::~thread_config() {
  * @param s
  * @param n
  */
-global_state::global_state(const pda_state& s, const size_t& n) :
+global_state::global_state(const pda_state& s, const size_n& n) :
 		s(s), L(n) {
 
 }
@@ -116,7 +116,7 @@ global_state::~global_state() {
  * @param s
  * @param n
  */
-explicit_config::explicit_config(const pda_state& s, const size_t& n) :
+explicit_config::explicit_config(const pda_state& s, const size_n& n) :
 		s(s), W(n) {
 }
 
@@ -177,7 +177,7 @@ global_state explicit_config::top() {
  * @param s
  * @param n
  */
-global_config::global_config(const pda_state& s, const size_t& n) :
+explicit_config_tid::explicit_config_tid(const pda_state& s, const size_n& n) :
 		explicit_config(s, n), id(0), k(0) {
 
 }
@@ -189,8 +189,8 @@ global_config::global_config(const pda_state& s, const size_t& n) :
  * @param s
  * @param n
  */
-global_config::global_config(const id_thread& id, const ctx_bound& k,
-		const pda_state& s, const size_t& n) :
+explicit_config_tid::explicit_config_tid(const id_thread& id, const ctx_bound& k,
+		const pda_state& s, const size_n& n) :
 		explicit_config(s, n), id(id), k(k) {
 
 }
@@ -201,7 +201,7 @@ global_config::global_config(const id_thread& id, const ctx_bound& k,
  * @param s
  * @param W
  */
-global_config::global_config(const id_thread& id, const pda_state& s,
+explicit_config_tid::explicit_config_tid(const id_thread& id, const pda_state& s,
 		const stack_vec& W) :
 		explicit_config(s, W), id(id), k(0) {
 
@@ -214,19 +214,19 @@ global_config::global_config(const id_thread& id, const pda_state& s,
  * @param s
  * @param W
  */
-global_config::global_config(const id_thread& id, const ctx_bound& k,
+explicit_config_tid::explicit_config_tid(const id_thread& id, const ctx_bound& k,
 		const pda_state& s, const stack_vec& W) :
 		explicit_config(s, W), id(id), k(k) {
 
 }
 
-global_config::global_config(const global_config& c) :
+explicit_config_tid::explicit_config_tid(const explicit_config_tid& c) :
 		explicit_config(c.get_state(), c.get_stacks()), id(c.get_thread_id()), k(
 				c.get_context_k()) {
 
 }
 
-global_config::~global_config() {
+explicit_config_tid::~explicit_config_tid() {
 
 }
 
@@ -252,7 +252,7 @@ symbolic_config::symbolic_config(const pda_state& g,
  * @param n
  * @param A
  */
-symbolic_config::symbolic_config(const pda_state& g, const size_t&n,
+symbolic_config::symbolic_config(const pda_state& g, const size_n&n,
 		const finite_automaton& A) :
 		q(g), W(n, A) {
 }
@@ -263,4 +263,4 @@ symbolic_config::symbolic_config(const pda_state& g, const size_t&n,
 symbolic_config::~symbolic_config() {
 
 }
-} /* namespace bssp */
+} /* namespace ruba */

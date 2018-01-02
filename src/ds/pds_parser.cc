@@ -7,7 +7,7 @@
 
 #include "cuba.hh"
 
-namespace cuba {
+namespace ruba {
 
 /**
  * Read and parse CPDS from file, to build concurrent pushdown automaton
@@ -439,4 +439,4 @@ deque<string> parser::split(const string &s, const char& delim) {
 	}
 	return elems;
 }
-} /* namespace cuba */
+} /* namespace ruba */

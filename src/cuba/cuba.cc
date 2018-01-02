@@ -1,5 +1,5 @@
 /**
- * @brief pre_processor.cc
+ * The implementation of base_cuba class
  *
  * @date  : Jun 13, 2017
  * @author: Peizun Liu
@@ -15,7 +15,7 @@ namespace cuba {
  * @param n: the number of threads, for parameterized system only
  */
 base_cuba::base_cuba(const string& initl, const string& final,
-		const string& filename, const size_t n) :
+		const string& filename, const size_n n) :
 		initl_c(0, 1), final_c(0, 1), CPDA(), generators(), reachable_T() {
 	if (prop::OPT_PARAMETERIZED) {
 
@@ -161,7 +161,7 @@ deque<top_config> base_cuba::step(const top_config& c,
  */
 top_config base_cuba::top_mapping(const explicit_config& tau) {
 	vector<pda_alpha> W(tau.get_stacks().size());
-	for (size_t i = 0; i < tau.get_stacks().size(); ++i) {
+	for (size_n i = 0; i < tau.get_stacks().size(); ++i) {
 		if (tau.get_stacks()[i].empty())
 			W[i] = alphabet::EPSILON;
 		else
