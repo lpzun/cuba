@@ -36,6 +36,9 @@ protected:
 	///     popped top configurations
 	vector<set<top_config>> generators;
 	vector<vector<bool>> reachable_T;
+
+	size_k convergence_GS; /// convergence of OS of global states
+	size_k convergence_VS; /// convergence of OS of visible states
 };
 
 /////////////////////////////////////////////////////////////////////////

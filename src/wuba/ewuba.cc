@@ -76,16 +76,12 @@ bool explicit_wuba::k_bounded_reachability(const size_k k_bound,
 				/// add the successors to current round (R_{k}) if no write, and
 				/// to next round (R_{k+1}) otherwise.
 				if (_tau.get_state() == tau.get_state()) {
-					//cout << "shared unchange: " << _tau << "\n";
 					if (!update_R(_tau, k, global_R))
 						continue;
 					currRound.emplace_back(_tau);
 				} else {
-					//cout << "shared changed: " << _tau << "\n";
 					if (!update_R(_tau, k + 1, global_R))
 						continue;
-
-					//cout << "shared changed: " << _tau << "\n";
 					nextRound.emplace_back(_tau);
 				}
 			}
@@ -93,19 +89,27 @@ bool explicit_wuba::k_bounded_reachability(const size_k k_bound,
 
 		/// step 2.2: convergence detection
 		/// 2.2.1: global_R collapses
-		if (nextRound.size() == 0) {
-			cout << "=> sequence R and T(R) collapses at "
-					<< (k == 0 ? k : k - 1) << "\n";
+		if (convergence_GS > 0 || nextRound.size() == 0) {
+			cout << "=> sequence R and T(R) collapses at ";
+			if (convergence_GS == 0)
+				convergence_GS = k == 0 ? k : k - 1;
+			cout << convergence_GS << "\n";
 			cout << "======================================" << endl;
-			return true;
 		}
 		/// 2.2.2: top_R collapses
-		if (converge(global_R[k], k, top_R)) {
-			cout << "=> sequence T(R) collapses at " << (k == 0 ? k : k - 1)
-					<< "\n";
+		if (converge(global_R[k], k, top_R) || convergence_VS) {
+			cout << "=> sequence T(R) collapses at ";
+			if (convergence_VS == 0)
+				convergence_VS = k == 0 ? k : k - 1;
+			cout << convergence_VS << "\n";
 			cout << "======================================" << endl;
-			return true;
 		}
+
+		/// k_bound == 0 means the user does specify the resource
+		/// bound, so unbounded analysis applies. We need to return
+		/// when we reach a convergence.
+		if (k_bound == 0 && (convergence_GS > 0 || convergence_VS > 0))
+			return true;
 
 		/// step 2.3: if all configurations in current round have been processed,
 		/// then move onto next round, aka with k+1 writes
