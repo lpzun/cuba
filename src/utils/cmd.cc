@@ -91,8 +91,9 @@ short cmd_line::get_opt_index(const opt_type& opt) {
 ///
 ///////////////////////////////////////////////////////////////////////////////
 cmd_line::cmd_line() :
-		SHORT_HELP_OPT("-h"), LONG_HELP_OPT("--help"), SHORT_VERSION_OPT("-v"), LONG_VERSION_OPT(
-				"--version"), VERSION("v1.0"), name_width(0), xwidth(10), help_message(
+		SHORT_HELP_OPT("-h"), LONG_HELP_OPT("--help"), SHORT_VERSION_OPT("-v"), ///
+		LONG_VERSION_OPT("--version"), VERSION("v1.0"), name_width(0), ///
+		xwidth(10), help_message(
 				"Use " + string(SHORT_HELP_OPT) + " or " + string(LONG_HELP_OPT)
 						+ " for help"), v_info(), cmd_options(), cmd_switches(), types() {
 	this->create_argument_list();
@@ -317,16 +318,16 @@ void cmd_line::create_argument_list() {
 	this->add_option(get_opt_index(opt_type::PROB), "-f", "--input-file",
 			"an input pushdown system", "X");
 	this->add_option(get_opt_index(opt_type::PROB), "-i", "--initial",
-			"an initial configuration", "0|0,0");
+			"an initial global state", "0|0,..,0");
 	this->add_option(get_opt_index(opt_type::PROB), "-a", "--target",
-			"a target configuration", "0|0,0");
+			"a  target  global state", "0|0,..,0");
 	this->add_switch(get_opt_index(opt_type::PROB), "-l", "--list-input",
 			"show the input pushdown system");
 	this->add_option(get_opt_index(opt_type::PROB), "-m", "--mode",
 			(string("input program mode (default = C):\n") //
-			+ string(27, ' ') + " \"S\": sequential mode\n" //
-					+ string(27, ' ') + " \"C\": concurrent mode\n" //
-					+ string(27, ' ') + " \"O\": overapproximation mode" //
+			+ string(28, ' ') + " \"S\": sequential mode\n" //
+					+ string(28, ' ') + " \"C\": concurrent mode\n" //
+					+ string(28, ' ') + " \"O\": overapproximation mode" //
 			).c_str(), "");
 	this->add_switch(get_opt_index(opt_type::PROB), "-r", "--reachability",
 			"check the reachability of the given target");
@@ -336,12 +337,25 @@ void cmd_line::create_argument_list() {
 			"show the pushdown store automaton");
 
 	/// concurrent mode
-	this->add_option(get_opt_index(opt_type::CON), "-k", "--ctx-bound",
-			"the bound of contexts, perform CUBA if specify nothing", "0");
+	this->add_option(get_opt_index(opt_type::CON), "-s", "--resource",
+			(string("the type of resource-unbounded analysis (default = C):\n") /// row 1
+			.append(string(28, ' ')).append(
+					" \"C\": CUBA (context-unbounded analysis)\n")     /// row 2
+			.append(string(28, ' ')).append(
+					" \"W\": WUBA (write-unbounded analysis)")).c_str(), ""); /// row 3
+	this->add_option(get_opt_index(opt_type::CON), "-k", "--res-bound",
+			(string("resource bound, ").append(
+					"performing resource-unbounded analysis if specify nothing.\n") /// row 1
+			.append(string(28, ' ')).append(
+					"Per parameter -s, it has different meanings:\n") /// row 2
+			.append(string(29, ' ')).append(
+					"if -s = C, then k represents the context bound\n") ///
+			.append(string(29, ' ')).append(
+					"if -s = W, then k represents the write access bound")), ""); /// row 4
 	this->add_option(get_opt_index(opt_type::CON), "-n", "--threads",
 			"the number of threads (used only for parameterized systems)", "0");
 	this->add_switch(get_opt_index(opt_type::CON), "-x", "--explicit",
-			"an explicit CUBA working with finite context reachability");
+			"an explicit exploration assuming finite resource reachability");
 	this->add_switch(get_opt_index(opt_type::CON), "-p", "--parameterized",
 			"the input is a parameterized pushdown system");
 

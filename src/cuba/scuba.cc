@@ -575,7 +575,6 @@ uint symbolic_cuba::top_mapping(const deque<symbolic_config>& R,
 		vector<set<top_config>>& topped_R) {
 	uint cnt_new_top_cfg = 0;
 	for (const auto& c : R) {
-		//cout << c << endl;
 		for (const auto& top_c : top_mapping(c)) {
 			auto ret = topped_R[top_c.get_state()].emplace(top_c);
 			if (ret.second) {
@@ -584,7 +583,6 @@ uint symbolic_cuba::top_mapping(const deque<symbolic_config>& R,
 				/// updating approx_X
 				auto ifind = generators[top_c.get_state()].find(top_c);
 				if (ifind != generators[top_c.get_state()].end()) {
-					//cout << "----------------" << top_c << endl;
 					generators[top_c.get_state()].erase(ifind);
 				}
 			}

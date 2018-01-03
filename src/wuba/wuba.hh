@@ -51,21 +51,27 @@ private:
 	bool k_bounded_reachability(const size_k k_bound,
 			const explicit_config& c_I);
 	deque<explicit_config> k_round(const deque<explicit_config>& R_k);
-	deque<explicit_config> step(const explicit_config& c);
-	bool update_R(vector<vector<deque<explicit_config>>>& global_R,
-			const size_k k, const explicit_config& c);
+	deque<explicit_config> step(const explicit_config& tau);
+	bool update_R(const explicit_config& tau, const size_k k,
+			vector<vector<deque<explicit_config>>>& R);
+	bool is_reachable(const explicit_config& tau, const size_k k,
+			vector<vector<deque<explicit_config>>>& R);
+
+	bool converge(const vector<deque<explicit_config>>& Rk, const size_k k,
+			vector<set<top_config>>& top_R);
+	top_config top_mapping(const explicit_config& tau);
 };
 
 /////////////////////////////////////////////////////////////////////////
 /// PART 3. The following class is the symbolic version for
 /// write-unbounded analysis.
 /////////////////////////////////////////////////////////////////////////
-class symbolic_wuba: public base_wuba {
-public:
-
-private:
-
-};
+//class symbolic_wuba: public base_wuba {
+//public:
+//
+//private:
+//
+//};
 
 } /* namespace wuba */
 

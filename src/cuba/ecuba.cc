@@ -122,8 +122,8 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		/// step 2.2: convergence detection
 		/// 2.2.1: OS1 collapses
 		if (nextLevel.size() == 0) {
-			cout << "=> sequence R and T(R) collapses at " << (k == 0 ? k : k - 1)
-					<< "\n";
+			cout << "=> sequence R and T(R) collapses at "
+					<< (k == 0 ? k : k - 1) << "\n";
 			cout << "======================================" << endl;
 			return true;
 		}
@@ -147,7 +147,8 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
  * @param tau: a global configuration
  * @return a list of successors, aka. global configurations
  */
-antichain explicit_cuba::step(const explicit_config_tid& tau, const bool is_switch) {
+antichain explicit_cuba::step(const explicit_config_tid& tau,
+		const bool is_switch) {
 	antichain successors;
 	/// step 1: if context switches already reach to the upper bound
 	const auto& q = tau.get_state(); /// the control state of tau
@@ -162,7 +163,7 @@ antichain explicit_cuba::step(const explicit_config_tid& tau, const bool is_swit
 		for (uint tid = 0; tid < W.size(); ++tid) {
 			/// step 2.2.1: deal with the situation of the thread whose index
 			/// ID = tid is "dead".
-			/// @WARNING: this means we don't allow an action whose source
+			/// @TODO WARNING: this means we don't allow an action whose source
 			/// is empty. Need to revisit
 			if (tid == tau.get_thread_id())
 				continue;
@@ -185,11 +186,11 @@ void explicit_cuba::step(const pda_state& q, const stack_vec& W, const uint tid,
 	if (tid >= CPDA.size() || W[tid].empty())
 		return;
 	/// step 2.2: iterator over all successors of current thread state
-	const auto& ifind = CPDA[tid].get_program().find(
+	const auto ifind = CPDA[tid].get_program().find(
 			thread_state(q, W[tid].top()));
 	if (ifind == CPDA[tid].get_program().end())
 		return;
-	for (const auto& rid : ifind->second) { /// rid: transition id
+	for (const auto rid : ifind->second) { /// rid: transition id
 		const auto& r = CPDA[tid].get_actions()[rid];
 		const auto& dst = r.get_dst();
 
@@ -294,44 +295,41 @@ bool explicit_cuba::is_convergent() {
 
 /**
  * This procedure is to determine whether there exists c \in R such that
- * (1) c == tau;
- * (2) c.id == tau.id /\ c.s == c.s /\ c.W == tau.W /\ c.k < tau.k.
+ * (1) c.id == tau.id /\ c.s == c.s /\ c.W == tau.W /\ c.k <= tau.k.
  * It returns true if any of above conditions satisfies. Otherwise, it
  * returns false.
  *
- * (3) One special case is that: there exists c \in explored such that
+ * (2) One special case is that: there exists c \in R such that
  * c.id == tau.id /\ c.s == tau.s /\ c.W == tau.W /\ c.k > tau.k,
- * then, the procedure replaces c by tau except returning false.
+ * then, c is removed.
+ *
+ * In the implementation, we first check condition (1) and then (2).
  *
  * @param tau
  * @param curr_k
  * @param R
  * @return bool
  */
-bool explicit_cuba::is_reachable(const explicit_config_tid& tau, const size_k curr_k,
-		vector<vector<antichain>>& R) {
-	bool flag = false;
-
+bool explicit_cuba::is_reachable(const explicit_config_tid& tau,
+		const size_k curr_k, vector<vector<antichain>>& R) {
+	/// step 1: retrieve the shared state of tau
 	const auto& q = tau.get_state();
-	/// step 1: check condition (1) and (2)
-	for (uint k = 0; k <= curr_k && k < R.size(); ++k) {
-		for (uint i = 0; i < R[k][q].size(); ++i) {
-			if (R[k][q][i] == tau) {
-				flag = true;
-				break; /// break out the inner loop
-			}
-		}
-		if (flag) /// break out the outer loop
-			break;
-	}
 	/// step 2: check condition 3
-	for (uint k = curr_k + 1; k < R.size(); ++k) {
-		for (uint i = 0; i < R[k][q].size(); ++i) {
-			if (R[k][q][i] == tau)
-				R[k][q].erase(R[k][q].begin() + i);
+	for (uint j = curr_k + 1; j < R.size(); ++j) {
+		for (uint i = 0; i < R[j][q].size(); ++i) {
+			if (R[j][q][i] == tau)
+				R[j][q].erase(R[j][q].begin() + i);
 		}
 	}
-	return flag;
+
+	/// step 3: check condition (1) and (2)
+	for (uint j = 0; j <= curr_k && j < R.size(); ++j) {
+		for (uint i = 0; i < R[j][q].size(); ++i) {
+			if (R[j][q][i] == tau)
+				return true;
+		}
+	}
+	return false;
 }
 
 /**

@@ -8,12 +8,14 @@
 
 #include <iostream>
 
-#include "utils/cmd.hh"
-#include "cuba/cuba.hh"
+#include "cmd.hh"
+#include "cuba.hh"
+#include "wuba.hh"
 
 using namespace std;
 using namespace cmd;
 using namespace cuba;
+using namespace wuba;
 
 /**
  *
@@ -82,8 +84,10 @@ int main(const int argc, const char * const * const argv) {
 
 			if (is_explicit) {
 				cout << "explicit exploration......\n";
-				explicit_cuba ecuba(initl, final, filename, std::stoul(n));
-				ecuba.context_unbounded_analysis(std::stoul(k));
+				explicit_wuba ewuba(initl, final, filename, std::stoul(n));
+				ewuba.write_bounded_analysis(std::stoul(k));
+				//explicit_cuba ecuba(initl, final, filename, std::stoul(n));
+				//ecuba.context_unbounded_analysis(std::stoul(k));
 			} else {
 				cout << "symbolic exploration......\n";
 				symbolic_cuba scuba(initl, final, filename, std::stoul(n));
