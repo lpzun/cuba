@@ -27,8 +27,6 @@ public:
 			const size_n n);
 	virtual ~base_cuba();
 	virtual void context_unbounded_analysis(const size_k k_bound = 0) = 0;
-
-	void context_insensitive(const string& initl, const string& filename);
 protected:
 	explicit_config initl_c;
 	explicit_config final_c;
@@ -39,16 +37,6 @@ protected:
 	vector<vector<bool>> reachable_T;
 
 private:
-	void context_insensitive(const explicit_config& initl,
-			const string& filename);
-	vector<set<top_config>> context_insensitive(const top_config& initl_c,
-			const vector<finite_machine>& CFSM);
-	vector<set<top_config>> standard_FWS(const top_config& initl_c,
-			const vector<finite_machine>& CFSM);
-	deque<top_config> step(const top_config& c,
-			const vector<finite_machine>& CFSM);
-	top_config top_mapping(const explicit_config& tau);
-	void print_approximation(const vector<set<top_config>>& approx_R);
 };
 
 /////////////////////////////////////////////////////////////////////////

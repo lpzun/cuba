@@ -32,6 +32,10 @@ protected:
 	explicit_config initl_c;
 	explicit_config final_c;
 	concurrent_pushdown_automata CPDA;
+	/// 1.1 <generators>: the overapproximation of the set of reachable
+	///     popped top configurations
+	vector<set<top_config>> generators;
+	vector<vector<bool>> reachable_T;
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -59,6 +63,7 @@ private:
 
 	bool converge(const vector<deque<explicit_config>>& Rk, const size_k k,
 			vector<set<top_config>>& top_R);
+	bool converge();
 	top_config top_mapping(const explicit_config& tau);
 };
 

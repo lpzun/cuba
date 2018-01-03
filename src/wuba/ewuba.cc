@@ -104,6 +104,7 @@ bool explicit_wuba::k_bounded_reachability(const size_k k_bound,
 			cout << "=> sequence T(R) collapses at " << (k == 0 ? k : k - 1)
 					<< "\n";
 			cout << "======================================" << endl;
+			return true;
 		}
 
 		/// step 2.3: if all configurations in current round have been processed,
@@ -237,15 +238,43 @@ bool explicit_wuba::converge(const vector<deque<explicit_config>>& Rk,
 				if (prop::OPT_PRINT_ALL)
 					cout << " : " << top_c;
 				++cnt_new_top_cfg;
+				/// removing reachable generators
+				auto ifind = generators[top_c.get_state()].find(top_c);
+				if (ifind != generators[top_c.get_state()].end())
+					generators[top_c.get_state()].erase(ifind);
 			}
 			if (prop::OPT_PRINT_ALL)
 				cout << "\n";
 		}
 	}
 	cout << "the number of new visible states: " << cnt_new_top_cfg << "\n";
+	if (cnt_new_top_cfg == 0) {
+		if (converge())
+			return true;
+		cout << "=> sequence T(R) plateaus at " << k << "\n";
+	}
 	return false;
 }
 
+/**
+ * Determine if OS3 converges or not
+ * @return bool
+ *         true : if OS3 converges
+ *         false: otherwise
+ */
+bool explicit_wuba::converge() {
+	for (const auto& s : generators) {
+		if (!s.empty())
+			return false;
+	}
+	return true;
+}
+
+/**
+ *
+ * @param tau
+ * @return
+ */
 top_config explicit_wuba::top_mapping(const explicit_config& tau) {
 	vector<pda_alpha> W(tau.get_stacks().size());
 	for (size_n i = 0; i < tau.get_stacks().size(); ++i)
