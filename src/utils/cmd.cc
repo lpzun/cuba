@@ -318,16 +318,16 @@ void cmd_line::create_argument_list() {
 	this->add_option(get_opt_index(opt_type::PROB), "-f", "--input-file",
 			"an input pushdown system", "X");
 	this->add_option(get_opt_index(opt_type::PROB), "-i", "--initial",
-			"an initial global state", "0|0,..,0");
+			"an initial global state", "0|0,0");
 	this->add_option(get_opt_index(opt_type::PROB), "-a", "--target",
-			"a  target  global state", "0|0,..,0");
+			"a  target  global state", "0|0,0");
 	this->add_switch(get_opt_index(opt_type::PROB), "-l", "--list-input",
 			"show the input pushdown system");
 	this->add_option(get_opt_index(opt_type::PROB), "-m", "--mode",
 			(string("input program mode (default = C):\n") //
-			+ string(28, ' ') + " \"S\": sequential mode\n" //
-					+ string(28, ' ') + " \"C\": concurrent mode\n" //
-					+ string(28, ' ') + " \"O\": overapproximation mode" //
+			+ string(28, ' ') + " \'S\': sequential mode\n" //
+					+ string(28, ' ') + " \'C\': concurrent mode\n" //
+					+ string(28, ' ') + " \'O\': overapproximation mode" //
 			).c_str(), "");
 	this->add_switch(get_opt_index(opt_type::PROB), "-r", "--reachability",
 			"check the reachability of the given target");
@@ -340,22 +340,24 @@ void cmd_line::create_argument_list() {
 	this->add_option(get_opt_index(opt_type::CON), "-s", "--resource",
 			(string("the type of resource-unbounded analysis (default = C):\n") /// row 1
 			.append(string(28, ' ')).append(
-					" \"C\": CUBA (context-unbounded analysis)\n")     /// row 2
+					" \'C\': CBA or CUBA (context-(un)bounded analysis)\n") /// row 2
 			.append(string(28, ' ')).append(
-					" \"W\": WUBA (write-unbounded analysis)")).c_str(), ""); /// row 3
+					" \'W\': WBA or WUBA (write-(un)bounded analysis)")).c_str(),
+			""); /// row 3
 	this->add_option(get_opt_index(opt_type::CON), "-k", "--res-bound",
 			(string("resource bound, ").append(
 					"performing resource-unbounded analysis if specify nothing.\n") /// row 1
 			.append(string(28, ' ')).append(
 					"Per parameter -s, it has different meanings:\n") /// row 2
 			.append(string(29, ' ')).append(
-					"if -s = C, then k represents the context bound\n") ///
+					"if -s = \'C\', then k represents the context bound\n") ///
 			.append(string(29, ' ')).append(
-					"if -s = W, then k represents the write access bound")), ""); /// row 4
+					"if -s = \'W\', then k represents the write access bound")),
+			""); /// row 4
 	this->add_option(get_opt_index(opt_type::CON), "-n", "--threads",
 			"the number of threads (used only for parameterized systems)", "0");
 	this->add_switch(get_opt_index(opt_type::CON), "-x", "--explicit",
-			"an explicit exploration assuming finite resource reachability");
+			"the explicit exploration assuming finite resource reachability");
 	this->add_switch(get_opt_index(opt_type::CON), "-p", "--parameterized",
 			"the input is a parameterized pushdown system");
 

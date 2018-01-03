@@ -66,12 +66,18 @@ private:
 /// PART 3. The following class is the symbolic version for
 /// write-unbounded analysis.
 /////////////////////////////////////////////////////////////////////////
-//class symbolic_wuba: public base_wuba {
-//public:
-//
-//private:
-//
-//};
+class symbolic_wuba: public base_wuba {
+public:
+	symbolic_wuba(const string& initl, const string& final,
+			const string& filename, const size_n n_bound = 0);
+	virtual ~symbolic_wuba();
+
+	virtual void write_bounded_analysis(const size_k k_bound);
+	virtual void write_unbounded_analysis();
+
+private:
+
+};
 
 } /* namespace wuba */
 

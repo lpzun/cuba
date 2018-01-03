@@ -53,8 +53,10 @@ int main(const int argc, const char * const * const argv) {
 				"--automaton");
 
 		/// Concurrent Mode
+		const string& resource = cmd.arg_value(
+				cmd_line::get_opt_index(opt_type::CON), "--resource");
 		const string& k = cmd.arg_value(cmd_line::get_opt_index(opt_type::CON),
-				"--ctx-bound");
+				"--res-bound");
 		const string& n = cmd.arg_value(cmd_line::get_opt_index(opt_type::CON),
 				"--threads");
 		const bool is_explicit = cmd.arg_bool(
@@ -67,7 +69,7 @@ int main(const int argc, const char * const * const argv) {
 				cmd_line::get_opt_index(opt_type::OTHER), "--cmd-line");
 		prop::OPT_PRINT_ALL = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--all");
-
+		cout << filename << " " << initl << " " << final << endl;
 		if (mode == "O") {
 			cout << "Overapproximation mode\n";
 			cout << filename << " " << initl << "\n";
@@ -81,17 +83,28 @@ int main(const int argc, const char * const * const argv) {
 				throw cuba_runtime_error(
 						"Please specify the number of threads!");
 			}
-
-			if (is_explicit) {
-				cout << "explicit exploration......\n";
-				explicit_wuba ewuba(initl, final, filename, std::stoul(n));
-				ewuba.write_bounded_analysis(std::stoul(k));
-				//explicit_cuba ecuba(initl, final, filename, std::stoul(n));
-				//ecuba.context_unbounded_analysis(std::stoul(k));
-			} else {
-				cout << "symbolic exploration......\n";
-				symbolic_cuba scuba(initl, final, filename, std::stoul(n));
-				scuba.context_unbounded_analysis(std::stoul(k));
+			if (resource == "W") { /// WBA or WUBA
+				cout << "write-bounded analysis......\n";
+				if (is_explicit) {
+					cout << "explicit exploration......\n";
+					explicit_wuba ewuba(initl, final, filename, std::stoul(n));
+					ewuba.write_bounded_analysis(std::stoul(k));
+				} else {
+					cout << "symbolic exploration......\n";
+					symbolic_wuba swuba(initl, final, filename, std::stoul(n));
+					swuba.write_bounded_analysis(std::stoul(k));
+				}
+			} else { /// CBA or CUBA
+				cout << "CBA...\n";
+				if (is_explicit) {
+					cout << "explicit exploration......\n";
+					explicit_cuba ecuba(initl, final, filename, std::stoul(n));
+					ecuba.context_unbounded_analysis(std::stoul(k));
+				} else {
+					cout << "symbolic exploration......\n";
+					symbolic_cuba scuba(initl, final, filename, std::stoul(n));
+					scuba.context_unbounded_analysis(std::stoul(k));
+				}
 			}
 		}
 
