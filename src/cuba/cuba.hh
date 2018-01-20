@@ -9,7 +9,7 @@
 #define CUBA_CUBA_HH_
 
 #include "prop.hh"
-#include "parsers.hh"
+#include "generator.hh"
 
 using namespace ruba;
 

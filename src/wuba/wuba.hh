@@ -1,15 +1,15 @@
 /**
- * wuba.hh
+ * Write-(Un)bounded Analysis
  *
  * @date  : Jan 1, 2018
- * @author: lpzun
+ * @author: Peizun Liu
  */
 
 #ifndef WUBA_WUBA_HH_
 #define WUBA_WUBA_HH_
 
 #include "prop.hh"
-#include "parsers.hh"
+#include "generator.hh"
 
 using namespace ruba;
 
