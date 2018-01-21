@@ -42,7 +42,7 @@ void symbolic_cuba::context_unbounded_analysis(const size_k k_bound) {
 	for (uint i = 0; i < CPDA.size(); ++i) {
 		W.emplace_back(create_init_automaton(i));
 	}
-	symbolic_config cfg_I(initl_c.get_state(), W);
+	symbolic_state cfg_I(initl_c.get_state(), W);
 
 	/// step 2: perform context-unbounded analysis
 	cout << "\n" << "Initial configuration: " << cfg_I << endl;
@@ -61,21 +61,21 @@ void symbolic_cuba::context_unbounded_analysis(const size_k k_bound) {
  * @return a set of reachable symbolic configuration
  */
 bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
-		const symbolic_config& c_I) {
+		const symbolic_state& c_I) {
 	/// Step 1: declare the data structures used in this procedure:
 	///
 	/// 1.1 <currLevel> = S_{k} \ S_{k-1}: the set of symbolic configurations
 	/// which are reached in the kth context for processing. It's initialized
 	/// as { <q_I|(A1_I, ..., An_I)> }.
-	deque<symbolic_config> currLevel;
+	deque<symbolic_state> currLevel;
 	currLevel.emplace_back(c_I);
 	/// 1.2 <k>: contexts, k = 0 represents the initial configuration c_I
 	size_k k = 0;
 	/// 1.3 <global_R>: the set of reachable global configurations.
 	/// We obtain this by computing the symbolic configurations.
-	vector<deque<symbolic_config>> global_R;
+	vector<deque<symbolic_state>> global_R;
 	global_R.reserve(k_bound + 1);
-	global_R.emplace_back(deque<symbolic_config> { c_I });
+	global_R.emplace_back(deque<symbolic_state> { c_I });
 	/// 1.4 <top_R>: the set of reachable tops of configurations.
 	/// We obtain this by computing the symbolic configurations.
 	vector<set<top_config>> top_R(thread_visible_state::S);
@@ -87,7 +87,7 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 	while (k_bound == 0 || k < k_bound) {
 		/// <nextLevel> = S_{k+1} \ S_{k}: the set of symbolic configurations
 		/// reached in the (k+1)st context. It's initialized as empty.
-		deque<symbolic_config> nextLevel;
+		deque<symbolic_state> nextLevel;
 		/// step 2.1 compute nextLevel, or S_{k+1}: iterate over all elements
 		/// in the currLevel. This is a BFS-like procedure.
 		while (!currLevel.empty()) {
@@ -407,7 +407,7 @@ set<fsa_state> symbolic_cuba::BFS_visit(const fsa_state& root,
  * @param idx
  * @return symbolic configuration
  */
-symbolic_config symbolic_cuba::compose(const pda_state& q_I,
+symbolic_state symbolic_cuba::compose(const pda_state& q_I,
 		const store_automaton& Ai, const vector<store_automaton>& automata,
 		const size_n& i) {
 	vector<store_automaton> W;
@@ -418,7 +418,7 @@ symbolic_config symbolic_cuba::compose(const pda_state& q_I,
 		else
 			W.push_back(this->rename(automata[j], q_I));
 	}
-	return symbolic_config(q_I, W);
+	return symbolic_state(q_I, W);
 }
 
 /**
@@ -538,7 +538,7 @@ store_automaton symbolic_cuba::anonymize_by_rename(const store_automaton& A,
  * @param top_R
  * @return
  */
-bool symbolic_cuba::converge(const vector<deque<symbolic_config>>& R,
+bool symbolic_cuba::converge(const vector<deque<symbolic_state>>& R,
 		const size_k k, vector<set<top_config>>& top_R) {
 	cout << "======================================\n";
 	cout << "context " << k << "\n";
@@ -571,7 +571,7 @@ bool symbolic_cuba::is_convergent() {
  * @param topped_R
  * @return
  */
-uint symbolic_cuba::top_mapping(const deque<symbolic_config>& R,
+uint symbolic_cuba::top_mapping(const deque<symbolic_state>& R,
 		vector<set<top_config>>& topped_R) {
 	uint cnt_new_top_cfg = 0;
 	for (const auto& c : R) {
@@ -596,7 +596,7 @@ uint symbolic_cuba::top_mapping(const deque<symbolic_config>& R,
  * @param tau
  * @return a set of configuration tops
  */
-vector<top_config> symbolic_cuba::top_mapping(const symbolic_config& tau) {
+vector<top_config> symbolic_cuba::top_mapping(const symbolic_state& tau) {
 	const auto q = tau.get_state();
 	vector<set<pda_alpha>> toppings(tau.get_automata().size());
 

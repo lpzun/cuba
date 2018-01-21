@@ -363,12 +363,12 @@ using store_automaton = finite_automaton;
 /**
  * Define a symbolic configuration
  */
-class symbolic_config {
+class symbolic_state {
 public:
-	symbolic_config(const pda_state& q, const vector<store_automaton>& W);
-	symbolic_config(const pda_state& q, const size_n&n,
+	symbolic_state(const pda_state& q, const vector<store_automaton>& W);
+	symbolic_state(const pda_state& q, const size_n&n,
 			const store_automaton& A);
-	~symbolic_config();
+	~symbolic_state();
 
 	pda_state get_state() const {
 		return q;
@@ -383,7 +383,7 @@ private:
 	vector<store_automaton> W;
 };
 
-inline ostream& operator<<(ostream& os, const symbolic_config& c) {
+inline ostream& operator<<(ostream& os, const symbolic_state& c) {
 	os << "<" << c.get_state() << "|";
 	if (c.get_automata().size() > 0) {
 		for (uint i = 0; i < c.get_automata().size() - 1; ++i) {

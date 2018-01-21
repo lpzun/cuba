@@ -240,7 +240,7 @@ explicit_config_tid::~explicit_config_tid() {
  * @param g
  * @param W
  */
-symbolic_config::symbolic_config(const pda_state& g,
+symbolic_state::symbolic_state(const pda_state& g,
 		const vector<finite_automaton>& W) :
 		q(g), W(W) {
 }
@@ -252,7 +252,7 @@ symbolic_config::symbolic_config(const pda_state& g,
  * @param n
  * @param A
  */
-symbolic_config::symbolic_config(const pda_state& g, const size_n&n,
+symbolic_state::symbolic_state(const pda_state& g, const size_n&n,
 		const finite_automaton& A) :
 		q(g), W(n, A) {
 }
@@ -260,7 +260,7 @@ symbolic_config::symbolic_config(const pda_state& g, const size_n&n,
 /**
  * destructor
  */
-symbolic_config::~symbolic_config() {
+symbolic_state::~symbolic_state() {
 
 }
 } /* namespace ruba */

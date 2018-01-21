@@ -61,12 +61,12 @@ private:
 			const pushdown_automaton& P);
 
 	/// QR algorithm: context-bounded analysis
-	bool context_bounded_analysis(const size_k k, const symbolic_config& cfg_I);
+	bool context_bounded_analysis(const size_k k, const symbolic_state& cfg_I);
 	set<fsa_state> project_Q(const store_automaton& A);
 	set<fsa_state> BFS_visit(const fsa_state& root,
 			const unordered_map<fsa_state, deque<fsa_state>>& adj,
 			const fsa_state_set& initials);
-	symbolic_config compose(const pda_state& _q, const store_automaton& Ai,
+	symbolic_state compose(const pda_state& _q, const store_automaton& Ai,
 			const vector<store_automaton>& automata, const size_n& idx);
 	store_automaton rename(const store_automaton& A, const pda_state& q_I);
 	store_automaton anonymize(const store_automaton& A, const pda_state& q_I,
@@ -87,12 +87,12 @@ private:
 	store_automaton cross_product(const vector<store_automaton>& W);
 
 	/// determine bar(R_k) = bar(R_{k+1})s
-	bool converge(const vector<deque<symbolic_config>>& R, const size_k k,
+	bool converge(const vector<deque<symbolic_state>>& R, const size_k k,
 			vector<set<top_config>>& top_R);
 	bool is_convergent();
-	uint top_mapping(const deque<symbolic_config>& R,
+	uint top_mapping(const deque<symbolic_state>& R,
 			vector<set<top_config>>& topped_R);
-	vector<top_config> top_mapping(const symbolic_config& tau);
+	vector<top_config> top_mapping(const symbolic_state& tau);
 	set<pda_alpha> top_mapping(const store_automaton& A, const pda_state q);
 	vector<vector<pda_alpha>> cross_product(const vector<set<pda_alpha>>& tops);
 };
