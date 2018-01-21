@@ -40,7 +40,7 @@ private:
 
 	static deque<string> split(const string &s, const char delim);
 
-	static thread_config create_thread_config_from_str(const string& s_ts,
+	static thread_state create_thread_config_from_str(const string& s_ts,
 			const char delim = prop::SHARED_LOCAL_DELIMITER);
 	static explicit_config create_global_config_from_str(const string& s_ts,
 			const char delim = prop::SHARED_LOCAL_DELIMITER);

@@ -77,7 +77,7 @@ private:
 			const pda_state& q_I);
 
 	/// determine R_k = R_{k+1}
-	bool is_recongnizable(const store_automaton& A, const thread_config& c);
+	bool is_recongnizable(const store_automaton& A, const thread_state& c);
 	bool is_equivalent(const store_automaton& A1, const store_automaton& A2);
 	store_automaton iunion(const store_automaton& A1,
 			const store_automaton& A2);

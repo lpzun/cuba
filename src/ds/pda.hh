@@ -397,14 +397,14 @@ using pda_stack = sstack<pda_alpha>;
 /**
  * a configuration (s, w) of a PDS is an element of Q x L*.
  */
-class thread_config {
+class thread_state {
 public:
-	thread_config();
-	thread_config(const pda_state& s, const pda_alpha& l);
-	thread_config(const thread_visible_state& t);
-	thread_config(const pda_state& s, const pda_stack& w);
-	thread_config(const thread_config& c);
-	~thread_config();
+	thread_state();
+	thread_state(const pda_state& s, const pda_alpha& l);
+	thread_state(const thread_visible_state& t);
+	thread_state(const pda_state& s, const pda_stack& w);
+	thread_state(const thread_state& c);
+	~thread_state();
 
 	pda_state get_state() const {
 		return s;
@@ -430,7 +430,7 @@ private:
  * @param c
  * @return ostream
  */
-inline ostream& operator<<(ostream& os, const thread_config& c) {
+inline ostream& operator<<(ostream& os, const thread_state& c) {
 	os << "(" << c.get_state() << "," << c.get_stack() << ")";
 	return os;
 }
@@ -441,7 +441,7 @@ inline ostream& operator<<(ostream& os, const thread_config& c) {
  * @param c2
  * @return bool
  */
-inline bool operator<(const thread_config& c1, const thread_config& c2) {
+inline bool operator<(const thread_state& c1, const thread_state& c2) {
 	if (c1.get_state() == c2.get_state())
 		return c1.get_stack() < c2.get_stack();
 	return c1.get_state() < c2.get_state();
@@ -453,7 +453,7 @@ inline bool operator<(const thread_config& c1, const thread_config& c2) {
  * @param c2
  * @return bool
  */
-inline bool operator>(const thread_config& c1, const thread_config& c2) {
+inline bool operator>(const thread_state& c1, const thread_state& c2) {
 	return c2 < c1;
 }
 
@@ -463,7 +463,7 @@ inline bool operator>(const thread_config& c1, const thread_config& c2) {
  * @param c2
  * @return bool
  */
-inline bool operator==(const thread_config& c1, const thread_config& c2) {
+inline bool operator==(const thread_state& c1, const thread_state& c2) {
 	return (c1.get_state() == c2.get_state())
 			&& (c1.get_stack() == c2.get_stack());
 }
@@ -474,7 +474,7 @@ inline bool operator==(const thread_config& c1, const thread_config& c2) {
  * @param c2
  * @return bool
  */
-inline bool operator!=(const thread_config& c1, const thread_config& c2) {
+inline bool operator!=(const thread_state& c1, const thread_state& c2) {
 	return !(c1 == c2);
 }
 
@@ -487,7 +487,7 @@ using id_action = uint;
 using vertex = thread_visible_state;
 using edge = id_action;
 using adj_list = map<vertex, deque<edge>>;
-using pda_action = transition<vertex, thread_config>;
+using pda_action = transition<vertex, thread_state>;
 
 /**
  * Definition of Pushdown automaton

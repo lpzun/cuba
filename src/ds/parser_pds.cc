@@ -129,14 +129,14 @@ pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
 		if (parse_input_alpha(l3) != alphabet::NULLPTR) { /// push operation
 			W.push(parse_input_alpha(l3));
 			W.push(parse_input_alpha(l2));
-			thread_config dst(s2, W);
+			thread_state dst(s2, W);
 			actions.emplace_back(src, dst, type_stack_operation::PUSH);
 		} else if (parse_input_alpha(l2) != alphabet::EPSILON) { /// overwrite operation
 			W.push(parse_input_alpha(l2));
-			thread_config dst(s2, W);
+			thread_state dst(s2, W);
 			actions.emplace_back(src, dst, type_stack_operation::OVERWRITE);
 		} else { /// pop operation
-			thread_config dst(s2, W);
+			thread_state dst(s2, W);
 			actions.emplace_back(src, dst, type_stack_operation::POP);
 		}
 
@@ -282,7 +282,7 @@ explicit_config parser::create_global_config_from_str(const string& s_ts,
  * @param delim
  * @return
  */
-thread_config parser::create_thread_config_from_str(const string& s_ts,
+thread_state parser::create_thread_config_from_str(const string& s_ts,
 		const char delim) {
 	const auto& vs_tg = split(s_ts, delim);
 	if (vs_tg.size() != 2) {
@@ -293,7 +293,7 @@ thread_config parser::create_thread_config_from_str(const string& s_ts,
 	for (const auto& s : symbols) {
 		w.push(std::stoi(s));
 	}
-	return thread_config(std::stoi(vs_tg[0]), w);
+	return thread_state(std::stoi(vs_tg[0]), w);
 }
 
 /**

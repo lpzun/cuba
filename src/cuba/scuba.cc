@@ -293,7 +293,7 @@ store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
  *         false: otherwise.
  */
 bool symbolic_cuba::is_recongnizable(const store_automaton& A,
-		const thread_config& c) {
+		const thread_state& c) {
 	queue<pair<fsa_state, uint>> worklist;
 	worklist.emplace(c.get_state(), 0);
 

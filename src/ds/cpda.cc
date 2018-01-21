@@ -36,7 +36,7 @@ thread_visible_state::~thread_visible_state() {
 /**
  * A default constructor without any input parameters
  */
-thread_config::thread_config() :
+thread_state::thread_state() :
 		s(), w() {
 }
 
@@ -45,7 +45,7 @@ thread_config::thread_config() :
  * @param s
  * @param l
  */
-thread_config::thread_config(const pda_state& s, const pda_alpha& l) :
+thread_state::thread_state(const pda_state& s, const pda_alpha& l) :
 		s(s), w() {
 	w.push(l);
 }
@@ -54,7 +54,7 @@ thread_config::thread_config(const pda_state& s, const pda_alpha& l) :
  * A constructor with a thread state
  * @param t
  */
-thread_config::thread_config(const thread_visible_state& t) :
+thread_state::thread_state(const thread_visible_state& t) :
 		s(t.get_state()), w() {
 	w.push(t.get_alpha());
 }
@@ -63,7 +63,7 @@ thread_config::thread_config(const thread_visible_state& t) :
  * @param s
  * @param w
  */
-thread_config::thread_config(const pda_state& s, const pda_stack& w) :
+thread_state::thread_state(const pda_state& s, const pda_stack& w) :
 		s(s), w(w) {
 }
 
@@ -71,14 +71,14 @@ thread_config::thread_config(const pda_state& s, const pda_stack& w) :
  * A constructor with a thread configuration
  * @param c
  */
-thread_config::thread_config(const thread_config& c) :
+thread_state::thread_state(const thread_state& c) :
 		s(c.get_state()), w(c.get_stack()) {
 }
 
 /**
  * destructor
  */
-thread_config::~thread_config() {
+thread_state::~thread_state() {
 
 }
 
