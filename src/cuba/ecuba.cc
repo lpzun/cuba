@@ -86,7 +86,7 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 
 	/// 1.4 <top_R>: the sequences of visible configurations. We obtained the
 	/// sequence from R directly.
-	vector<set<top_config>> top_R(thread_visible_state::S);
+	vector<set<visible_state>> top_R(thread_visible_state::S);
 	/// step 2: compute all reachable configurations with up to k_bound contexts.
 	while (k_bound == 0 || k <= k_bound) {
 		/// step 2.0 <nextLevel> = R_{k+1} \ R_{k}: the set of explicit
@@ -244,7 +244,7 @@ bool explicit_cuba::update_R(vector<vector<antichain>>& R, const size_k k,
  * @return
  */
 bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
-		vector<set<top_config>>& top_R) {
+		vector<set<visible_state>>& top_R) {
 	cout << "======================================\n";
 	cout << "context " << k << "\n";
 	/// the number of new reachable top configurations
@@ -347,7 +347,7 @@ void explicit_cuba::marking(const pda_state& s, const pda_alpha& l) {
  * @param tau
  * @return
  */
-top_config explicit_cuba::top_mapping(const explicit_config_tid& tau) {
+visible_state explicit_cuba::top_mapping(const explicit_config_tid& tau) {
 	vector<pda_alpha> W(tau.get_stacks().size());
 	for (size_n i = 0; i < tau.get_stacks().size(); ++i) {
 		if (tau.get_stacks()[i].empty())
@@ -355,7 +355,7 @@ top_config explicit_cuba::top_mapping(const explicit_config_tid& tau) {
 		else
 			W[i] = tau.get_stacks()[i].top();
 	}
-	return top_config(tau.get_state(), W);
+	return visible_state(tau.get_state(), W);
 }
 
 /**
@@ -392,7 +392,8 @@ bool explicit_cuba::finite_context_reachability(const size_n tid) {
  */
 bool explicit_cuba::finite_context_reachability(const size_n tid,
 		const thread_visible_state& s, stack<pda_alpha>& W,
-		map<thread_visible_state, bool>& visit, map<thread_visible_state, bool>& trace) {
+		map<thread_visible_state, bool>& visit,
+		map<thread_visible_state, bool>& trace) {
 	visit[s] = true;
 	trace[s] = true;
 	auto ifind = CPDA[tid].get_program().find(s);

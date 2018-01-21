@@ -78,7 +78,7 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 	global_R.emplace_back(deque<symbolic_state> { c_I });
 	/// 1.4 <top_R>: the set of reachable tops of configurations.
 	/// We obtain this by computing the symbolic configurations.
-	vector<set<top_config>> top_R(thread_visible_state::S);
+	vector<set<visible_state>> top_R(thread_visible_state::S);
 	/// Compute top_R_0
 	converge(global_R, k, top_R);
 	/// Step 2: compute all reachable configurations with up to k_bound
@@ -539,7 +539,7 @@ store_automaton symbolic_cuba::anonymize_by_rename(const store_automaton& A,
  * @return
  */
 bool symbolic_cuba::converge(const vector<deque<symbolic_state>>& R,
-		const size_k k, vector<set<top_config>>& top_R) {
+		const size_k k, vector<set<visible_state>>& top_R) {
 	cout << "======================================\n";
 	cout << "context " << k << "\n";
 	const auto cnt_new_top_cfg = top_mapping(R[k], top_R);
@@ -572,7 +572,7 @@ bool symbolic_cuba::is_convergent() {
  * @return
  */
 uint symbolic_cuba::top_mapping(const deque<symbolic_state>& R,
-		vector<set<top_config>>& topped_R) {
+		vector<set<visible_state>>& topped_R) {
 	uint cnt_new_top_cfg = 0;
 	for (const auto& c : R) {
 		for (const auto& top_c : top_mapping(c)) {
@@ -596,7 +596,7 @@ uint symbolic_cuba::top_mapping(const deque<symbolic_state>& R,
  * @param tau
  * @return a set of configuration tops
  */
-vector<top_config> symbolic_cuba::top_mapping(const symbolic_state& tau) {
+vector<visible_state> symbolic_cuba::top_mapping(const symbolic_state& tau) {
 	const auto q = tau.get_state();
 	vector<set<pda_alpha>> toppings(tau.get_automata().size());
 
@@ -608,7 +608,7 @@ vector<top_config> symbolic_cuba::top_mapping(const symbolic_state& tau) {
 
 	const auto& worklist = cross_product(toppings);
 
-	vector<top_config> tops;
+	vector<visible_state> tops;
 	tops.reserve(worklist.size());
 	for (const auto& W : worklist) {
 		tops.emplace_back(q, W);

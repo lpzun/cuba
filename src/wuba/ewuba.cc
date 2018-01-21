@@ -55,12 +55,13 @@ bool explicit_wuba::k_bounded_reachability(const size_k k_bound,
 	/// while the column represents the shared state.
 	vector<vector<deque<explicit_state>>> global_R;
 	global_R.reserve(k_bound + 1);
-	global_R.emplace_back(vector<deque<explicit_state>>(thread_visible_state::S));
+	global_R.emplace_back(
+			vector<deque<explicit_state>>(thread_visible_state::S));
 	global_R[k][c_I.get_state()].emplace_back(c_I);
 
 	/// <visible_R>: the sequences of set of visible configurations. We
 	/// compute the sequence from R directly.
-	vector<set<top_config>> top_R(thread_visible_state::S);
+	vector<set<visible_state>> top_R(thread_visible_state::S);
 
 	/// step 2: compute all reachable configurations with up to k_bound write
 	while (k_bound == 0 || k <= k_bound) {
@@ -227,7 +228,7 @@ bool explicit_wuba::is_reachable(const explicit_state& tau, const size_k k,
  * @return
  */
 bool explicit_wuba::converge(const vector<deque<explicit_state>>& Rk,
-		const size_k k, vector<set<top_config>>& top_R) {
+		const size_k k, vector<set<visible_state>>& top_R) {
 	cout << "======================================\n";
 	cout << "write " << k << "\n";
 	/// the number of new reachable top configurations
@@ -279,12 +280,12 @@ bool explicit_wuba::converge() {
  * @param tau
  * @return
  */
-top_config explicit_wuba::top_mapping(const explicit_state& tau) {
+visible_state explicit_wuba::top_mapping(const explicit_state& tau) {
 	vector<pda_alpha> W(tau.get_stacks().size());
 	for (size_n i = 0; i < tau.get_stacks().size(); ++i)
 		W[i] = tau.get_stacks()[i].empty() ?
 				alphabet::EPSILON : tau.get_stacks()[i].top();
-	return top_config(tau.get_state(), W);
+	return visible_state(tau.get_state(), W);
 }
 
 } /* namespace wuba */

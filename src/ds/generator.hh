@@ -21,24 +21,24 @@ public:
 	generator(const string& initl, const string& filename);
 	~generator();
 
-	const vector<set<top_config> >& get_generators() const {
+	const vector<set<visible_state> >& get_generators() const {
 		return generators;
 	}
 
 private:
-	vector<set<top_config>> generators;
+	vector<set<visible_state>> generators;
 
 	void context_insensitive(const string& initl, const string& filename);
 
-	void context_insensitive(const top_config& initl, const string& filename);
-	vector<set<top_config>> context_insensitive(const top_config& initl_c,
+	void context_insensitive(const visible_state& initl, const string& filename);
+	vector<set<visible_state>> context_insensitive(const visible_state& initl_c,
 			const vector<finite_machine>& CFSM);
-	vector<set<top_config>> standard_FWS(const top_config& initl_c,
+	vector<set<visible_state>> standard_FWS(const visible_state& initl_c,
 			const vector<finite_machine>& CFSM);
-	deque<top_config> step(const top_config& c,
+	deque<visible_state> step(const visible_state& c,
 			const vector<finite_machine>& CFSM);
-	top_config top_mapping(const explicit_state& tau);
-	void print_approximation(const vector<set<top_config>>& approx_R);
+	visible_state top_mapping(const explicit_state& tau);
+	void print_approximation(const vector<set<visible_state>>& approx_R);
 };
 
 } /* namespace ruba */

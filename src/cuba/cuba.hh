@@ -33,7 +33,7 @@ protected:
 	concurrent_pushdown_automata CPDA;
 	/// 1.1 <generators>: the overapproximation of the set of reachable
 	///     popped top configurations
-	vector<set<top_config>> generators;
+	vector<set<visible_state>> generators;
 	vector<vector<bool>> reachable_T;
 
 private:
@@ -88,11 +88,11 @@ private:
 
 	/// determine bar(R_k) = bar(R_{k+1})s
 	bool converge(const vector<deque<symbolic_state>>& R, const size_k k,
-			vector<set<top_config>>& top_R);
+			vector<set<visible_state>>& top_R);
 	bool is_convergent();
 	uint top_mapping(const deque<symbolic_state>& R,
-			vector<set<top_config>>& topped_R);
-	vector<top_config> top_mapping(const symbolic_state& tau);
+			vector<set<visible_state>>& topped_R);
+	vector<visible_state> top_mapping(const symbolic_state& tau);
 	set<pda_alpha> top_mapping(const store_automaton& A, const pda_state q);
 	vector<vector<pda_alpha>> cross_product(const vector<set<pda_alpha>>& tops);
 };
@@ -125,13 +125,13 @@ private:
 
 	/// determine convergence, reachability of a target and so on
 	bool converge(const vector<antichain>& R, const size_k k,
-			vector<set<top_config>>& top_R);
+			vector<set<visible_state>>& top_R);
 	bool is_convergent();
 	bool is_reachable(const explicit_config_tid& tau, const size_k k,
 			vector<vector<antichain>>& R);
 	void marking(const pda_state& s, const pda_alpha& l);
 
-	top_config top_mapping(const explicit_config_tid& tau);
+	visible_state top_mapping(const explicit_config_tid& tau);
 
 	/// determine the finite context reachability
 	bool finite_context_reachability(const size_n tid);

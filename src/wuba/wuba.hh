@@ -34,7 +34,7 @@ protected:
 	concurrent_pushdown_automata CPDA;
 	/// 1.1 <generators>: the overapproximation of the set of reachable
 	///     popped top configurations
-	vector<set<top_config>> generators;
+	vector<set<visible_state>> generators;
 	vector<vector<bool>> reachable_T;
 
 	size_k convergence_GS; /// convergence of OS of global states
@@ -65,9 +65,9 @@ private:
 			vector<vector<deque<explicit_state>>>& R);
 
 	bool converge(const vector<deque<explicit_state>>& Rk, const size_k k,
-			vector<set<top_config>>& top_R);
+			vector<set<visible_state>>& top_R);
 	bool converge();
-	top_config top_mapping(const explicit_state& tau);
+	visible_state top_mapping(const explicit_state& tau);
 };
 
 /////////////////////////////////////////////////////////////////////////
