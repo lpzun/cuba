@@ -135,7 +135,7 @@ private:
 
 	/// determine the finite context reachability
 	bool finite_context_reachability(const size_n tid);
-	bool finite_context_reachability(const size_n tid, const thread_state& s,
+	bool finite_context_reachability(const size_n tid, const thread_visible_state& s,
 			stack<pda_alpha>& W, map<vertex, bool>& visit,
 			map<vertex, bool>& trace);
 };

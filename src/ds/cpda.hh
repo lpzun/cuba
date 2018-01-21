@@ -398,7 +398,7 @@ inline ostream& operator<<(ostream& os, const symbolic_config& c) {
  * Defining the top of configuration, which is a global state
  */
 using top_config = global_state;
-using finite_machine = map<thread_state, deque<transition<thread_state, thread_state>>>;
+using finite_machine = map<thread_visible_state, deque<transition<thread_visible_state, thread_visible_state>>>;
 using concurrent_finite_machine = vector<finite_machine>;
 
 /**

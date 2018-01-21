@@ -45,7 +45,7 @@ private:
 	static explicit_config create_global_config_from_str(const string& s_ts,
 			const char delim = prop::SHARED_LOCAL_DELIMITER);
 
-	static thread_state create_thread_state_from_str(const string& s_ts,
+	static thread_visible_state create_thread_state_from_str(const string& s_ts,
 			const char delim = prop::SHARED_LOCAL_DELIMITER);
 	static global_state create_global_state_from_str(const string& s_ts,
 			const char delim = prop::SHARED_LOCAL_DELIMITER);

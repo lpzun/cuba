@@ -14,9 +14,9 @@
 namespace ruba {
 
 /// define the control state of PDSs
-using pda_state = int;
+using pda_state = unsigned int;
 /// define the stack symbol of PDSs
-using pda_alpha = int;
+using pda_alpha = unsigned int;
 
 /////////////////////////////////////////////////////////////////////////
 /// PART 1. alphabet and PDA stack's definitions are from here.
@@ -155,14 +155,13 @@ template<typename T1, typename T2> inline ostream& operator<<(ostream& os,
 /**
  * the thread state class
  */
-class thread_state {
+class thread_visible_state {
 public:
-	thread_state();
-	thread_state(const pda_state& s, const pda_alpha& l);
-	~thread_state();
+	thread_visible_state();
+	thread_visible_state(const pda_state& s, const pda_alpha& l);
+	~thread_visible_state();
 
 	static pda_state S;
-	static pda_alpha L;
 
 	/**
 	 * @return the stack symbol of current thread state
@@ -189,7 +188,7 @@ private:
  * @param s
  * @return ostream
  */
-inline ostream& operator<<(ostream& os, const thread_state& t) {
+inline ostream& operator<<(ostream& os, const thread_visible_state& t) {
 	os << "(" << t.get_state() << ",";
 	if (t.get_alpha() == alphabet::EPSILON)
 		os << alphabet::OPT_EPSILON;
@@ -205,7 +204,7 @@ inline ostream& operator<<(ostream& os, const thread_state& t) {
  * @param t2
  * @return bool
  */
-inline bool operator<(const thread_state& t1, const thread_state& t2) {
+inline bool operator<(const thread_visible_state& t1, const thread_visible_state& t2) {
 	if (t1.get_state() == t2.get_state())
 		return t1.get_alpha() < t2.get_alpha();
 	return t1.get_state() < t2.get_state();
@@ -217,7 +216,7 @@ inline bool operator<(const thread_state& t1, const thread_state& t2) {
  * @param t2
  * @return bool
  */
-inline bool operator>(const thread_state& t1, const thread_state& t2) {
+inline bool operator>(const thread_visible_state& t1, const thread_visible_state& t2) {
 	return t2 < t1;
 }
 
@@ -227,7 +226,7 @@ inline bool operator>(const thread_state& t1, const thread_state& t2) {
  * @param t2
  * @return bool
  */
-inline bool operator==(const thread_state& t1, const thread_state& t2) {
+inline bool operator==(const thread_visible_state& t1, const thread_visible_state& t2) {
 	return (t1.get_state() == t2.get_state())
 			&& (t1.get_alpha() == t2.get_alpha());
 }
@@ -238,7 +237,7 @@ inline bool operator==(const thread_state& t1, const thread_state& t2) {
  * @param t2
  * @return bool
  */
-inline bool operator!=(const thread_state& t1, const thread_state& t2) {
+inline bool operator!=(const thread_visible_state& t1, const thread_visible_state& t2) {
 	return !(t1 == t2);
 }
 
@@ -402,7 +401,7 @@ class thread_config {
 public:
 	thread_config();
 	thread_config(const pda_state& s, const pda_alpha& l);
-	thread_config(const thread_state& t);
+	thread_config(const thread_visible_state& t);
 	thread_config(const pda_state& s, const pda_stack& w);
 	thread_config(const thread_config& c);
 	~thread_config();
@@ -415,8 +414,8 @@ public:
 		return w;
 	}
 
-	thread_state top() const {
-		return thread_state(s, w.top());
+	thread_visible_state top() const {
+		return thread_visible_state(s, w.top());
 	}
 
 private:
@@ -485,7 +484,7 @@ inline bool operator!=(const thread_config& c1, const thread_config& c2) {
 /////////////////////////////////////////////////////////////////////////
 /// define the transition ID
 using id_action = uint;
-using vertex = thread_state;
+using vertex = thread_visible_state;
 using edge = id_action;
 using adj_list = map<vertex, deque<edge>>;
 using pda_action = transition<vertex, thread_config>;

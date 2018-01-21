@@ -78,7 +78,7 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 	global_R.emplace_back(deque<symbolic_config> { c_I });
 	/// 1.4 <top_R>: the set of reachable tops of configurations.
 	/// We obtain this by computing the symbolic configurations.
-	vector<set<top_config>> top_R(thread_state::S);
+	vector<set<top_config>> top_R(thread_visible_state::S);
 	/// Compute top_R_0
 	converge(global_R, k, top_R);
 	/// Step 2: compute all reachable configurations with up to k_bound
@@ -233,11 +233,11 @@ store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
 		const auto& q = t.get_dst();
 
 		const auto& ret = deltas[p].insert(t);
-		if (!ret.second || p >= thread_state::S)
+		if (!ret.second || p >= thread_visible_state::S)
 			continue;
 
 		if (a != alphabet::EPSILON) { /// if label != epsilon
-			auto ifind = P.get_program().find(thread_state(p, a));
+			auto ifind = P.get_program().find(thread_visible_state(p, a));
 			if (ifind != P.get_program().end()) {
 				for (const auto& rid : ifind->second) {
 

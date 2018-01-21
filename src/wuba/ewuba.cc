@@ -55,12 +55,12 @@ bool explicit_wuba::k_bounded_reachability(const size_k k_bound,
 	/// while the column represents the shared state.
 	vector<vector<deque<explicit_config>>> global_R;
 	global_R.reserve(k_bound + 1);
-	global_R.emplace_back(vector<deque<explicit_config>>(thread_state::S));
+	global_R.emplace_back(vector<deque<explicit_config>>(thread_visible_state::S));
 	global_R[k][c_I.get_state()].emplace_back(c_I);
 
 	/// <visible_R>: the sequences of set of visible configurations. We
 	/// compute the sequence from R directly.
-	vector<set<top_config>> top_R(thread_state::S);
+	vector<set<top_config>> top_R(thread_visible_state::S);
 
 	/// step 2: compute all reachable configurations with up to k_bound write
 	while (k_bound == 0 || k <= k_bound) {
@@ -132,7 +132,7 @@ deque<explicit_config> explicit_wuba::step(const explicit_config& tau) {
 		if (W[tid].empty())
 			continue;
 		const auto ifind = CPDA[tid].get_program().find(
-				thread_state(q, W[tid].top()));
+				thread_visible_state(q, W[tid].top()));
 		if (ifind == CPDA[tid].get_program().end())
 			continue;
 		for (const auto rid : ifind->second) { /// rid: transition id
@@ -177,7 +177,7 @@ bool explicit_wuba::update_R(const explicit_config& tau, const size_k k,
 	if (is_reachable(tau, k, R))
 		return false;
 	if (k >= R.size())
-		R.emplace_back(vector<deque<explicit_config>>(thread_state::S));
+		R.emplace_back(vector<deque<explicit_config>>(thread_visible_state::S));
 	R[k][tau.get_state()].emplace_back(tau);
 	return true;
 }
@@ -232,7 +232,7 @@ bool explicit_wuba::converge(const vector<deque<explicit_config>>& Rk,
 	cout << "write " << k << "\n";
 	/// the number of new reachable top configurations
 	uint cnt_new_top_cfg = 0;
-	for (pda_state q = 0; q < thread_state::S; ++q) {
+	for (pda_state q = 0; q < thread_visible_state::S; ++q) {
 		for (const auto& c : Rk[q]) {
 			if (prop::OPT_PRINT_ALL)
 				cout << string(2, ' ') << c;

@@ -9,13 +9,12 @@
 
 namespace ruba {
 
-pda_state thread_state::S = 0;
-pda_alpha thread_state::L = 0;
+pda_state thread_visible_state::S = 0;
 
 /**
  * default constructor
  */
-thread_state::thread_state() :
+thread_visible_state::thread_visible_state() :
 		s(0), l(0) {
 }
 
@@ -24,14 +23,14 @@ thread_state::thread_state() :
  * @param s
  * @param l
  */
-thread_state::thread_state(const pda_state& s, const pda_alpha& l) :
+thread_visible_state::thread_visible_state(const pda_state& s, const pda_alpha& l) :
 		s(s), l(l) {
 }
 
 /**
  * destructor
  */
-thread_state::~thread_state() {
+thread_visible_state::~thread_visible_state() {
 }
 
 /**
@@ -55,7 +54,7 @@ thread_config::thread_config(const pda_state& s, const pda_alpha& l) :
  * A constructor with a thread state
  * @param t
  */
-thread_config::thread_config(const thread_state& t) :
+thread_config::thread_config(const thread_visible_state& t) :
 		s(t.get_state()), w() {
 	w.push(t.get_alpha());
 }

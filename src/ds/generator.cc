@@ -20,7 +20,7 @@ namespace ruba {
  * @param filename: input CPDS
  */
 generator::generator(const string& initl, const string& filename) :
-		generators(vector<set<top_config>>(thread_state::S)) {
+		generators(vector<set<top_config>>(thread_visible_state::S)) {
 	context_insensitive(initl, filename);
 }
 
@@ -87,7 +87,7 @@ vector<set<top_config>> generator::standard_FWS(const top_config& initl_c,
 	/// step 1: set up the data structures
 	/// 1.1 <approx_Z>: the overapproximation of the set of reachable
 	///     top configurations
-	vector<set<top_config>> approx_Z(thread_state::S);
+	vector<set<top_config>> approx_Z(thread_visible_state::S);
 	/// 1.2 <worklist>: a worklist
 	queue<top_config> worklist( { initl_c });
 	while (!worklist.empty()) {
@@ -112,7 +112,7 @@ deque<top_config> generator::step(const top_config& c,
 	deque<top_config> successors;
 	for (uint i = 0; i < c.get_local().size(); ++i) {
 		auto ifind = CFSM[i].find(
-				thread_state(c.get_state(), c.get_local()[i]));
+				thread_visible_state(c.get_state(), c.get_local()[i]));
 		if (ifind == CFSM[i].end())
 			continue;
 		for (const auto& trans : ifind->second) {

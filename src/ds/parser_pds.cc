@@ -63,8 +63,8 @@ vector<vector<string>> parser::read_input_cpds(const string& filename,
 				"Something wrong when reading the input file!");
 
 	/// parse the set of control states: MUST be in the first line
-	new_in >> thread_state::S;
-	for (pda_state s = 0; s < thread_state::S; ++s) {
+	new_in >> thread_visible_state::S;
+	for (pda_state s = 0; s < thread_visible_state::S; ++s) {
 		states.emplace(s);
 	}
 
@@ -123,7 +123,7 @@ pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
 		iss >> s1 >> l1 >> sep >> s2 >> l2 >> l3;
 
 		/// source thread state
-		thread_state src(s1, parse_input_alpha(l1));
+		thread_visible_state src(s1, parse_input_alpha(l1));
 		/// destination thread configuration
 		pda_stack W; /// the stack of the destination thread configuration
 		if (parse_input_alpha(l3) != alphabet::NULLPTR) { /// push operation
@@ -182,14 +182,14 @@ finite_machine parser::parse_input_fsm(const vector<string>& sPDA) {
 		iss >> s1 >> l1 >> sep >> s2 >> l2 >> l3;
 
 		/// source thread state
-		thread_state src(s1, parse_input_alpha(l1));
+		thread_visible_state src(s1, parse_input_alpha(l1));
 		/// destination thread configuration
 		if (parse_input_alpha(l3) != alphabet::NULLPTR) { /// push operation
 			pop_candidate.emplace(parse_input_alpha(l3));
-			thread_state dst(s2, parse_input_alpha(l2));
+			thread_visible_state dst(s2, parse_input_alpha(l2));
 			fsm[src].emplace_back(src, dst, type_stack_operation::PUSH);
 		} else if (parse_input_alpha(l2) != alphabet::EPSILON) { /// overwrite operation
-			thread_state dst(s2, parse_input_alpha(l2));
+			thread_visible_state dst(s2, parse_input_alpha(l2));
 			fsm[src].emplace_back(src, dst, type_stack_operation::OVERWRITE);
 		} else { /// pop operation
 			pop_action_id.emplace_back(i);
@@ -204,9 +204,9 @@ finite_machine parser::parse_input_fsm(const vector<string>& sPDA) {
 
 		istringstream iss(sPDA[i]);
 		iss >> s1 >> l1 >> sep >> s2;
-		thread_state src(s1, parse_input_alpha(l1));
+		thread_visible_state src(s1, parse_input_alpha(l1));
 		for (const auto l2 : pop_candidate) {
-			thread_state dst(s2, l2);
+			thread_visible_state dst(s2, l2);
 			fsm[src].emplace_back(src, dst, type_stack_operation::POP);
 		}
 	}
@@ -302,13 +302,13 @@ thread_config parser::create_thread_config_from_str(const string& s_ts,
  * @param delim
  * @return bool
  */
-thread_state parser::create_thread_state_from_str(const string& s_ts,
+thread_visible_state parser::create_thread_state_from_str(const string& s_ts,
 		const char delim) {
 	deque<string> vs_ts = split(s_ts, delim);
 	if (vs_ts.size() != 2) {
 		throw("The format of thread state is wrong.");
 	}
-	return thread_state(std::stoi(vs_ts[0]), stoi(vs_ts[1]));
+	return thread_visible_state(std::stoi(vs_ts[0]), stoi(vs_ts[1]));
 }
 
 /**
