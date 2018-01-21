@@ -37,7 +37,7 @@ private:
 			const vector<finite_machine>& CFSM);
 	deque<top_config> step(const top_config& c,
 			const vector<finite_machine>& CFSM);
-	top_config top_mapping(const explicit_config& tau);
+	top_config top_mapping(const explicit_state& tau);
 	void print_approximation(const vector<set<top_config>>& approx_R);
 };
 

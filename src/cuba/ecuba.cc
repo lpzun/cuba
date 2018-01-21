@@ -67,7 +67,7 @@ void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
  *         false: all bad states are unreachable
  */
 bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
-		const explicit_config& c_I) {
+		const explicit_state& c_I) {
 	/// step 1: set the data structures that used in the explicit exploration
 	///         procedure
 	/// 1.1 <currLevel> = R_{k} \ R_{k-1}: the set of unexplored global conf-

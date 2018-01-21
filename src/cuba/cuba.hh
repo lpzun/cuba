@@ -28,8 +28,8 @@ public:
 	virtual ~base_cuba();
 	virtual void context_unbounded_analysis(const size_k k_bound = 0) = 0;
 protected:
-	explicit_config initl_c;
-	explicit_config final_c;
+	explicit_state initl_c;
+	explicit_state final_c;
 	concurrent_pushdown_automata CPDA;
 	/// 1.1 <generators>: the overapproximation of the set of reachable
 	///     popped top configurations
@@ -116,7 +116,7 @@ public:
 private:
 
 	bool k_bounded_reachability(const size_k k_bound,
-			const explicit_config& c_I);
+			const explicit_state& c_I);
 	antichain step(const explicit_config_tid& tau, const bool is_switch);
 	void step(const pda_state& q, const stack_vec& W, const uint tid,
 			antichain& successors);

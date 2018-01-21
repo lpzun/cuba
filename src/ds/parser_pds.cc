@@ -233,7 +233,7 @@ pda_alpha parser::parse_input_alpha(const string& alpha) {
  * @param s
  * @return thread state
  */
-explicit_config parser::parse_input_cfg(const string& s) {
+explicit_state parser::parse_input_cfg(const string& s) {
 	if (s.find('|') == std::string::npos) { /// s is store in a file
 		ifstream in(s.c_str());
 		if (in.good()) {
@@ -255,7 +255,7 @@ explicit_config parser::parse_input_cfg(const string& s) {
  * @param delim
  * @return concrete configuration
  */
-explicit_config parser::create_global_config_from_str(const string& s_ts,
+explicit_state parser::create_global_config_from_str(const string& s_ts,
 		const char delim) {
 	const auto& vs_cfg = split(s_ts, delim);
 	if (vs_cfg.size() != 2) {
@@ -273,7 +273,7 @@ explicit_config parser::create_global_config_from_str(const string& s_ts,
 				W[i].push(std::stoi(s));
 		}
 	}
-	return explicit_config(std::stoi(vs_cfg[0]), W);
+	return explicit_state(std::stoi(vs_cfg[0]), W);
 }
 
 /**

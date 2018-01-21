@@ -46,16 +46,16 @@ void explicit_wuba::write_unbounded_analysis() {
  *         false: all bad states are unreachable
  */
 bool explicit_wuba::k_bounded_reachability(const size_k k_bound,
-		const explicit_config& c_I) {
-	deque<explicit_config> currRound;
+		const explicit_state& c_I) {
+	deque<explicit_state> currRound;
 	currRound.emplace_back(c_I);
 	size_k k = 0;
 	/// <global_R>: the sequences of reachable global configurations. It's
 	/// a 2-D vector where the row represents the round w.r.t. the resource
 	/// while the column represents the shared state.
-	vector<vector<deque<explicit_config>>> global_R;
+	vector<vector<deque<explicit_state>>> global_R;
 	global_R.reserve(k_bound + 1);
-	global_R.emplace_back(vector<deque<explicit_config>>(thread_visible_state::S));
+	global_R.emplace_back(vector<deque<explicit_state>>(thread_visible_state::S));
 	global_R[k][c_I.get_state()].emplace_back(c_I);
 
 	/// <visible_R>: the sequences of set of visible configurations. We
@@ -64,7 +64,7 @@ bool explicit_wuba::k_bounded_reachability(const size_k k_bound,
 
 	/// step 2: compute all reachable configurations with up to k_bound write
 	while (k_bound == 0 || k <= k_bound) {
-		deque<explicit_config> nextRound;
+		deque<explicit_state> nextRound;
 
 		/// step 2.1: compute nextLevel, or R_{k+1}: iterate over
 		while (!currRound.empty()) {
@@ -124,8 +124,8 @@ bool explicit_wuba::k_bounded_reachability(const size_k k_bound,
  * @param tau
  * @return
  */
-deque<explicit_config> explicit_wuba::step(const explicit_config& tau) {
-	deque<explicit_config> successors;
+deque<explicit_state> explicit_wuba::step(const explicit_state& tau) {
+	deque<explicit_state> successors;
 	const auto& q = tau.get_state();
 	const auto& W = tau.get_stacks();
 	for (size_n tid = 0; tid < W.size(); ++tid) {
@@ -171,13 +171,13 @@ deque<explicit_config> explicit_wuba::step(const explicit_config& tau) {
  * @param c
  * @return
  */
-bool explicit_wuba::update_R(const explicit_config& tau, const size_k k,
-		vector<vector<deque<explicit_config>>>& R) {
+bool explicit_wuba::update_R(const explicit_state& tau, const size_k k,
+		vector<vector<deque<explicit_state>>>& R) {
 	/// step 2.1.2: discard it if tau is already explored
 	if (is_reachable(tau, k, R))
 		return false;
 	if (k >= R.size())
-		R.emplace_back(vector<deque<explicit_config>>(thread_visible_state::S));
+		R.emplace_back(vector<deque<explicit_state>>(thread_visible_state::S));
 	R[k][tau.get_state()].emplace_back(tau);
 	return true;
 }
@@ -198,8 +198,8 @@ bool explicit_wuba::update_R(const explicit_config& tau, const size_k k,
  * @param R
  * @return bool
  */
-bool explicit_wuba::is_reachable(const explicit_config& tau, const size_k k,
-		vector<vector<deque<explicit_config>>>& R) {
+bool explicit_wuba::is_reachable(const explicit_state& tau, const size_k k,
+		vector<vector<deque<explicit_state>>>& R) {
 	/// step 1: retrieve the shared state of tau
 	const auto& q = tau.get_state();
 	/// step 2: check condition (2)
@@ -226,7 +226,7 @@ bool explicit_wuba::is_reachable(const explicit_config& tau, const size_k k,
  * @param
  * @return
  */
-bool explicit_wuba::converge(const vector<deque<explicit_config>>& Rk,
+bool explicit_wuba::converge(const vector<deque<explicit_state>>& Rk,
 		const size_k k, vector<set<top_config>>& top_R) {
 	cout << "======================================\n";
 	cout << "write " << k << "\n";
@@ -279,7 +279,7 @@ bool explicit_wuba::converge() {
  * @param tau
  * @return
  */
-top_config explicit_wuba::top_mapping(const explicit_config& tau) {
+top_config explicit_wuba::top_mapping(const explicit_state& tau) {
 	vector<pda_alpha> W(tau.get_stacks().size());
 	for (size_n i = 0; i < tau.get_stacks().size(); ++i)
 		W[i] = tau.get_stacks()[i].empty() ?

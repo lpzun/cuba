@@ -21,7 +21,7 @@ public:
 	static concurrent_pushdown_automata parse_input_cpds(
 			const string& filename);
 	static concurrent_finite_machine parse_input_cfsm(const string& filename);
-	static explicit_config parse_input_cfg(const string& s);
+	static explicit_state parse_input_cfg(const string& s);
 
 private:
 	static vector<vector<string>> read_input_cpds(const string& filename,
@@ -42,7 +42,7 @@ private:
 
 	static thread_state create_thread_config_from_str(const string& s_ts,
 			const char delim = prop::SHARED_LOCAL_DELIMITER);
-	static explicit_config create_global_config_from_str(const string& s_ts,
+	static explicit_state create_global_config_from_str(const string& s_ts,
 			const char delim = prop::SHARED_LOCAL_DELIMITER);
 
 	static thread_visible_state create_thread_state_from_str(const string& s_ts,

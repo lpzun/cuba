@@ -29,8 +29,8 @@ public:
 
 protected:
 	size_n n_bound; /// the number of threads, only for parameterized programs
-	explicit_config initl_c;
-	explicit_config final_c;
+	explicit_state initl_c;
+	explicit_state final_c;
 	concurrent_pushdown_automata CPDA;
 	/// 1.1 <generators>: the overapproximation of the set of reachable
 	///     popped top configurations
@@ -56,18 +56,18 @@ public:
 
 private:
 	bool k_bounded_reachability(const size_k k_bound,
-			const explicit_config& c_I);
-	deque<explicit_config> k_round(const deque<explicit_config>& R_k);
-	deque<explicit_config> step(const explicit_config& tau);
-	bool update_R(const explicit_config& tau, const size_k k,
-			vector<vector<deque<explicit_config>>>& R);
-	bool is_reachable(const explicit_config& tau, const size_k k,
-			vector<vector<deque<explicit_config>>>& R);
+			const explicit_state& c_I);
+	deque<explicit_state> k_round(const deque<explicit_state>& R_k);
+	deque<explicit_state> step(const explicit_state& tau);
+	bool update_R(const explicit_state& tau, const size_k k,
+			vector<vector<deque<explicit_state>>>& R);
+	bool is_reachable(const explicit_state& tau, const size_k k,
+			vector<vector<deque<explicit_state>>>& R);
 
-	bool converge(const vector<deque<explicit_config>>& Rk, const size_k k,
+	bool converge(const vector<deque<explicit_state>>& Rk, const size_k k,
 			vector<set<top_config>>& top_R);
 	bool converge();
-	top_config top_mapping(const explicit_config& tau);
+	top_config top_mapping(const explicit_state& tau);
 };
 
 /////////////////////////////////////////////////////////////////////////

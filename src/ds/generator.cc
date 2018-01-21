@@ -134,7 +134,7 @@ deque<top_config> generator::step(const top_config& c,
  * @param tau
  * @return
  */
-top_config generator::top_mapping(const explicit_config& tau) {
+top_config generator::top_mapping(const explicit_state& tau) {
 	vector<pda_alpha> W(tau.get_stacks().size());
 	for (size_n i = 0; i < tau.get_stacks().size(); ++i) {
 		if (tau.get_stacks()[i].empty())

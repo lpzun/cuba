@@ -23,7 +23,8 @@ thread_visible_state::thread_visible_state() :
  * @param s
  * @param l
  */
-thread_visible_state::thread_visible_state(const pda_state& s, const pda_alpha& l) :
+thread_visible_state::thread_visible_state(const pda_state& s,
+		const pda_alpha& l) :
 		s(s), l(l) {
 }
 
@@ -115,7 +116,7 @@ global_state::~global_state() {
  * @param s
  * @param n
  */
-explicit_config::explicit_config(const pda_state& s, const size_n& n) :
+explicit_state::explicit_state(const pda_state& s, const size_n& n) :
 		s(s), W(n) {
 }
 
@@ -127,7 +128,7 @@ explicit_config::explicit_config(const pda_state& s, const size_n& n) :
  * @param s
  * @param W
  */
-explicit_config::explicit_config(const pda_state& s, const stack_vec& W) :
+explicit_state::explicit_state(const pda_state& s, const stack_vec& W) :
 		s(s), W(W) {
 
 }
@@ -136,14 +137,14 @@ explicit_config::explicit_config(const pda_state& s, const stack_vec& W) :
  * A constructor with a global configuration
  * @param g
  */
-explicit_config::explicit_config(const explicit_config& c) :
+explicit_state::explicit_state(const explicit_state& c) :
 		s(c.get_state()), W(c.get_stacks()) {
 }
 
 /**
  * destructor
  */
-explicit_config::~explicit_config() {
+explicit_state::~explicit_state() {
 
 }
 
@@ -151,7 +152,7 @@ explicit_config::~explicit_config() {
  * return a top configuration
  * @return a global state
  */
-global_state explicit_config::top() const {
+global_state explicit_state::top() const {
 	vector<pda_alpha> L(W.size());
 	for (uint i = 0; i < W.size(); ++i) {
 		L[i] = W[i].top();
@@ -163,7 +164,7 @@ global_state explicit_config::top() const {
  * return a top configuration
  * @return a global state
  */
-global_state explicit_config::top() {
+global_state explicit_state::top() {
 	vector<pda_alpha> L(W.size());
 	for (uint i = 0; i < W.size(); ++i) {
 		L[i] = W[i].top();
@@ -177,7 +178,7 @@ global_state explicit_config::top() {
  * @param n
  */
 explicit_config_tid::explicit_config_tid(const pda_state& s, const size_n& n) :
-		explicit_config(s, n), id(0), k(0) {
+		explicit_state(s, n), id(0), k(0) {
 
 }
 
@@ -188,9 +189,9 @@ explicit_config_tid::explicit_config_tid(const pda_state& s, const size_n& n) :
  * @param s
  * @param n
  */
-explicit_config_tid::explicit_config_tid(const id_thread& id, const ctx_bound& k,
-		const pda_state& s, const size_n& n) :
-		explicit_config(s, n), id(id), k(k) {
+explicit_config_tid::explicit_config_tid(const id_thread& id,
+		const ctx_bound& k, const pda_state& s, const size_n& n) :
+		explicit_state(s, n), id(id), k(k) {
 
 }
 
@@ -200,9 +201,9 @@ explicit_config_tid::explicit_config_tid(const id_thread& id, const ctx_bound& k
  * @param s
  * @param W
  */
-explicit_config_tid::explicit_config_tid(const id_thread& id, const pda_state& s,
-		const stack_vec& W) :
-		explicit_config(s, W), id(id), k(0) {
+explicit_config_tid::explicit_config_tid(const id_thread& id,
+		const pda_state& s, const stack_vec& W) :
+		explicit_state(s, W), id(id), k(0) {
 
 }
 
@@ -213,14 +214,14 @@ explicit_config_tid::explicit_config_tid(const id_thread& id, const pda_state& s
  * @param s
  * @param W
  */
-explicit_config_tid::explicit_config_tid(const id_thread& id, const ctx_bound& k,
-		const pda_state& s, const stack_vec& W) :
-		explicit_config(s, W), id(id), k(k) {
+explicit_config_tid::explicit_config_tid(const id_thread& id,
+		const ctx_bound& k, const pda_state& s, const stack_vec& W) :
+		explicit_state(s, W), id(id), k(k) {
 
 }
 
 explicit_config_tid::explicit_config_tid(const explicit_config_tid& c) :
-		explicit_config(c.get_state(), c.get_stacks()), id(c.get_thread_id()), k(
+		explicit_state(c.get_state(), c.get_stacks()), id(c.get_thread_id()), k(
 				c.get_context_k()) {
 
 }
