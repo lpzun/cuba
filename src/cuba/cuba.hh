@@ -135,9 +135,10 @@ private:
 
 	/// determine the finite context reachability
 	bool finite_context_reachability(const size_n tid);
-	bool finite_context_reachability(const size_n tid, const thread_visible_state& s,
-			stack<pda_alpha>& W, map<vertex, bool>& visit,
-			map<vertex, bool>& trace);
+	bool finite_context_reachability(const size_n tid,
+			const thread_visible_state& s, stack<pda_alpha>& W,
+			map<thread_visible_state, bool>& visit,
+			map<thread_visible_state, bool>& trace);
 };
 }
 /* namespace cuba */

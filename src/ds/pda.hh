@@ -14,9 +14,9 @@
 namespace ruba {
 
 /// define the control state of PDSs
-using pda_state = unsigned int;
+using pda_state = uint;
 /// define the stack symbol of PDSs
-using pda_alpha = unsigned int;
+using pda_alpha = uint;
 
 /////////////////////////////////////////////////////////////////////////
 /// PART 1. alphabet and PDA stack's definitions are from here.
@@ -204,7 +204,8 @@ inline ostream& operator<<(ostream& os, const thread_visible_state& t) {
  * @param t2
  * @return bool
  */
-inline bool operator<(const thread_visible_state& t1, const thread_visible_state& t2) {
+inline bool operator<(const thread_visible_state& t1,
+		const thread_visible_state& t2) {
 	if (t1.get_state() == t2.get_state())
 		return t1.get_alpha() < t2.get_alpha();
 	return t1.get_state() < t2.get_state();
@@ -216,7 +217,8 @@ inline bool operator<(const thread_visible_state& t1, const thread_visible_state
  * @param t2
  * @return bool
  */
-inline bool operator>(const thread_visible_state& t1, const thread_visible_state& t2) {
+inline bool operator>(const thread_visible_state& t1,
+		const thread_visible_state& t2) {
 	return t2 < t1;
 }
 
@@ -226,7 +228,8 @@ inline bool operator>(const thread_visible_state& t1, const thread_visible_state
  * @param t2
  * @return bool
  */
-inline bool operator==(const thread_visible_state& t1, const thread_visible_state& t2) {
+inline bool operator==(const thread_visible_state& t1,
+		const thread_visible_state& t2) {
 	return (t1.get_state() == t2.get_state())
 			&& (t1.get_alpha() == t2.get_alpha());
 }
@@ -237,7 +240,8 @@ inline bool operator==(const thread_visible_state& t1, const thread_visible_stat
  * @param t2
  * @return bool
  */
-inline bool operator!=(const thread_visible_state& t1, const thread_visible_state& t2) {
+inline bool operator!=(const thread_visible_state& t1,
+		const thread_visible_state& t2) {
 	return !(t1 == t2);
 }
 
@@ -484,10 +488,8 @@ inline bool operator!=(const thread_state& c1, const thread_state& c2) {
 /////////////////////////////////////////////////////////////////////////
 /// define the transition ID
 using id_action = uint;
-using vertex = thread_visible_state;
-using edge = id_action;
-using adj_list = map<vertex, deque<edge>>;
-using pda_action = transition<vertex, thread_state>;
+using adj_list = map<thread_visible_state, deque<id_action>>;
+using pda_action = transition<thread_visible_state, thread_state>;
 
 /**
  * Definition of Pushdown automaton

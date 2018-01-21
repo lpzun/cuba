@@ -364,8 +364,8 @@ top_config explicit_cuba::top_mapping(const explicit_config_tid& tau) {
  * @return bool
  */
 bool explicit_cuba::finite_context_reachability(const size_n tid) {
-	map<vertex, bool> visit;
-	map<vertex, bool> trace;
+	map<thread_visible_state, bool> visit;
+	map<thread_visible_state, bool> trace;
 	for (const auto& p : CPDA[tid].get_program()) {
 		visit[p.first] = false;
 		trace[p.first] = false;
