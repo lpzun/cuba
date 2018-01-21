@@ -88,7 +88,7 @@ thread_state::~thread_state() {
  * @param s
  * @param n
  */
-global_state::global_state(const pda_state& s, const size_n& n) :
+visible_state::visible_state(const pda_state& s, const size_n& n) :
 		s(s), L(n) {
 
 }
@@ -98,7 +98,7 @@ global_state::global_state(const pda_state& s, const size_n& n) :
  * @param s
  * @param L
  */
-global_state::global_state(const pda_state& s, const vector<pda_alpha>& L) :
+visible_state::visible_state(const pda_state& s, const vector<pda_alpha>& L) :
 		s(s), L(L) {
 
 }
@@ -106,7 +106,7 @@ global_state::global_state(const pda_state& s, const vector<pda_alpha>& L) :
 /**
  * destructor
  */
-global_state::~global_state() {
+visible_state::~visible_state() {
 
 }
 
@@ -152,24 +152,24 @@ explicit_state::~explicit_state() {
  * return a top configuration
  * @return a global state
  */
-global_state explicit_state::top() const {
+visible_state explicit_state::top() const {
 	vector<pda_alpha> L(W.size());
 	for (uint i = 0; i < W.size(); ++i) {
 		L[i] = W[i].top();
 	}
-	return global_state(s, L);
+	return visible_state(s, L);
 }
 
 /**
  * return a top configuration
  * @return a global state
  */
-global_state explicit_state::top() {
+visible_state explicit_state::top() {
 	vector<pda_alpha> L(W.size());
 	for (uint i = 0; i < W.size(); ++i) {
 		L[i] = W[i].top();
 	}
-	return global_state(s, L);
+	return visible_state(s, L);
 }
 
 /**

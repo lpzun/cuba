@@ -56,11 +56,11 @@ using concurrent_pushdown_automata = vector<pushdown_automaton>;
 /// the set of stacks in CPDS
 using stack_vec = vector<pda_stack>;
 
-class global_state {
+class visible_state {
 public:
-	global_state(const pda_state& s, const size_n& n);
-	global_state(const pda_state& s, const vector<pda_state>& L);
-	~global_state();
+	visible_state(const pda_state& s, const size_n& n);
+	visible_state(const pda_state& s, const vector<pda_state>& L);
+	~visible_state();
 
 	const vector<pda_alpha>& get_local() const {
 		return L;
@@ -81,7 +81,7 @@ private:
  * @param c
  * @return bool
  */
-inline ostream& operator<<(ostream& os, const global_state& g) {
+inline ostream& operator<<(ostream& os, const visible_state& g) {
 	os << "(" << g.get_state() << prop::SHARED_LOCAL_DELIMITER;
 	if (g.get_local().size() > 0) {
 		if (g.get_local()[0] == alphabet::EPSILON)
@@ -106,7 +106,7 @@ inline ostream& operator<<(ostream& os, const global_state& g) {
  * @param g2
  * @return bool
  */
-inline bool operator<(const global_state& g1, const global_state& g2) {
+inline bool operator<(const visible_state& g1, const visible_state& g2) {
 	if (g1.get_state() == g2.get_state()) {
 		return algs::compare(g1.get_local(), g2.get_local()) == -1;
 	}
@@ -119,7 +119,7 @@ inline bool operator<(const global_state& g1, const global_state& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator>(const global_state& g1, const global_state& g2) {
+inline bool operator>(const visible_state& g1, const visible_state& g2) {
 	return g2 < g1;
 }
 
@@ -129,7 +129,7 @@ inline bool operator>(const global_state& g1, const global_state& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator==(const global_state& g1, const global_state& g2) {
+inline bool operator==(const visible_state& g1, const visible_state& g2) {
 	if (g1.get_state() == g2.get_state()) {
 		return algs::compare(g1.get_local(), g2.get_local()) == 0;
 	}
@@ -142,7 +142,7 @@ inline bool operator==(const global_state& g1, const global_state& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator!=(const global_state& g1, const global_state& g2) {
+inline bool operator!=(const visible_state& g1, const visible_state& g2) {
 	return !(g1 == g2);
 }
 
@@ -164,8 +164,8 @@ public:
 		return W;
 	}
 
-	global_state top();
-	global_state top() const;
+	visible_state top();
+	visible_state top() const;
 
 private:
 	pda_state s;
@@ -402,7 +402,7 @@ inline ostream& operator<<(ostream& os, const symbolic_config& c) {
 /**
  * Defining the top of configuration, which is a global state
  */
-using top_config = global_state;
+using top_config = visible_state;
 using finite_machine = map<thread_visible_state, deque<transition<thread_visible_state, thread_visible_state>>>;
 using concurrent_finite_machine = vector<finite_machine>;
 

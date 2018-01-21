@@ -47,7 +47,7 @@ private:
 
 	static thread_visible_state create_thread_state_from_str(const string& s_ts,
 			const char delim = prop::SHARED_LOCAL_DELIMITER);
-	static global_state create_global_state_from_str(const string& s_ts,
+	static visible_state create_global_state_from_str(const string& s_ts,
 			const char delim = prop::SHARED_LOCAL_DELIMITER);
 };
 }
