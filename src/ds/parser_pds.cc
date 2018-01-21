@@ -29,17 +29,12 @@ concurrent_pushdown_automata parser::parse_input_cpds(const string& filename) {
  * @param filename
  * @return concurrent finite machine
  */
-concurrent_finite_machine parser::parse_input_cfsm(const string& filename,
-		const bool no_pop) {
+concurrent_finite_machine parser::parse_input_cfsm(const string& filename) {
 	concurrent_finite_machine CFSM;
 	set<pda_state> states;
 	const auto& sCPDA = read_input_cpds(filename, states);
-	if (no_pop) {
-		for (auto pda : sCPDA)
-			CFSM.emplace_back(parse_input_fsm_no_pop(pda));
-	} else {
-		for (auto pda : sCPDA)
-			CFSM.emplace_back(parse_input_fsm(states, pda));
+	for (auto pda : sCPDA) {
+		CFSM.emplace_back(parse_input_fsm(pda));
 	}
 	return CFSM;
 }
@@ -156,8 +151,7 @@ pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
  * @param sPDA
  * @return a finite machine
  */
-finite_machine parser::parse_input_fsm(const set<pda_state>& states,
-		const vector<string>& sPDA) {
+finite_machine parser::parse_input_fsm(const vector<string>& sPDA) {
 	if (sPDA.size() == 0)
 		return finite_machine();
 	{
@@ -214,56 +208,6 @@ finite_machine parser::parse_input_fsm(const set<pda_state>& states,
 		for (const auto l2 : pop_candidate) {
 			thread_state dst(s2, l2);
 			fsm[src].emplace_back(src, dst, type_stack_operation::POP);
-		}
-	}
-	return fsm;
-}
-
-/**
- * TODO The approach is not quite correct.
- * @param sPDA
- * @return
- */
-finite_machine parser::parse_input_fsm_no_pop(const vector<string>& sPDA) {
-
-	if (sPDA.size() == 0)
-		return finite_machine();
-	{
-		istringstream iss(sPDA[0]);
-		string pda_mark;
-		pda_alpha start, end;
-		iss >> pda_mark >> start >> end;
-		if (pda_mark != "PDA")
-			throw cuba_runtime_error("PDA input format error!");
-	}
-
-	finite_machine fsm;
-	for (uint i = 1; i < sPDA.size(); ++i) {
-		/// three types of transition:
-		///   PUSH: (s1, l1) -> (s2, l2l3)
-		///   POP : (s1, l1) -> (s2, )
-		///   OVERWRITE: (s1, l1) -> (s2, l2)
-		pda_state s1;  /// source state
-		string l1;  /// source alpha
-		string sep;    /// separator ->
-		pda_state s2;  /// destination state
-		string l2, l3; /// destination alphabets. Note: using string here
-
-		istringstream iss(sPDA[i]);
-		iss >> s1 >> l1 >> sep >> s2 >> l2 >> l3;
-
-		/// source thread state
-		thread_state src(s1, parse_input_alpha(l1));
-		/// destination thread configuration
-		if (parse_input_alpha(l3) != alphabet::NULLPTR) { /// push operation
-			thread_state dst(s2, parse_input_alpha(l2));
-			fsm[src].emplace_back(src, dst, type_stack_operation::PUSH);
-		} else if (parse_input_alpha(l2) != alphabet::EPSILON) { /// overwrite operation
-			thread_state dst(s2, parse_input_alpha(l2) != alphabet::EPSILON);
-			fsm[src].emplace_back(src, dst, type_stack_operation::OVERWRITE);
-		} else { /// pop operation
-			thread_state dst(s2, alphabet::EPSILON);
-			fsm[src].emplace_back(src, dst, type_stack_operation::OVERWRITE);
 		}
 	}
 	return fsm;

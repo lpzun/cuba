@@ -1,8 +1,8 @@
-/*
+/**
  * generator.cc
  *
  * @date  : Jan 19, 2018
- * @author: lpzun
+ * @author: Peizun Liu
  */
 
 #include <generator.hh>

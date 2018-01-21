@@ -73,8 +73,8 @@ bool explicit_wuba::k_bounded_reachability(const size_k k_bound,
 
 			const auto& k_images = step(tau);
 			for (const auto& _tau : k_images) {
-				/// add the successors to current round (R_{k}) if no write, and
-				/// to next round (R_{k+1}) otherwise.
+				/// add the successors to current round (R_{k}) if no write,
+				/// and to next round (R_{k+1}) otherwise.
 				if (_tau.get_state() == tau.get_state()) {
 					if (!update_R(_tau, k, global_R))
 						continue;

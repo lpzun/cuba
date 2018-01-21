@@ -276,7 +276,6 @@ private:
  * @return ostream
  */
 inline ostream& operator<<(ostream& os, const explicit_config_tid& c) {
-	// os << "k=" << c.get_context_k() << " ";
 	if (c.get_thread_id() == c.get_stacks().size())
 		os << "t=" << "* ";
 	else
@@ -402,6 +401,9 @@ using top_config = global_state;
 using finite_machine = map<thread_state, deque<transition<thread_state, thread_state>>>;
 using concurrent_finite_machine = vector<finite_machine>;
 
+/**
+ * The result data structure of observation sequences
+ */
 enum class sequence {
 	CONVERGENT, DIVERGENT, REACHABLE, UNKNOWN
 };

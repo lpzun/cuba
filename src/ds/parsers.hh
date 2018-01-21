@@ -20,8 +20,7 @@ class parser {
 public:
 	static concurrent_pushdown_automata parse_input_cpds(
 			const string& filename);
-	static concurrent_finite_machine parse_input_cfsm(const string& filename,
-			const bool no_pop = false);
+	static concurrent_finite_machine parse_input_cfsm(const string& filename);
 	static explicit_config parse_input_cfg(const string& s);
 
 private:
@@ -29,9 +28,7 @@ private:
 			set<pda_state>& states);
 	static pushdown_automaton parse_input_pda(const set<pda_state>& states,
 			const vector<string>& sPDA);
-	static finite_machine parse_input_fsm(const set<pda_state>& states,
-			const vector<string>& sPDA);
-	static finite_machine parse_input_fsm_no_pop(const vector<string>& sPDA);
+	static finite_machine parse_input_fsm(const vector<string>& sPDA);
 
 	static pda_alpha parse_input_alpha(const string& alpha);
 
