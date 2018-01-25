@@ -500,7 +500,7 @@ public:
 	pushdown_automaton(const set<pda_state>& states,
 			const set<pda_alpha>& alphas, ///
 			const vector<pda_action>& actions, ///
-			const adj_list& PDA);
+			const adj_list& program);
 	~pushdown_automaton();
 
 	const set<pda_state>& get_states() const {

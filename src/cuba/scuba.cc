@@ -216,11 +216,15 @@ store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
 	}
 
 	deque<fsa_transition> worklist;
-	fsa_delta epsilon_R; /// used to deal with ...
+	fsa_delta epsilon_R; /// used to handle epsilon transitions
 
 	/// initialize the worklist
-	for (const auto& p : A.get_transitions()) {
-		worklist.insert(worklist.begin(), p.second.begin(), p.second.end());
+	for (const auto& trans : A.get_transitions()) {
+		for (const auto& t : trans.second) {
+			worklist.emplace_back(t);
+			if (t.get_label() == alphabet::EPSILON)
+				epsilon_R[t.get_src()].emplace(t);
+		}
 	}
 
 	while (!worklist.empty()) {
@@ -240,7 +244,6 @@ store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
 			auto ifind = P.get_program().find(thread_visible_state(p, a));
 			if (ifind != P.get_program().end()) {
 				for (const auto& rid : ifind->second) {
-
 					const auto& r = P.get_actions()[rid]; /// PDA transition
 					const auto& _p = r.get_dst().get_state(); /// state
 					auto _W = r.get_dst().get_stack(); /// stack: maintain a copy

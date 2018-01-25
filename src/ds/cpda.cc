@@ -241,7 +241,7 @@ explicit_config_tid::~explicit_config_tid() {
  * @param W
  */
 symbolic_state::symbolic_state(const pda_state& g,
-		const vector<finite_automaton>& W) :
+		const vector<store_automaton>& W) :
 		q(g), W(W) {
 }
 
@@ -253,7 +253,7 @@ symbolic_state::symbolic_state(const pda_state& g,
  * @param A
  */
 symbolic_state::symbolic_state(const pda_state& g, const size_n&n,
-		const finite_automaton& A) :
+		const store_automaton& A) :
 		q(g), W(n, A) {
 }
 
