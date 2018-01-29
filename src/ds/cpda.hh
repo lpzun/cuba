@@ -359,6 +359,20 @@ inline bool operator!=(const explicit_config_tid& g1,
  *    and intermediate states, e.g., initial 0..5, accept 6, states 7..9
  */
 using store_automaton = finite_automaton;
+/*
+ class store_automaton: public finite_automaton {
+ public:
+ store_automaton(const fsa_state_set& states, const fsa_alphabet& alphabet,
+ const fsa_delta& transitions, const fsa_state_set& initials,
+ const fsa_state& accept) :
+ finite_automaton(states, alphabet, transitions, initials, accept) {
+
+ }
+
+ private:
+
+ };
+ */
 
 /**
  * Define a symbolic configuration

@@ -136,7 +136,7 @@ public:
 	finite_automaton(const fsa_state_set& states, const fsa_alphabet& alphabet,
 			const fsa_state_set& initials, const fsa_state& accept);
 
-	~finite_automaton();
+	virtual ~finite_automaton();
 
 	const fsa_state_set& get_states() const {
 		return states;
@@ -170,9 +170,9 @@ private:
 	fsa_state_set states;  /// the finite set of states
 	fsa_alphabet alphas;   /// the finite set of symbols
 	fsa_delta transitions; /// the finite set of transitions, organized
-	                       /// in adjacency list
+						   /// in adjacency list
 	fsa_state_set initials;  /// the set of initial states, it's a subset
-	                         /// of states
+							 /// of states
 	fsa_state accept;  /// the set of accepting states, it's a subset of states
 };
 
