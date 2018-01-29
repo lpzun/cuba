@@ -5,12 +5,12 @@
  * @author: lpzun
  */
 
-#ifndef CUBA_FSA_HH_
-#define CUBA_FSA_HH_
+#ifndef DS_FSA_HH_
+#define DS_FSA_HH_
 
 #include "pda.hh"
 
-namespace cuba {
+namespace ruba {
 using fsa_state = pda_state;
 /// a set of fsa_state
 using fsa_state_set = set<fsa_state>;
@@ -136,7 +136,7 @@ public:
 	finite_automaton(const fsa_state_set& states, const fsa_alphabet& alphabet,
 			const fsa_state_set& initials, const fsa_state& accept);
 
-	~finite_automaton();
+	virtual ~finite_automaton();
 
 	const fsa_state_set& get_states() const {
 		return states;
@@ -170,9 +170,9 @@ private:
 	fsa_state_set states;  /// the finite set of states
 	fsa_alphabet alphas;   /// the finite set of symbols
 	fsa_delta transitions; /// the finite set of transitions, organized
-	                       /// in adjacency list
+						   /// in adjacency list
 	fsa_state_set initials;  /// the set of initial states, it's a subset
-	                         /// of states
+							 /// of states
 	fsa_state accept;  /// the set of accepting states, it's a subset of states
 };
 
@@ -237,6 +237,6 @@ inline ostream& operator<<(ostream& os, const finite_automaton& fsa) {
 	return os;
 }
 
-} /* namespace cuba */
+} /* namespace ruba */
 
-#endif /* CUBA_FSA_HH_ */
+#endif /* DS_FSA_HH_ */

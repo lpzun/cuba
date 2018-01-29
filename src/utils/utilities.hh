@@ -12,7 +12,7 @@
 
 #include "heads.hh"
 
-namespace cuba {
+namespace ruba {
 
 enum class alignment {
 	LEFTJUST, RIGHTJUST, CENTERED
@@ -98,6 +98,6 @@ string algs::widthify(const T& x, const ushort& width, const alignment& c,
 	}
 	return result;
 }
-} /* namespace cuba */
+} /* namespace ruba */
 
 #endif /* UTILS_UTILITIES_HH_ */

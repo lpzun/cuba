@@ -7,7 +7,7 @@
 
 #include "pda.hh"
 
-namespace cuba {
+namespace ruba {
 
 const pda_alpha alphabet::EPSILON = -1;
 const pda_alpha alphabet::NULLPTR = -2;
@@ -31,8 +31,8 @@ pushdown_automaton::pushdown_automaton() :
  */
 pushdown_automaton::pushdown_automaton(const set<pda_state>& states,
 		const set<pda_alpha>& alphas, const vector<pda_action>& actions,
-		const adj_list& PDA) :
-		states(states), alphas(alphas), actions(actions), program(PDA) {
+		const adj_list& program) :
+		states(states), alphas(alphas), actions(actions), program(program) {
 }
 
 /**
@@ -41,4 +41,4 @@ pushdown_automaton::pushdown_automaton(const set<pda_state>& states,
 pushdown_automaton::~pushdown_automaton() {
 }
 
-} /* namespace cuba */
+} /* namespace ruba */

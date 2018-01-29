@@ -5,18 +5,18 @@
  * @author: lpzun
  */
 
-#ifndef CUBA_PDA_HH_
-#define CUBA_PDA_HH_
+#ifndef DS_PDA_HH_
+#define DS_PDA_HH_
 
 #include "utilities.hh"
 #include "prop.hh"
 
-namespace cuba {
+namespace ruba {
 
 /// define the control state of PDSs
-using pda_state = int;
+using pda_state = uint;
 /// define the stack symbol of PDSs
-using pda_alpha = int;
+using pda_alpha = uint;
 
 /////////////////////////////////////////////////////////////////////////
 /// PART 1. alphabet and PDA stack's definitions are from here.
@@ -155,14 +155,13 @@ template<typename T1, typename T2> inline ostream& operator<<(ostream& os,
 /**
  * the thread state class
  */
-class thread_state {
+class thread_visible_state {
 public:
-	thread_state();
-	thread_state(const pda_state& s, const pda_alpha& l);
-	~thread_state();
+	thread_visible_state();
+	thread_visible_state(const pda_state& s, const pda_alpha& l);
+	~thread_visible_state();
 
 	static pda_state S;
-	static pda_alpha L;
 
 	/**
 	 * @return the stack symbol of current thread state
@@ -189,7 +188,7 @@ private:
  * @param s
  * @return ostream
  */
-inline ostream& operator<<(ostream& os, const thread_state& t) {
+inline ostream& operator<<(ostream& os, const thread_visible_state& t) {
 	os << "(" << t.get_state() << ",";
 	if (t.get_alpha() == alphabet::EPSILON)
 		os << alphabet::OPT_EPSILON;
@@ -205,7 +204,8 @@ inline ostream& operator<<(ostream& os, const thread_state& t) {
  * @param t2
  * @return bool
  */
-inline bool operator<(const thread_state& t1, const thread_state& t2) {
+inline bool operator<(const thread_visible_state& t1,
+		const thread_visible_state& t2) {
 	if (t1.get_state() == t2.get_state())
 		return t1.get_alpha() < t2.get_alpha();
 	return t1.get_state() < t2.get_state();
@@ -217,7 +217,8 @@ inline bool operator<(const thread_state& t1, const thread_state& t2) {
  * @param t2
  * @return bool
  */
-inline bool operator>(const thread_state& t1, const thread_state& t2) {
+inline bool operator>(const thread_visible_state& t1,
+		const thread_visible_state& t2) {
 	return t2 < t1;
 }
 
@@ -227,7 +228,8 @@ inline bool operator>(const thread_state& t1, const thread_state& t2) {
  * @param t2
  * @return bool
  */
-inline bool operator==(const thread_state& t1, const thread_state& t2) {
+inline bool operator==(const thread_visible_state& t1,
+		const thread_visible_state& t2) {
 	return (t1.get_state() == t2.get_state())
 			&& (t1.get_alpha() == t2.get_alpha());
 }
@@ -238,7 +240,8 @@ inline bool operator==(const thread_state& t1, const thread_state& t2) {
  * @param t2
  * @return bool
  */
-inline bool operator!=(const thread_state& t1, const thread_state& t2) {
+inline bool operator!=(const thread_visible_state& t1,
+		const thread_visible_state& t2) {
 	return !(t1 == t2);
 }
 
@@ -398,14 +401,14 @@ using pda_stack = sstack<pda_alpha>;
 /**
  * a configuration (s, w) of a PDS is an element of Q x L*.
  */
-class thread_config {
+class thread_state {
 public:
-	thread_config();
-	thread_config(const pda_state& s, const pda_alpha& l);
-	thread_config(const thread_state& t);
-	thread_config(const pda_state& s, const pda_stack& w);
-	thread_config(const thread_config& c);
-	~thread_config();
+	thread_state();
+	thread_state(const pda_state& s, const pda_alpha& l);
+	thread_state(const thread_visible_state& t);
+	thread_state(const pda_state& s, const pda_stack& w);
+	thread_state(const thread_state& c);
+	~thread_state();
 
 	pda_state get_state() const {
 		return s;
@@ -415,8 +418,8 @@ public:
 		return w;
 	}
 
-	thread_state top() const {
-		return thread_state(s, w.top());
+	thread_visible_state top() const {
+		return thread_visible_state(s, w.top());
 	}
 
 private:
@@ -431,7 +434,7 @@ private:
  * @param c
  * @return ostream
  */
-inline ostream& operator<<(ostream& os, const thread_config& c) {
+inline ostream& operator<<(ostream& os, const thread_state& c) {
 	os << "(" << c.get_state() << "," << c.get_stack() << ")";
 	return os;
 }
@@ -442,7 +445,7 @@ inline ostream& operator<<(ostream& os, const thread_config& c) {
  * @param c2
  * @return bool
  */
-inline bool operator<(const thread_config& c1, const thread_config& c2) {
+inline bool operator<(const thread_state& c1, const thread_state& c2) {
 	if (c1.get_state() == c2.get_state())
 		return c1.get_stack() < c2.get_stack();
 	return c1.get_state() < c2.get_state();
@@ -454,7 +457,7 @@ inline bool operator<(const thread_config& c1, const thread_config& c2) {
  * @param c2
  * @return bool
  */
-inline bool operator>(const thread_config& c1, const thread_config& c2) {
+inline bool operator>(const thread_state& c1, const thread_state& c2) {
 	return c2 < c1;
 }
 
@@ -464,7 +467,7 @@ inline bool operator>(const thread_config& c1, const thread_config& c2) {
  * @param c2
  * @return bool
  */
-inline bool operator==(const thread_config& c1, const thread_config& c2) {
+inline bool operator==(const thread_state& c1, const thread_state& c2) {
 	return (c1.get_state() == c2.get_state())
 			&& (c1.get_stack() == c2.get_stack());
 }
@@ -475,7 +478,7 @@ inline bool operator==(const thread_config& c1, const thread_config& c2) {
  * @param c2
  * @return bool
  */
-inline bool operator!=(const thread_config& c1, const thread_config& c2) {
+inline bool operator!=(const thread_state& c1, const thread_state& c2) {
 	return !(c1 == c2);
 }
 
@@ -485,10 +488,8 @@ inline bool operator!=(const thread_config& c1, const thread_config& c2) {
 /////////////////////////////////////////////////////////////////////////
 /// define the transition ID
 using id_action = uint;
-using vertex = thread_state;
-using edge = id_action;
-using adj_list = map<vertex, deque<edge>>;
-using pda_action = transition<vertex, thread_config>;
+using adj_list = map<thread_visible_state, deque<id_action>>;
+using pda_action = transition<thread_visible_state, thread_state>;
 
 /**
  * Definition of Pushdown automaton
@@ -499,7 +500,7 @@ public:
 	pushdown_automaton(const set<pda_state>& states,
 			const set<pda_alpha>& alphas, ///
 			const vector<pda_action>& actions, ///
-			const adj_list& PDA);
+			const adj_list& program);
 	~pushdown_automaton();
 
 	const set<pda_state>& get_states() const {
@@ -543,6 +544,6 @@ inline ostream& operator<<(ostream& os, const pushdown_automaton& PDA) {
 	return os;
 }
 
-} /* namespace cuba */
+} /* namespace ruba */
 
-#endif /* CUBA_PDA_HH_ */
+#endif /* DS_PDA_HH_ */

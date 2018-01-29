@@ -7,7 +7,7 @@
 
 #include "fsa.hh"
 
-namespace cuba {
+namespace ruba {
 
 /**
  * default constructor

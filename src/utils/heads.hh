@@ -1,8 +1,8 @@
 /**
  * heads.hh
  *
- *  Created on: Jun 25, 2015
- *      Author: lpzun
+ *  @date  : Jun 25, 2015
+ *  @author: Peizun Liu
  */
 
 #ifndef HEADS_HH_

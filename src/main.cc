@@ -1,19 +1,53 @@
-//============================================================================
-// Name        : Context-UnBounded Analysis Concurrent Software
-// Author      : Peizun Liu
-// Version     :
-// Copyright   : Your copyright notice
-// Description : Hello World in C++, Ansi-style
-//============================================================================
+/******************************************************************************
+ * Synopsis	 [CUBA: Context-UnBounded Analysis for Concurrent Programs]
+ *
+ * Developer [Peizun Liu]
+ *
+ * (C) 2017 - 2018 Peizun Liu, Northeastern University, United States
+ *
+ * All rights reserved. Redistribution and use in source and binary forms,
+ * with or without modification, are permitted provided that the following
+ * conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgment:
+ *
+ *    This product includes software developed by Peizun Liu @ Thomas Wahl's
+ *    group, Northeastern University, United States and its contributors.
+ *
+ * 4. Neither the name of the University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS `AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *****************************************************************************/
 
 #include <iostream>
 
-#include "utils/cmd.hh"
-#include "cuba/cuba.hh"
+#include "cmd.hh"
+#include "cuba.hh"
+#include "wuba.hh"
 
 using namespace std;
 using namespace cmd;
 using namespace cuba;
+using namespace wuba;
 
 /**
  *
@@ -51,10 +85,14 @@ int main(const int argc, const char * const * const argv) {
 				"--automaton");
 
 		/// Concurrent Mode
-		const string& k = cmd.arg_value(cmd_line::get_opt_index(opt_type::CON),
-				"--ctx-bound");
-		const string& n = cmd.arg_value(cmd_line::get_opt_index(opt_type::CON),
-				"--threads");
+		const string& resource = cmd.arg_value(
+				cmd_line::get_opt_index(opt_type::CON), "--resource");
+		const string& k_bound = cmd.arg_value(
+				cmd_line::get_opt_index(opt_type::CON), "--res-bound");
+		size_k k = k_bound.size() == 0 ? 0 : std::stoul(k_bound);
+		const string& n_bound = cmd.arg_value(
+				cmd_line::get_opt_index(opt_type::CON), "--threads");
+		size_n n = n_bound.size() == 0 ? 0 : std::stoul(n_bound);
 		const bool is_explicit = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::CON), "--explicit");
 		prop::OPT_PARAMETERIZED = cmd.arg_bool(
@@ -65,7 +103,7 @@ int main(const int argc, const char * const * const argv) {
 				cmd_line::get_opt_index(opt_type::OTHER), "--cmd-line");
 		prop::OPT_PRINT_ALL = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--all");
-
+		cout << filename << " " << initl << " " << final << endl;
 		if (mode == "O") {
 			cout << "Overapproximation mode\n";
 			cout << filename << " " << initl << "\n";
@@ -75,27 +113,40 @@ int main(const int argc, const char * const * const argv) {
 			cout << "sequential computation is not set up yet! \n";
 		} else {
 			cout << "concurrent mode......\n";
-			if (prop::OPT_PARAMETERIZED && std::stoul(n) == 0) {
+			if (prop::OPT_PARAMETERIZED && n == 0) {
 				throw cuba_runtime_error(
 						"Please specify the number of threads!");
 			}
-
-			if (is_explicit) {
-				cout << "explicit exploration......\n";
-				explicit_cuba ecuba(initl, final, filename, std::stoul(n));
-				ecuba.context_unbounded_analysis(std::stoul(k));
-			} else {
-				cout << "symbolic exploration......\n";
-				symbolic_cuba scuba(initl, final, filename, std::stoul(n));
-				scuba.context_unbounded_analysis(std::stoul(k));
+			if (resource == "W") { /// WBA or WUBA
+				cout << "write-bounded analysis......\n";
+				if (is_explicit) {
+					cout << "explicit exploration......\n";
+					explicit_wuba ewuba(initl, final, filename, n);
+					ewuba.write_bounded_analysis(k);
+				} else {
+					cout << "symbolic exploration......\n";
+					symbolic_wuba swuba(initl, final, filename, n);
+					swuba.write_bounded_analysis(k);
+				}
+			} else { /// CBA or CUBA
+				cout << "CBA...\n";
+				if (is_explicit) {
+					cout << "explicit exploration......\n";
+					explicit_cuba ecuba(initl, final, filename, n);
+					ecuba.context_unbounded_analysis(k);
+				} else {
+					cout << "symbolic exploration......\n";
+					symbolic_cuba scuba(initl, final, filename, n);
+					scuba.context_unbounded_analysis(k);
+				}
 			}
 		}
 
 	} catch (const cmd::cmd_runtime_error& e) {
 		e.what();
-	} catch (const cuba::cuba_runtime_error& e) {
+	} catch (const ruba::cuba_runtime_error& e) {
 		e.what();
-	} catch (const cuba::cuba_exception& e) {
+	} catch (const ruba::cuba_exception& e) {
 		e.what();
 	} catch (const std::exception& e) {
 		e.what();

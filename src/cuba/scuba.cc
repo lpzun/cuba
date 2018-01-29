@@ -1,5 +1,5 @@
 /**
- * @brief cuba.cc
+ * cuba.cc
  *
  * @date  : Aug 28, 2016
  * @author: Peizun Liu
@@ -16,7 +16,7 @@ namespace cuba {
  * @param n: the number of threads, for parameterized system only
  */
 symbolic_cuba::symbolic_cuba(const string& initl, const string& final,
-		const string& filename, const size_t n) :
+		const string& filename, const size_n n) :
 		base_cuba(initl, final, filename, n) {
 }
 
@@ -42,7 +42,7 @@ void symbolic_cuba::context_unbounded_analysis(const size_k k_bound) {
 	for (uint i = 0; i < CPDA.size(); ++i) {
 		W.emplace_back(create_init_automaton(i));
 	}
-	symbolic_config cfg_I(initl_c.get_state(), W);
+	symbolic_state cfg_I(initl_c.get_state(), W);
 
 	/// step 2: perform context-unbounded analysis
 	cout << "\n" << "Initial configuration: " << cfg_I << endl;
@@ -61,24 +61,24 @@ void symbolic_cuba::context_unbounded_analysis(const size_k k_bound) {
  * @return a set of reachable symbolic configuration
  */
 bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
-		const symbolic_config& c_I) {
+		const symbolic_state& c_I) {
 	/// Step 1: declare the data structures used in this procedure:
 	///
 	/// 1.1 <currLevel> = S_{k} \ S_{k-1}: the set of symbolic configurations
 	/// which are reached in the kth context for processing. It's initialized
 	/// as { <q_I|(A1_I, ..., An_I)> }.
-	deque<symbolic_config> currLevel;
+	deque<symbolic_state> currLevel;
 	currLevel.emplace_back(c_I);
 	/// 1.2 <k>: contexts, k = 0 represents the initial configuration c_I
 	size_k k = 0;
 	/// 1.3 <global_R>: the set of reachable global configurations.
 	/// We obtain this by computing the symbolic configurations.
-	vector<deque<symbolic_config>> global_R;
+	vector<deque<symbolic_state>> global_R;
 	global_R.reserve(k_bound + 1);
-	global_R.emplace_back(deque<symbolic_config> { c_I });
+	global_R.emplace_back(deque<symbolic_state> { c_I });
 	/// 1.4 <top_R>: the set of reachable tops of configurations.
 	/// We obtain this by computing the symbolic configurations.
-	vector<set<top_config>> top_R(thread_state::S);
+	vector<set<visible_state>> top_R(thread_visible_state::S);
 	/// Compute top_R_0
 	converge(global_R, k, top_R);
 	/// Step 2: compute all reachable configurations with up to k_bound
@@ -87,7 +87,7 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 	while (k_bound == 0 || k < k_bound) {
 		/// <nextLevel> = S_{k+1} \ S_{k}: the set of symbolic configurations
 		/// reached in the (k+1)st context. It's initialized as empty.
-		deque<symbolic_config> nextLevel;
+		deque<symbolic_state> nextLevel;
 		/// step 2.1 compute nextLevel, or S_{k+1}: iterate over all elements
 		/// in the currLevel. This is a BFS-like procedure.
 		while (!currLevel.empty()) {
@@ -127,7 +127,7 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
  * The procedure of building the reachability automaton FSA for a PDA
  * @return a finite automaton
  */
-store_automaton symbolic_cuba::create_store_automaton(const size_t i) {
+store_automaton symbolic_cuba::create_store_automaton(const size_n i) {
 	auto fsa = create_init_automaton(i);
 	cout << "Initial automaton: \n";
 	cout << fsa << endl;
@@ -141,7 +141,7 @@ store_automaton symbolic_cuba::create_store_automaton(const size_t i) {
  * @param PDA
  * @return
  */
-store_automaton symbolic_cuba::create_init_automaton(const size_t i) {
+store_automaton symbolic_cuba::create_init_automaton(const size_n i) {
 	/// step 0: set up the accept state
 	const auto& P = CPDA[i];
 	const auto& q_I = initl_c.get_state();
@@ -216,11 +216,15 @@ store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
 	}
 
 	deque<fsa_transition> worklist;
-	fsa_delta epsilon_R; /// used to deal with ...
+	fsa_delta epsilon_R; /// used to handle epsilon transitions
 
 	/// initialize the worklist
-	for (const auto& p : A.get_transitions()) {
-		worklist.insert(worklist.begin(), p.second.begin(), p.second.end());
+	for (const auto& trans : A.get_transitions()) {
+		for (const auto& t : trans.second) {
+			worklist.emplace_back(t);
+			if (t.get_label() == alphabet::EPSILON)
+				epsilon_R[t.get_src()].emplace(t);
+		}
 	}
 
 	while (!worklist.empty()) {
@@ -233,14 +237,13 @@ store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
 		const auto& q = t.get_dst();
 
 		const auto& ret = deltas[p].insert(t);
-		if (!ret.second || p >= thread_state::S)
+		if (!ret.second || p >= thread_visible_state::S)
 			continue;
 
 		if (a != alphabet::EPSILON) { /// if label != epsilon
-			auto ifind = P.get_program().find(thread_state(p, a));
+			auto ifind = P.get_program().find(thread_visible_state(p, a));
 			if (ifind != P.get_program().end()) {
 				for (const auto& rid : ifind->second) {
-
 					const auto& r = P.get_actions()[rid]; /// PDA transition
 					const auto& _p = r.get_dst().get_state(); /// state
 					auto _W = r.get_dst().get_stack(); /// stack: maintain a copy
@@ -293,7 +296,7 @@ store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
  *         false: otherwise.
  */
 bool symbolic_cuba::is_recongnizable(const store_automaton& A,
-		const thread_config& c) {
+		const thread_state& c) {
 	queue<pair<fsa_state, uint>> worklist;
 	worklist.emplace(c.get_state(), 0);
 
@@ -407,9 +410,9 @@ set<fsa_state> symbolic_cuba::BFS_visit(const fsa_state& root,
  * @param idx
  * @return symbolic configuration
  */
-symbolic_config symbolic_cuba::compose(const pda_state& q_I,
+symbolic_state symbolic_cuba::compose(const pda_state& q_I,
 		const store_automaton& Ai, const vector<store_automaton>& automata,
-		const size_t& i) {
+		const size_n& i) {
 	vector<store_automaton> W;
 	W.reserve(automata.size());
 	for (uint j = 0; j < automata.size(); ++j) {
@@ -418,7 +421,7 @@ symbolic_config symbolic_cuba::compose(const pda_state& q_I,
 		else
 			W.push_back(this->rename(automata[j], q_I));
 	}
-	return symbolic_config(q_I, W);
+	return symbolic_state(q_I, W);
 }
 
 /**
@@ -538,8 +541,8 @@ store_automaton symbolic_cuba::anonymize_by_rename(const store_automaton& A,
  * @param top_R
  * @return
  */
-bool symbolic_cuba::converge(const vector<deque<symbolic_config>>& R,
-		const size_k k, vector<set<top_config>>& top_R) {
+bool symbolic_cuba::converge(const vector<deque<symbolic_state>>& R,
+		const size_k k, vector<set<visible_state>>& top_R) {
 	cout << "======================================\n";
 	cout << "context " << k << "\n";
 	const auto cnt_new_top_cfg = top_mapping(R[k], top_R);
@@ -571,11 +574,10 @@ bool symbolic_cuba::is_convergent() {
  * @param topped_R
  * @return
  */
-uint symbolic_cuba::top_mapping(const deque<symbolic_config>& R,
-		vector<set<top_config>>& topped_R) {
+uint symbolic_cuba::top_mapping(const deque<symbolic_state>& R,
+		vector<set<visible_state>>& topped_R) {
 	uint cnt_new_top_cfg = 0;
 	for (const auto& c : R) {
-		//cout << c << endl;
 		for (const auto& top_c : top_mapping(c)) {
 			auto ret = topped_R[top_c.get_state()].emplace(top_c);
 			if (ret.second) {
@@ -584,7 +586,6 @@ uint symbolic_cuba::top_mapping(const deque<symbolic_config>& R,
 				/// updating approx_X
 				auto ifind = generators[top_c.get_state()].find(top_c);
 				if (ifind != generators[top_c.get_state()].end()) {
-					//cout << "----------------" << top_c << endl;
 					generators[top_c.get_state()].erase(ifind);
 				}
 			}
@@ -598,7 +599,7 @@ uint symbolic_cuba::top_mapping(const deque<symbolic_config>& R,
  * @param tau
  * @return a set of configuration tops
  */
-vector<top_config> symbolic_cuba::top_mapping(const symbolic_config& tau) {
+vector<visible_state> symbolic_cuba::top_mapping(const symbolic_state& tau) {
 	const auto q = tau.get_state();
 	vector<set<pda_alpha>> toppings(tau.get_automata().size());
 
@@ -610,7 +611,7 @@ vector<top_config> symbolic_cuba::top_mapping(const symbolic_config& tau) {
 
 	const auto& worklist = cross_product(toppings);
 
-	vector<top_config> tops;
+	vector<visible_state> tops;
 	tops.reserve(worklist.size());
 	for (const auto& W : worklist) {
 		tops.emplace_back(q, W);

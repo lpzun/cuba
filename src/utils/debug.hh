@@ -29,7 +29,7 @@
 
 #define STATISTIC
 
-namespace cuba {
+namespace ruba {
 class debugger {
 public:
     debugger();

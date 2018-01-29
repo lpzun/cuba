@@ -16,7 +16,7 @@ using std::runtime_error;
 using std::exception;
 using std::string;
 
-namespace cuba {
+namespace ruba {
 
 /**
  * @brief customized runtime error class

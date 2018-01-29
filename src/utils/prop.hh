@@ -11,7 +11,7 @@
 
 #include "heads.hh"
 
-namespace cuba {
+namespace ruba {
 
 class prop {
 public:
@@ -33,6 +33,6 @@ public:
 	static const char THREAD_DELIMITER;
 };
 
-} /* namespace cuba */
+} /* namespace ruba */
 
 #endif /* UTILS_PROP_HH_ */

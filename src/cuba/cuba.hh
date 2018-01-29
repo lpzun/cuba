@@ -2,21 +2,20 @@
  * @brief cuba.hh
  *
  * @date  : Aug 28, 2016
- * @author: lpzun
+ * @author: Peizun Liu
  */
 
 #ifndef CUBA_CUBA_HH_
 #define CUBA_CUBA_HH_
 
 #include "prop.hh"
+#include "generator.hh"
 
-#include "cpda.hh"
-#include "fsa.hh"
+using namespace ruba;
 
 namespace cuba {
-using antichain = deque<global_config>;
-using finite_machine = map<thread_state, deque<transition<thread_state, thread_state>>>;
-using concurrent_finite_machine = vector<finite_machine>;
+
+using antichain = deque<explicit_config_tid>;
 
 /////////////////////////////////////////////////////////////////////////
 /// PART 1. The following are the base class for context-unbounded
@@ -25,62 +24,50 @@ using concurrent_finite_machine = vector<finite_machine>;
 class base_cuba {
 public:
 	base_cuba(const string& initl, const string& final, const string& filename,
-			const size_t n);
+			const size_n n);
 	virtual ~base_cuba();
 	virtual void context_unbounded_analysis(const size_k k_bound = 0) = 0;
-
-	void context_insensitive(const string& initl, const string& filename);
 protected:
-	explicit_config initl_c;
-	explicit_config final_c;
+	explicit_state initl_c;
+	explicit_state final_c;
 	concurrent_pushdown_automata CPDA;
 	/// 1.1 <generators>: the overapproximation of the set of reachable
 	///     popped top configurations
-	vector<set<top_config>> generators;
+	vector<set<visible_state>> generators;
 	vector<vector<bool>> reachable_T;
 
 private:
-	void context_insensitive(const explicit_config& initl,
-			const string& filename);
-	vector<set<top_config>> context_insensitive(const top_config& initl_c,
-			const vector<finite_machine>& CFSM);
-	vector<set<top_config>> standard_FWS(const top_config& initl_c,
-			const vector<finite_machine>& CFSM);
-	deque<top_config> step(const top_config& c,
-			const vector<finite_machine>& CFSM);
-	top_config top_mapping(const explicit_config& tau);
-	void print_approximation(const vector<set<top_config>>& approx_R);
 };
 
 /////////////////////////////////////////////////////////////////////////
-/// PART 2. The following are the declarations for context-unbounded
-/// analysis.
+/// PART 2. The following class is the symbolic version for
+/// context-unbounded analysis.
 /////////////////////////////////////////////////////////////////////////
 class symbolic_cuba: public base_cuba {
 public:
 	symbolic_cuba(const string& initl, const string& final,
-			const string& filename, const size_t n = 0);
+			const string& filename, const size_n n = 0);
 	~symbolic_cuba();
 
 	virtual void context_unbounded_analysis(const size_k k_bound = 0);
 private:
 
 	/// Post*(A): build pushdown store automaton
-	store_automaton create_store_automaton(const size_t i);
-	store_automaton create_init_automaton(const size_t i);
+	store_automaton create_store_automaton(const size_n i);
+	store_automaton create_init_automaton(const size_n i);
 	fsa_state create_accept_state(const fsa_state_set& states);
 	fsa_state create_interm_state(const fsa_state_set& states);
 	store_automaton post_kleene(const store_automaton& A,
 			const pushdown_automaton& P);
 
 	/// QR algorithm: context-bounded analysis
-	bool context_bounded_analysis(const size_k k, const symbolic_config& cfg_I);
+	bool context_bounded_analysis(const size_k k, const symbolic_state& cfg_I);
 	set<fsa_state> project_Q(const store_automaton& A);
 	set<fsa_state> BFS_visit(const fsa_state& root,
 			const unordered_map<fsa_state, deque<fsa_state>>& adj,
 			const fsa_state_set& initials);
-	symbolic_config compose(const pda_state& _q, const store_automaton& Ai,
-			const vector<store_automaton>& automata, const size_t& idx);
+	symbolic_state compose(const pda_state& _q, const store_automaton& Ai,
+			const vector<store_automaton>& automata, const size_n& idx);
 	store_automaton rename(const store_automaton& A, const pda_state& q_I);
 	store_automaton anonymize(const store_automaton& A, const pda_state& q_I,
 			const bool& is_rename = false);
@@ -90,7 +77,7 @@ private:
 			const pda_state& q_I);
 
 	/// determine R_k = R_{k+1}
-	bool is_recongnizable(const store_automaton& A, const thread_config& c);
+	bool is_recongnizable(const store_automaton& A, const thread_state& c);
 	bool is_equivalent(const store_automaton& A1, const store_automaton& A2);
 	store_automaton iunion(const store_automaton& A1,
 			const store_automaton& A2);
@@ -100,19 +87,19 @@ private:
 	store_automaton cross_product(const vector<store_automaton>& W);
 
 	/// determine bar(R_k) = bar(R_{k+1})s
-	bool converge(const vector<deque<symbolic_config>>& R, const size_k k,
-			vector<set<top_config>>& top_R);
+	bool converge(const vector<deque<symbolic_state>>& R, const size_k k,
+			vector<set<visible_state>>& top_R);
 	bool is_convergent();
-	uint top_mapping(const deque<symbolic_config>& R,
-			vector<set<top_config>>& topped_R);
-	vector<top_config> top_mapping(const symbolic_config& tau);
+	uint top_mapping(const deque<symbolic_state>& R,
+			vector<set<visible_state>>& topped_R);
+	vector<visible_state> top_mapping(const symbolic_state& tau);
 	set<pda_alpha> top_mapping(const store_automaton& A, const pda_state q);
 	vector<vector<pda_alpha>> cross_product(const vector<set<pda_alpha>>& tops);
 };
 
 /////////////////////////////////////////////////////////////////////////
-/// PART 3. The following are the utilities for explore.
-///
+/// PART 3. The following class is the explicit version for
+/// context-unbounded analysis.
 /////////////////////////////////////////////////////////////////////////
 
 /**
@@ -121,7 +108,7 @@ private:
 class explicit_cuba: public base_cuba {
 public:
 	explicit_cuba(const string& initl, const string& final,
-			const string& filename, const size_t n = 0);
+			const string& filename, const size_n n = 0);
 
 	virtual ~explicit_cuba();
 
@@ -129,73 +116,29 @@ public:
 private:
 
 	bool k_bounded_reachability(const size_k k_bound,
-			const explicit_config& c_I);
-	antichain step(const global_config& tau, const bool is_switch);
+			const explicit_state& c_I);
+	antichain step(const explicit_config_tid& tau, const bool is_switch);
 	void step(const pda_state& q, const stack_vec& W, const uint tid,
 			antichain& successors);
 	bool update_R(vector<vector<antichain>>& R, const size_k k,
-			const global_config& c);
+			const explicit_config_tid& c);
 
 	/// determine convergence, reachability of a target and so on
 	bool converge(const vector<antichain>& R, const size_k k,
-			vector<set<top_config>>& top_R);
+			vector<set<visible_state>>& top_R);
 	bool is_convergent();
-	bool is_reachable(const global_config& tau, const size_k k,
+	bool is_reachable(const explicit_config_tid& tau, const size_k k,
 			vector<vector<antichain>>& R);
 	void marking(const pda_state& s, const pda_alpha& l);
 
-	top_config top_mapping(const global_config& tau);
+	visible_state top_mapping(const explicit_config_tid& tau);
 
 	/// determine the finite context reachability
-	bool finite_context_reachability(const size_t tid);
-	bool finite_context_reachability(const size_t tid, const thread_state& s,
-			stack<pda_alpha>& W, map<vertex, bool>& visit,
-			map<vertex, bool>& trace);
-};
-
-/////////////////////////////////////////////////////////////////////////
-/// PART 4. The following are the utilities for PDS file parser.
-///
-/////////////////////////////////////////////////////////////////////////
-class parser {
-public:
-	static concurrent_pushdown_automata parse_input_cpds(
-			const string& filename);
-	static concurrent_finite_machine parse_input_cfsm(const string& filename,
-			const bool no_pop = false);
-	static explicit_config parse_input_cfg(const string& s);
-
-private:
-	static vector<vector<string>> read_input_cpds(const string& filename,
-			set<pda_state>& states);
-	static pushdown_automaton parse_input_pda(const set<pda_state>& states,
-			const vector<string>& sPDA);
-	static finite_machine parse_input_fsm(const set<pda_state>& states,
-			const vector<string>& sPDA);
-	static finite_machine parse_input_fsm_no_pop(const vector<string>& sPDA);
-
-	static pda_alpha parse_input_alpha(const string& alpha);
-
-	static void remove_comments(istream& in, ostream& out,
-			const string& comment);
-	static bool getline(istream& in, string& line, const char& eol = '\n');
-
-	static deque<string> split(const string &s, const char& delim);
-
-	static void remove_comments(istream& in, const string& filename,
-			const string& comment);
-	static void remove_comments(const string& in, string& out,
-			const string& comment);
-
-	static thread_config create_thread_config_from_str(const string& s_ts,
-			const char& delim = prop::SHARED_LOCAL_DELIMITER);
-	static explicit_config create_global_config_from_str(const string& s_ts,
-			const char& delim = prop::SHARED_LOCAL_DELIMITER);
-
-	static thread_state create_thread_state_from_str(const string& s_ts,
-			const char& delim = prop::SHARED_LOCAL_DELIMITER);
-	static global_state create_global_state_from_str(const string& s_ts,
-			const char& delim = prop::SHARED_LOCAL_DELIMITER);
+	bool finite_context_reachability(const size_n tid);
+	bool finite_context_reachability(const size_n tid,
+			const thread_visible_state& s, stack<pda_alpha>& W,
+			map<thread_visible_state, bool>& visit,
+			map<thread_visible_state, bool>& trace);
 };
 }
 /* namespace cuba */

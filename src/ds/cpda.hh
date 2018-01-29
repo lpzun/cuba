@@ -13,22 +13,22 @@
  * each i, (Q, L, Di) is a PDS.
  ******************************************************************************/
 
-#ifndef CUBA_CPDA_HH_
-#define CUBA_CPDA_HH_
+#ifndef DS_CPDA_HH_
+#define DS_CPDA_HH_
 
-#include "pda.hh"
 #include "fsa.hh"
+#include "pda.hh"
 
-namespace cuba {
+namespace ruba {
 
 /// the size of threads
-using size_t = ushort;
+using size_n = ushort;
 /// the size of context switches
 using size_k = ushort;
 
 using id_thread_state = uint;
 
-using id_thread = size_t;
+using id_thread = size_n;
 using ctx_bound = size_k;
 
 /////////////////////////////////////////////////////////////////////////
@@ -56,11 +56,11 @@ using concurrent_pushdown_automata = vector<pushdown_automaton>;
 /// the set of stacks in CPDS
 using stack_vec = vector<pda_stack>;
 
-class global_state {
+class visible_state {
 public:
-	global_state(const pda_state& s, const size_t& n);
-	global_state(const pda_state& s, const vector<pda_state>& L);
-	~global_state();
+	visible_state(const pda_state& s, const size_n& n);
+	visible_state(const pda_state& s, const vector<pda_state>& L);
+	~visible_state();
 
 	const vector<pda_alpha>& get_local() const {
 		return L;
@@ -81,7 +81,7 @@ private:
  * @param c
  * @return bool
  */
-inline ostream& operator<<(ostream& os, const global_state& g) {
+inline ostream& operator<<(ostream& os, const visible_state& g) {
 	os << "(" << g.get_state() << prop::SHARED_LOCAL_DELIMITER;
 	if (g.get_local().size() > 0) {
 		if (g.get_local()[0] == alphabet::EPSILON)
@@ -106,7 +106,7 @@ inline ostream& operator<<(ostream& os, const global_state& g) {
  * @param g2
  * @return bool
  */
-inline bool operator<(const global_state& g1, const global_state& g2) {
+inline bool operator<(const visible_state& g1, const visible_state& g2) {
 	if (g1.get_state() == g2.get_state()) {
 		return algs::compare(g1.get_local(), g2.get_local()) == -1;
 	}
@@ -119,7 +119,7 @@ inline bool operator<(const global_state& g1, const global_state& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator>(const global_state& g1, const global_state& g2) {
+inline bool operator>(const visible_state& g1, const visible_state& g2) {
 	return g2 < g1;
 }
 
@@ -129,7 +129,7 @@ inline bool operator>(const global_state& g1, const global_state& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator==(const global_state& g1, const global_state& g2) {
+inline bool operator==(const visible_state& g1, const visible_state& g2) {
 	if (g1.get_state() == g2.get_state()) {
 		return algs::compare(g1.get_local(), g2.get_local()) == 0;
 	}
@@ -142,19 +142,19 @@ inline bool operator==(const global_state& g1, const global_state& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator!=(const global_state& g1, const global_state& g2) {
+inline bool operator!=(const visible_state& g1, const visible_state& g2) {
 	return !(g1 == g2);
 }
 
 /**
  * A configuration (s|w1,...,wn) of a CPDS is an element of Qx(L*)^n
  */
-class explicit_config {
+class explicit_state {
 public:
-	explicit_config(const pda_state& s, const size_t& n);
-	explicit_config(const pda_state& s, const stack_vec& W);
-	explicit_config(const explicit_config& c);
-	~explicit_config();
+	explicit_state(const pda_state& s, const size_n& n);
+	explicit_state(const pda_state& s, const stack_vec& W);
+	explicit_state(const explicit_state& c);
+	~explicit_state();
 
 	pda_state get_state() const {
 		return s;
@@ -164,8 +164,8 @@ public:
 		return W;
 	}
 
-	global_state top();
-	global_state top() const;
+	visible_state top();
+	visible_state top() const;
 
 private:
 	pda_state s;
@@ -178,7 +178,7 @@ private:
  * @param c
  * @return ostream
  */
-inline ostream& operator<<(ostream& os, const explicit_config& c) {
+inline ostream& operator<<(ostream& os, const explicit_state& c) {
 	os << "(" << c.get_state() << prop::SHARED_LOCAL_DELIMITER;
 	if (c.get_stacks().size() > 0)
 		os << c.get_stacks()[0];
@@ -194,7 +194,7 @@ inline ostream& operator<<(ostream& os, const explicit_config& c) {
  * @param g2
  * @return bool
  */
-inline bool operator<(const explicit_config& g1, const explicit_config& g2) {
+inline bool operator<(const explicit_state& g1, const explicit_state& g2) {
 	return g1.top() < g2.top();
 }
 
@@ -204,7 +204,7 @@ inline bool operator<(const explicit_config& g1, const explicit_config& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator>(const explicit_config& g1, const explicit_config& g2) {
+inline bool operator>(const explicit_state& g1, const explicit_state& g2) {
 	return g2 < g1;
 }
 
@@ -214,7 +214,7 @@ inline bool operator>(const explicit_config& g1, const explicit_config& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator==(const explicit_config& g1, const explicit_config& g2) {
+inline bool operator==(const explicit_state& g1, const explicit_state& g2) {
 	if (g1.get_state() == g2.get_state()) {
 		auto iw1 = g1.get_stacks().cbegin();
 		auto iw2 = g2.get_stacks().cbegin();
@@ -234,23 +234,24 @@ inline bool operator==(const explicit_config& g1, const explicit_config& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator!=(const explicit_config& g1, const explicit_config& g2) {
+inline bool operator!=(const explicit_state& g1, const explicit_state& g2) {
 	return !(g1 == g2);
 }
 
 /**
  *
  */
-class global_config: public explicit_config {
+class explicit_config_tid: public explicit_state {
 public:
-	global_config(const pda_state& s, const size_t& n);
-	global_config(const id_thread& id, const ctx_bound& k, const pda_state& s,
-			const size_t& n);
-	global_config(const id_thread& id, const pda_state& s, const stack_vec& W);
-	global_config(const id_thread& id, const ctx_bound& k, const pda_state& s,
+	explicit_config_tid(const pda_state& s, const size_n& n);
+	explicit_config_tid(const id_thread& id, const ctx_bound& k,
+			const pda_state& s, const size_n& n);
+	explicit_config_tid(const id_thread& id, const pda_state& s,
 			const stack_vec& W);
-	global_config(const global_config& c);
-	~global_config();
+	explicit_config_tid(const id_thread& id, const ctx_bound& k,
+			const pda_state& s, const stack_vec& W);
+	explicit_config_tid(const explicit_config_tid& c);
+	~explicit_config_tid();
 
 	ctx_bound get_context_k() const {
 		return k;
@@ -275,8 +276,7 @@ private:
  * @param c
  * @return ostream
  */
-inline ostream& operator<<(ostream& os, const global_config& c) {
-	// os << "k=" << c.get_context_k() << " ";
+inline ostream& operator<<(ostream& os, const explicit_config_tid& c) {
 	if (c.get_thread_id() == c.get_stacks().size())
 		os << "t=" << "* ";
 	else
@@ -296,7 +296,8 @@ inline ostream& operator<<(ostream& os, const global_config& c) {
  * @param g2
  * @return bool
  */
-inline bool operator<(const global_config& g1, const global_config& g2) {
+inline bool operator<(const explicit_config_tid& g1,
+		const explicit_config_tid& g2) {
 	return g1.top() < g2.top();
 }
 
@@ -306,7 +307,8 @@ inline bool operator<(const global_config& g1, const global_config& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator>(const global_config& g1, const global_config& g2) {
+inline bool operator>(const explicit_config_tid& g1,
+		const explicit_config_tid& g2) {
 	return g2 < g1;
 }
 
@@ -316,7 +318,8 @@ inline bool operator>(const global_config& g1, const global_config& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator==(const global_config& g1, const global_config& g2) {
+inline bool operator==(const explicit_config_tid& g1,
+		const explicit_config_tid& g2) {
 	if (g1.get_state() == g2.get_state()) {
 		auto iw1 = g1.get_stacks().cbegin();
 		auto iw2 = g2.get_stacks().cbegin();
@@ -336,7 +339,8 @@ inline bool operator==(const global_config& g1, const global_config& g2) {
  * @param g2
  * @return bool
  */
-inline bool operator!=(const global_config& g1, const global_config& g2) {
+inline bool operator!=(const explicit_config_tid& g1,
+		const explicit_config_tid& g2) {
 	return !(g1 == g2);
 }
 
@@ -355,16 +359,30 @@ inline bool operator!=(const global_config& g1, const global_config& g2) {
  *    and intermediate states, e.g., initial 0..5, accept 6, states 7..9
  */
 using store_automaton = finite_automaton;
+/*
+ class store_automaton: public finite_automaton {
+ public:
+ store_automaton(const fsa_state_set& states, const fsa_alphabet& alphabet,
+ const fsa_delta& transitions, const fsa_state_set& initials,
+ const fsa_state& accept) :
+ finite_automaton(states, alphabet, transitions, initials, accept) {
+
+ }
+
+ private:
+
+ };
+ */
 
 /**
  * Define a symbolic configuration
  */
-class symbolic_config {
+class symbolic_state {
 public:
-	symbolic_config(const pda_state& q, const vector<store_automaton>& W);
-	symbolic_config(const pda_state& q, const size_t&n,
+	symbolic_state(const pda_state& q, const vector<store_automaton>& W);
+	symbolic_state(const pda_state& q, const size_n&n,
 			const store_automaton& A);
-	~symbolic_config();
+	~symbolic_state();
 
 	pda_state get_state() const {
 		return q;
@@ -379,7 +397,7 @@ private:
 	vector<store_automaton> W;
 };
 
-inline ostream& operator<<(ostream& os, const symbolic_config& c) {
+inline ostream& operator<<(ostream& os, const symbolic_state& c) {
 	os << "<" << c.get_state() << "|";
 	if (c.get_automata().size() > 0) {
 		for (uint i = 0; i < c.get_automata().size() - 1; ++i) {
@@ -398,9 +416,17 @@ inline ostream& operator<<(ostream& os, const symbolic_config& c) {
 /**
  * Defining the top of configuration, which is a global state
  */
-using top_config = global_state;
+using finite_machine = map<thread_visible_state, deque<transition<thread_visible_state, thread_visible_state>>>;
+using concurrent_finite_machine = vector<finite_machine>;
+
+/**
+ * The result data structure of observation sequences
+ */
+enum class sequence {
+	CONVERGENT, DIVERGENT, REACHABLE, UNKNOWN
+};
 
 }
-/* namespace cuba */
+/* namespace ruba */
 
-#endif /* CUBA_CPDA_HH_ */
+#endif /* DS_CPDA_HH_ */

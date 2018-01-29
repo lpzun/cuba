@@ -5,8 +5,8 @@
  * @author: lpzun
  */
 
-#include "../utils/utilities.hh"
+#include "utilities.hh"
 
-namespace cuba {
+namespace ruba {
 
-} /* namespace cuba */
+} /* namespace ruba */

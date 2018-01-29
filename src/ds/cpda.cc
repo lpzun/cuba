@@ -7,15 +7,14 @@
 
 #include "cpda.hh"
 
-namespace cuba {
+namespace ruba {
 
-pda_state thread_state::S = 0;
-pda_alpha thread_state::L = 0;
+pda_state thread_visible_state::S = 0;
 
 /**
  * default constructor
  */
-thread_state::thread_state() :
+thread_visible_state::thread_visible_state() :
 		s(0), l(0) {
 }
 
@@ -24,20 +23,21 @@ thread_state::thread_state() :
  * @param s
  * @param l
  */
-thread_state::thread_state(const pda_state& s, const pda_alpha& l) :
+thread_visible_state::thread_visible_state(const pda_state& s,
+		const pda_alpha& l) :
 		s(s), l(l) {
 }
 
 /**
  * destructor
  */
-thread_state::~thread_state() {
+thread_visible_state::~thread_visible_state() {
 }
 
 /**
  * A default constructor without any input parameters
  */
-thread_config::thread_config() :
+thread_state::thread_state() :
 		s(), w() {
 }
 
@@ -46,7 +46,7 @@ thread_config::thread_config() :
  * @param s
  * @param l
  */
-thread_config::thread_config(const pda_state& s, const pda_alpha& l) :
+thread_state::thread_state(const pda_state& s, const pda_alpha& l) :
 		s(s), w() {
 	w.push(l);
 }
@@ -55,7 +55,7 @@ thread_config::thread_config(const pda_state& s, const pda_alpha& l) :
  * A constructor with a thread state
  * @param t
  */
-thread_config::thread_config(const thread_state& t) :
+thread_state::thread_state(const thread_visible_state& t) :
 		s(t.get_state()), w() {
 	w.push(t.get_alpha());
 }
@@ -64,7 +64,7 @@ thread_config::thread_config(const thread_state& t) :
  * @param s
  * @param w
  */
-thread_config::thread_config(const pda_state& s, const pda_stack& w) :
+thread_state::thread_state(const pda_state& s, const pda_stack& w) :
 		s(s), w(w) {
 }
 
@@ -72,14 +72,14 @@ thread_config::thread_config(const pda_state& s, const pda_stack& w) :
  * A constructor with a thread configuration
  * @param c
  */
-thread_config::thread_config(const thread_config& c) :
+thread_state::thread_state(const thread_state& c) :
 		s(c.get_state()), w(c.get_stack()) {
 }
 
 /**
  * destructor
  */
-thread_config::~thread_config() {
+thread_state::~thread_state() {
 
 }
 
@@ -88,7 +88,7 @@ thread_config::~thread_config() {
  * @param s
  * @param n
  */
-global_state::global_state(const pda_state& s, const size_t& n) :
+visible_state::visible_state(const pda_state& s, const size_n& n) :
 		s(s), L(n) {
 
 }
@@ -98,7 +98,7 @@ global_state::global_state(const pda_state& s, const size_t& n) :
  * @param s
  * @param L
  */
-global_state::global_state(const pda_state& s, const vector<pda_alpha>& L) :
+visible_state::visible_state(const pda_state& s, const vector<pda_alpha>& L) :
 		s(s), L(L) {
 
 }
@@ -106,7 +106,7 @@ global_state::global_state(const pda_state& s, const vector<pda_alpha>& L) :
 /**
  * destructor
  */
-global_state::~global_state() {
+visible_state::~visible_state() {
 
 }
 
@@ -116,7 +116,7 @@ global_state::~global_state() {
  * @param s
  * @param n
  */
-explicit_config::explicit_config(const pda_state& s, const size_t& n) :
+explicit_state::explicit_state(const pda_state& s, const size_n& n) :
 		s(s), W(n) {
 }
 
@@ -128,7 +128,7 @@ explicit_config::explicit_config(const pda_state& s, const size_t& n) :
  * @param s
  * @param W
  */
-explicit_config::explicit_config(const pda_state& s, const stack_vec& W) :
+explicit_state::explicit_state(const pda_state& s, const stack_vec& W) :
 		s(s), W(W) {
 
 }
@@ -137,14 +137,14 @@ explicit_config::explicit_config(const pda_state& s, const stack_vec& W) :
  * A constructor with a global configuration
  * @param g
  */
-explicit_config::explicit_config(const explicit_config& c) :
+explicit_state::explicit_state(const explicit_state& c) :
 		s(c.get_state()), W(c.get_stacks()) {
 }
 
 /**
  * destructor
  */
-explicit_config::~explicit_config() {
+explicit_state::~explicit_state() {
 
 }
 
@@ -152,24 +152,24 @@ explicit_config::~explicit_config() {
  * return a top configuration
  * @return a global state
  */
-global_state explicit_config::top() const {
+visible_state explicit_state::top() const {
 	vector<pda_alpha> L(W.size());
 	for (uint i = 0; i < W.size(); ++i) {
 		L[i] = W[i].top();
 	}
-	return global_state(s, L);
+	return visible_state(s, L);
 }
 
 /**
  * return a top configuration
  * @return a global state
  */
-global_state explicit_config::top() {
+visible_state explicit_state::top() {
 	vector<pda_alpha> L(W.size());
 	for (uint i = 0; i < W.size(); ++i) {
 		L[i] = W[i].top();
 	}
-	return global_state(s, L);
+	return visible_state(s, L);
 }
 
 /**
@@ -177,8 +177,8 @@ global_state explicit_config::top() {
  * @param s
  * @param n
  */
-global_config::global_config(const pda_state& s, const size_t& n) :
-		explicit_config(s, n), id(0), k(0) {
+explicit_config_tid::explicit_config_tid(const pda_state& s, const size_n& n) :
+		explicit_state(s, n), id(0), k(0) {
 
 }
 
@@ -189,9 +189,9 @@ global_config::global_config(const pda_state& s, const size_t& n) :
  * @param s
  * @param n
  */
-global_config::global_config(const id_thread& id, const ctx_bound& k,
-		const pda_state& s, const size_t& n) :
-		explicit_config(s, n), id(id), k(k) {
+explicit_config_tid::explicit_config_tid(const id_thread& id,
+		const ctx_bound& k, const pda_state& s, const size_n& n) :
+		explicit_state(s, n), id(id), k(k) {
 
 }
 
@@ -201,9 +201,9 @@ global_config::global_config(const id_thread& id, const ctx_bound& k,
  * @param s
  * @param W
  */
-global_config::global_config(const id_thread& id, const pda_state& s,
-		const stack_vec& W) :
-		explicit_config(s, W), id(id), k(0) {
+explicit_config_tid::explicit_config_tid(const id_thread& id,
+		const pda_state& s, const stack_vec& W) :
+		explicit_state(s, W), id(id), k(0) {
 
 }
 
@@ -214,19 +214,19 @@ global_config::global_config(const id_thread& id, const pda_state& s,
  * @param s
  * @param W
  */
-global_config::global_config(const id_thread& id, const ctx_bound& k,
-		const pda_state& s, const stack_vec& W) :
-		explicit_config(s, W), id(id), k(k) {
+explicit_config_tid::explicit_config_tid(const id_thread& id,
+		const ctx_bound& k, const pda_state& s, const stack_vec& W) :
+		explicit_state(s, W), id(id), k(k) {
 
 }
 
-global_config::global_config(const global_config& c) :
-		explicit_config(c.get_state(), c.get_stacks()), id(c.get_thread_id()), k(
+explicit_config_tid::explicit_config_tid(const explicit_config_tid& c) :
+		explicit_state(c.get_state(), c.get_stacks()), id(c.get_thread_id()), k(
 				c.get_context_k()) {
 
 }
 
-global_config::~global_config() {
+explicit_config_tid::~explicit_config_tid() {
 
 }
 
@@ -240,8 +240,8 @@ global_config::~global_config() {
  * @param g
  * @param W
  */
-symbolic_config::symbolic_config(const pda_state& g,
-		const vector<finite_automaton>& W) :
+symbolic_state::symbolic_state(const pda_state& g,
+		const vector<store_automaton>& W) :
 		q(g), W(W) {
 }
 
@@ -252,15 +252,15 @@ symbolic_config::symbolic_config(const pda_state& g,
  * @param n
  * @param A
  */
-symbolic_config::symbolic_config(const pda_state& g, const size_t&n,
-		const finite_automaton& A) :
+symbolic_state::symbolic_state(const pda_state& g, const size_n&n,
+		const store_automaton& A) :
 		q(g), W(n, A) {
 }
 
 /**
  * destructor
  */
-symbolic_config::~symbolic_config() {
+symbolic_state::~symbolic_state() {
 
 }
-} /* namespace bssp */
+} /* namespace ruba */
