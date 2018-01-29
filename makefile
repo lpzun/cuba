@@ -18,7 +18,7 @@
 APP	         = cuba # the name of application
 SATDIR       = src# /usr/local/Z3#                                             # config your z3 include here
 ILIBS        =#-lz-L $(SATDIR)/lib -lz3#                                  -lm
-IINCLUDE     =-I $(SATDIR)/utils/# $(SATDIR)/cuba/#                                      
+IINCLUDE     =-I$(SATDIR)/utils/ -I$(SATDIR)/cuba/ -I$(SATDIR)/ds/ -I $(SATDIR)/wuba/#
 
 #ISTD	     = -std=c++0x                                                 # for old cpp standard
 ISTD	     = -std=c++11
