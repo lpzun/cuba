@@ -109,7 +109,6 @@ int main(const int argc, const char * const * const argv) {
 			cout << "sequential computation is not set up yet! \n";
 		} else {
 			cout << "concurrent mode......\n";
-
 			if (resource == "W") { /// WBA or WUBA
 				cout << "write-(un)bounded analysis......\n";
 				if (is_explicit) {

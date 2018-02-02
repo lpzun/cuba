@@ -346,8 +346,8 @@ void cmd_line::create_argument_list() {
 			""); /// row 3
 	this->add_option(get_opt_index(opt_type::CON), "-k", "--res-bound",
 			(string("resource bound, ").append(
-					"performing resource-unbounded analysis if specify nothing.\n") /// row 1
-			.append(string(28, ' ')).append(
+					"performing resource-unbounded analysis if specify nothing\n") /// row 1
+			.append(string(27, ' ')).append(
 					"Per parameter -s, it has different meanings:\n") /// row 2
 			.append(string(29, ' ')).append(
 					"if -s = \'C\', then k represents the context bound\n") ///
@@ -355,7 +355,7 @@ void cmd_line::create_argument_list() {
 					"if -s = \'W\', then k represents the write access bound")),
 			""); /// row 4
 	this->add_switch(get_opt_index(opt_type::CON), "-x", "--explicit",
-			"the explicit exploration assuming finite resource reachability");
+			"run the explicit exploration assuming finite resource reachability holds");
 
 	/// other options
 	this->add_switch(get_opt_index(opt_type::OTHER), "-cmd", "--cmd-line",
