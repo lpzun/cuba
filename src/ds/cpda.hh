@@ -350,29 +350,18 @@ inline bool operator!=(const explicit_config_tid& g1,
 /////////////////////////////////////////////////////////////////////////
 
 /**
+ * @IMPORTANT:
+ *
  * Define a pushdown store automaton. A pushdown store automaton is a
  * finite automaton, with the following specific features:
- *  - states: this contains only intermediate states and final states,
- *    no initial states;
- *  - initials: this contains only initial states;
- *  - accept: the accept state is a state defined between initial states
- *    and intermediate states, e.g., initial 0..5, accept 6, states 7..9
+ *  - states: this contains only intermediate states and accept states,
+ *    no start states;
+ *  - start: this contains only start states;
+ *  - accept: the accept state is a state. Its id is defined between the
+ *    IDs of start states and those of intermediate states, e.g., initial
+ *    0..5, accept 6, states 7..9
  */
 using store_automaton = finite_automaton;
-/*
- class store_automaton: public finite_automaton {
- public:
- store_automaton(const fsa_state_set& states, const fsa_alphabet& alphabet,
- const fsa_delta& transitions, const fsa_state_set& initials,
- const fsa_state& accept) :
- finite_automaton(states, alphabet, transitions, initials, accept) {
-
- }
-
- private:
-
- };
- */
 
 /**
  * Define a symbolic configuration

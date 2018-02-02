@@ -355,7 +355,7 @@ set<fsa_state> symbolic_cuba::project_Q(const store_automaton& A) {
 	 }
 	 return BFS_visit(A.get_accept(), transpose, A.get_initials());
 	 */
-	return A.get_initials();
+	return A.get_start();
 }
 
 /**
@@ -433,9 +433,9 @@ symbolic_state symbolic_cuba::compose(const pda_state& q_I,
  */
 store_automaton symbolic_cuba::rename(const store_automaton& A,
 		const pda_state& q_I) {
-	if (A.get_initials().size() == 0)
+	if (A.get_start().size() == 0)
 		throw cuba_runtime_error("rename: no initial state");
-	auto old = *A.get_initials().begin();
+	auto old = *A.get_start().begin();
 	auto ifind = A.get_transitions().find(old);
 	if (ifind == A.get_transitions().end())
 		return store_automaton(A.get_states(), A.get_alphas(),
@@ -520,12 +520,12 @@ store_automaton symbolic_cuba::anonymize_by_rename(const store_automaton& A,
 		const pda_state& q_I) {
 	auto states = A.get_states();
 	auto transs = A.get_transitions();
-	for (auto q : A.get_initials()) {
+	for (auto q : A.get_start()) {
 		if (q == q_I)
 			continue;
 		//transs.emplace(states++, transs[g]);
 	}
-	return store_automaton(states, A.get_alphas(), transs, A.get_initials(),
+	return store_automaton(states, A.get_alphas(), transs, A.get_start(),
 			A.get_accept());
 }
 

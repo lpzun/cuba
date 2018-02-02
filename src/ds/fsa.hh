@@ -150,12 +150,12 @@ public:
 		return transitions;
 	}
 
-	fsa_state_set get_initials() const {
-		return initials;
+	fsa_state_set get_start() const {
+		return start;
 	}
 
 	void set_initials(const fsa_state_set& initials) {
-		this->initials = initials;
+		this->start = initials;
 	}
 
 	fsa_state get_accept() const {
@@ -171,9 +171,9 @@ private:
 	fsa_alphabet alphas;   /// the finite set of symbols
 	fsa_delta transitions; /// the finite set of transitions, organized
 						   /// in adjacency list
-	fsa_state_set initials;  /// the set of initial states, it's a subset
-							 /// of states
-	fsa_state accept;  /// the set of accepting states, it's a subset of states
+	fsa_state_set start;  /// the set of start states, it's a subset
+						  /// of states
+	fsa_state accept;  /// the set of accept states, it's a subset of states
 };
 
 /**
@@ -222,7 +222,7 @@ inline ostream& operator<<(ostream& os, const finite_automaton& fsa) {
 	 }
 	 */
 	os << "S = { ";
-	for (auto q : fsa.get_initials())
+	for (auto q : fsa.get_start())
 		os << q << " ";
 	for (auto s : fsa.get_states())
 		os << s << " ";
