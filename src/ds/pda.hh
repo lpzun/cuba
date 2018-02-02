@@ -492,7 +492,7 @@ using adj_list = map<thread_visible_state, deque<id_action>>;
 using pda_action = transition<thread_visible_state, thread_state>;
 
 /**
- * Definition of Pushdown automaton
+ * Definition of pushdown automaton
  */
 class pushdown_automaton {
 public:

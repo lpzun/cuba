@@ -90,13 +90,9 @@ int main(const int argc, const char * const * const argv) {
 		const string& k_bound = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::CON), "--res-bound");
 		size_k k = k_bound.size() == 0 ? 0 : std::stoul(k_bound);
-		const string& n_bound = cmd.arg_value(
-				cmd_line::get_opt_index(opt_type::CON), "--threads");
-		size_n n = n_bound.size() == 0 ? 0 : std::stoul(n_bound);
+
 		const bool is_explicit = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::CON), "--explicit");
-		prop::OPT_PARAMETERIZED = cmd.arg_bool(
-				cmd_line::get_opt_index(opt_type::CON), "--parameterized");
 
 		/// Other Options
 		prop::OPT_PRINT_CMD = cmd.arg_bool(
@@ -113,30 +109,27 @@ int main(const int argc, const char * const * const argv) {
 			cout << "sequential computation is not set up yet! \n";
 		} else {
 			cout << "concurrent mode......\n";
-			if (prop::OPT_PARAMETERIZED && n == 0) {
-				throw cuba_runtime_error(
-						"Please specify the number of threads!");
-			}
+
 			if (resource == "W") { /// WBA or WUBA
-				cout << "write-bounded analysis......\n";
+				cout << "write-(un)bounded analysis......\n";
 				if (is_explicit) {
 					cout << "explicit exploration......\n";
-					explicit_wuba ewuba(initl, final, filename, n);
+					explicit_wuba ewuba(initl, final, filename);
 					ewuba.write_bounded_analysis(k);
 				} else {
 					cout << "symbolic exploration......\n";
-					symbolic_wuba swuba(initl, final, filename, n);
+					symbolic_wuba swuba(initl, final, filename);
 					swuba.write_bounded_analysis(k);
 				}
 			} else { /// CBA or CUBA
-				cout << "CBA...\n";
+				cout << "context-(un)bounded analysis...\n";
 				if (is_explicit) {
 					cout << "explicit exploration......\n";
-					explicit_cuba ecuba(initl, final, filename, n);
+					explicit_cuba ecuba(initl, final, filename);
 					ecuba.context_unbounded_analysis(k);
 				} else {
 					cout << "symbolic exploration......\n";
-					symbolic_cuba scuba(initl, final, filename, n);
+					symbolic_cuba scuba(initl, final, filename);
 					scuba.context_unbounded_analysis(k);
 				}
 			}

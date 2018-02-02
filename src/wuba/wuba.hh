@@ -20,15 +20,13 @@ namespace wuba {
 /////////////////////////////////////////////////////////////////////////
 class base_wuba {
 public:
-	base_wuba(const string& initl, const string& final, const string& filename,
-			const size_n n_bound);
+	base_wuba(const string& initl, const string& final, const string& filename);
 	virtual ~base_wuba();
 
 	virtual void write_bounded_analysis(const size_k k_bound) = 0;
 	virtual void write_unbounded_analysis() = 0;
 
 protected:
-	size_n n_bound; /// the number of threads, only for parameterized programs
 	explicit_state initl_c;
 	explicit_state final_c;
 	concurrent_pushdown_automata CPDA;
@@ -48,7 +46,7 @@ protected:
 class explicit_wuba: public base_wuba {
 public:
 	explicit_wuba(const string& initl, const string& final,
-			const string& filename, const size_n n_bound = 0);
+			const string& filename);
 	virtual ~explicit_wuba();
 
 	virtual void write_bounded_analysis(const size_k k_bound);
@@ -77,7 +75,7 @@ private:
 class symbolic_wuba: public base_wuba {
 public:
 	symbolic_wuba(const string& initl, const string& final,
-			const string& filename, const size_n n_bound = 0);
+			const string& filename);
 	virtual ~symbolic_wuba();
 
 	virtual void write_bounded_analysis(const size_k k_bound);

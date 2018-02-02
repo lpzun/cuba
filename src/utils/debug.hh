@@ -32,8 +32,17 @@
 namespace ruba {
 class debugger {
 public:
-    debugger();
-    ~debugger();
+	debugger();
+	~debugger();
+};
+
+class logger {
+public:
+	logger() {
+	}
+	~logger() {
+
+	}
 };
 }
 #endif /* DEBUG_HH_ */

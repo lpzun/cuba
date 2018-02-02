@@ -23,8 +23,7 @@ using antichain = deque<explicit_config_tid>;
 /////////////////////////////////////////////////////////////////////////
 class base_cuba {
 public:
-	base_cuba(const string& initl, const string& final, const string& filename,
-			const size_n n);
+	base_cuba(const string& initl, const string& final, const string& filename);
 	virtual ~base_cuba();
 	virtual void context_unbounded_analysis(const size_k k_bound = 0) = 0;
 protected:
@@ -46,7 +45,7 @@ private:
 class symbolic_cuba: public base_cuba {
 public:
 	symbolic_cuba(const string& initl, const string& final,
-			const string& filename, const size_n n = 0);
+			const string& filename);
 	~symbolic_cuba();
 
 	virtual void context_unbounded_analysis(const size_k k_bound = 0);
@@ -108,7 +107,7 @@ private:
 class explicit_cuba: public base_cuba {
 public:
 	explicit_cuba(const string& initl, const string& final,
-			const string& filename, const size_n n = 0);
+			const string& filename);
 
 	virtual ~explicit_cuba();
 

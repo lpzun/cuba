@@ -10,14 +10,14 @@
 namespace cuba {
 /**
  * constructor
- * @param initl initial global state
- * @param final final global state
+ * @param initl: initial global state
+ * @param final: final global state
  * @param filename: input CPDs
  * @param n: the number of threads, for parameterized system only
  */
 symbolic_cuba::symbolic_cuba(const string& initl, const string& final,
-		const string& filename, const size_n n) :
-		base_cuba(initl, final, filename, n) {
+		const string& filename) :
+		base_cuba(initl, final, filename) {
 }
 
 /**

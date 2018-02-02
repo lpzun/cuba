@@ -354,12 +354,8 @@ void cmd_line::create_argument_list() {
 			.append(string(29, ' ')).append(
 					"if -s = \'W\', then k represents the write access bound")),
 			""); /// row 4
-	this->add_option(get_opt_index(opt_type::CON), "-n", "--threads",
-			"the number of threads (used only for parameterized systems)", "0");
 	this->add_switch(get_opt_index(opt_type::CON), "-x", "--explicit",
 			"the explicit exploration assuming finite resource reachability");
-	this->add_switch(get_opt_index(opt_type::CON), "-p", "--parameterized",
-			"the input is a parameterized pushdown system");
 
 	/// other options
 	this->add_switch(get_opt_index(opt_type::OTHER), "-cmd", "--cmd-line",

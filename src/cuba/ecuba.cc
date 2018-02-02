@@ -16,8 +16,8 @@ namespace cuba {
  * @param n: the number of threads, for parameterized system only
  */
 explicit_cuba::explicit_cuba(const string& initl, const string& final,
-		const string& filename, const size_n n) :
-		base_cuba(initl, final, filename, n) {
+		const string& filename) :
+		base_cuba(initl, final, filename) {
 }
 
 /**
@@ -38,11 +38,6 @@ void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
 	while (tid < CPDA.size()) {
 		if (finite_context_reachability(tid)) {
 			cycle = true;
-			// cout << "PDA " << tid << " contains cycles. ECUBA exits...\n";
-			break;
-		}
-		if (prop::OPT_PARAMETERIZED) {
-			cout << "Parameterized CPDS, only test one PDA...\n";
 			break;
 		}
 		++tid;

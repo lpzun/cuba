@@ -17,8 +17,8 @@ namespace wuba {
  * @param n
  */
 base_wuba::base_wuba(const string& initl, const string& final,
-		const string& filename, const size_n n) :
-		n_bound(n), initl_c(0, 1), final_c(0, 1), CPDA(), ///
+		const string& filename) :
+		initl_c(0, 1), final_c(0, 1), CPDA(), ///
 		generators(), reachable_T(), ///
 		convergence_GS(0), convergence_VS(0) {
 

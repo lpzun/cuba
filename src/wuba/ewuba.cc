@@ -16,8 +16,8 @@ namespace wuba {
  * @param n
  */
 explicit_wuba::explicit_wuba(const string& initl, const string& final,
-		const string& filename, const size_n n_bound) :
-		base_wuba(initl, final, filename, n_bound) {
+		const string& filename) :
+		base_wuba(initl, final, filename) {
 
 }
 
