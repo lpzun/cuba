@@ -40,7 +40,9 @@ void symbolic_cuba::context_unbounded_analysis(const size_k k_bound) {
 	/// step 1: set up the initial configurations
 	vector<store_automaton> W;
 	for (uint i = 0; i < CPDA.size(); ++i) {
-		W.emplace_back(create_init_automaton(i));
+		W.emplace_back(
+				create_init_automaton(CPDA[i], initl_c.get_state(),
+						initl_c.get_stacks()[i]));
 	}
 	symbolic_state cfg_I(initl_c.get_state(), W);
 
@@ -124,77 +126,36 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 }
 
 /**
- * The procedure of building the reachability automaton FSA for a PDA
- * @return a finite automaton
- */
-store_automaton symbolic_cuba::create_store_automaton(const size_n i) {
-	auto fsa = create_init_automaton(i);
-	cout << "Initial automaton: \n";
-	cout << fsa << endl;
-	return post_kleene(fsa, CPDA[i]);
-}
-
-/**
  *
- * build the reachability automation for an initial configuration of a PDA
+ * build the reachability automation for an initial state of a PDA
  * @param c: an initial configuration
  * @param PDA
  * @return
  */
-store_automaton symbolic_cuba::create_init_automaton(const size_n i) {
-	/// step 0: set up the accept state
-	const auto& P = CPDA[i];
-	const auto& q_I = initl_c.get_state();
-	auto w = initl_c.get_stacks()[i];
-	auto q_F = create_accept_state(CPDA[i].get_states());
-	/// step 1: set up the set of states
-	fsa_state_set states { q_F };
+store_automaton symbolic_cuba::create_init_automaton(
+		const pushdown_automaton& P, const pda_state q_I, const pda_stack& w) {
+	/// step 1: the set of intermeidate states
+	fsa_state_set states;
 
-	/// step 2: set up the set of alphas
-	auto alphas = P.get_alphas();
-
-	/// step 3: set up the set of initial states
-	fsa_state_set initials { q_I };
-
-	/// step 4: set up the set of transitions
+	/// step 3: set up the set of transitions
 	fsa_delta delta;
+
 	auto q = q_I;
-	auto _q = create_interm_state(states);
-	while (!w.empty()) {
-		const auto a = w.top();
-		w.pop();
-		if (w.empty())
-			_q = q_F;
-
-		states.emplace(_q); /// add the intermediate state
-		delta[q].emplace(q, _q, a); /// add a new transition
-
-		q = _q++; /// set up new source & destination states
+	if (!w.empty()) {
+		for (const auto a : w.get_worklist()) {
+			auto _q = store_automaton::create_interm_state();
+			states.emplace(_q);
+			delta[q].emplace(q, _q, a);
+			q = _q;
+		}
+	} else { /// if stack w is empty, then add a epsilon transition
+		auto _q = store_automaton::create_interm_state();
+		states.emplace(_q);
+		delta[q].emplace(q, _q, alphabet::EPSILON);
 	}
-	return store_automaton(states, alphas, delta, initials, q_F);
-}
-
-/**
- *
- * @param states
- * @return
- */
-fsa_state symbolic_cuba::create_accept_state(const fsa_state_set& states) {
-	if (states.size() == 0)
-		throw cuba_runtime_error("no control state!");
-	auto s = *(states.rbegin()); /// s is an intermediate state
-	return ++s;
-}
-/**
- *
- * @param states
- * @return
- */
-fsa_state symbolic_cuba::create_interm_state(const fsa_state_set& states) {
-	if (states.size() == 0)
-		throw cuba_runtime_error("no control state!");
-	auto s = *(states.rbegin()); /// s is an intermediate state
-	return ++s;
+	/// step 4: set up the accept state
+	const auto q_F = *states.rbegin();
+	return store_automaton(states, P.get_alphas(), delta, { q_I }, q_F);
 }
 
 /**
@@ -205,14 +166,15 @@ fsa_state symbolic_cuba::create_interm_state(const fsa_state_set& states) {
 store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
 		const pushdown_automaton& P) {
 	auto states = A.get_states();
-	auto alphas = A.get_alphas();
 	fsa_delta deltas; /// the transitions of Post*(A)
 
-	unordered_map<int, fsa_state> map_r_to_aux_state;
-	auto s = create_interm_state(states);
-	for (uint i = 0; i < P.get_actions().size(); ++i) {
-		if (P.get_actions()[i].get_oper_type() == type_stack_operation::PUSH)
-			map_r_to_aux_state.emplace(i, s++);
+	const auto& actions = P.get_actions();
+	unordered_map<uint, fsa_state> load_interm_states;
+	for (uint rid = 0; rid < actions.size(); ++rid) {
+		if (actions[rid].get_oper_type() == type_stack_operation::PUSH) {
+			const auto s = store_automaton::create_interm_state();
+			load_interm_states.emplace(rid, s), states.emplace(s);
+		}
 	}
 
 	deque<fsa_transition> worklist;
@@ -243,8 +205,8 @@ store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
 		if (a != alphabet::EPSILON) { /// if label != epsilon
 			auto ifind = P.get_program().find(thread_visible_state(p, a));
 			if (ifind != P.get_program().end()) {
-				for (const auto& rid : ifind->second) {
-					const auto& r = P.get_actions()[rid]; /// PDA transition
+				for (const auto rid : ifind->second) {
+					const auto& r = actions[rid]; /// PDA transition
 					const auto& _p = r.get_dst().get_state(); /// state
 					auto _W = r.get_dst().get_stack(); /// stack: maintain a copy
 
@@ -259,7 +221,7 @@ store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
 					}
 						break;
 					default: { /// push
-						const auto& q_in = map_r_to_aux_state[rid];
+						const auto& q_in = load_interm_states[rid];
 						const auto& a1 = _W.top();
 						_W.pop();
 						const auto& a2 = _W.top();
@@ -283,7 +245,7 @@ store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
 		}
 	}
 
-	return store_automaton(states, alphas, deltas, P.get_states(),
+	return store_automaton(states, A.get_alphas(), deltas, P.get_states(),
 			A.get_accept());
 }
 

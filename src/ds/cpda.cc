@@ -229,9 +229,47 @@ explicit_config_tid::explicit_config_tid(const explicit_config_tid& c) :
 explicit_config_tid::~explicit_config_tid() {
 
 }
+/////////////////////////////////////////////////////////////////////////
+/// PART 2. The data structure for pushdown store automaton
+///
+/////////////////////////////////////////////////////////////////////////
+/**
+ *
+ * @param states
+ * @param alphabet
+ * @param transitions
+ * @param start
+ * @param accept
+ */
+store_automaton::store_automaton(const fsa_state_set& states,
+		const fsa_alphabet& alphabet, const fsa_delta& transitions,
+		const fsa_state_set& start, const fsa_state& accept) :
+		finite_automaton(states, alphabet, transitions, start, accept) {
+}
+
+/**
+ * destructor
+ */
+store_automaton::~store_automaton() {
+
+}
+
+fsa_state store_automaton::interm_s = 0;
+
+/**
+ *
+ * @return
+ */
+fsa_state store_automaton::create_interm_state() {
+	if (interm_s == 0)
+		interm_s = thread_visible_state::S;
+	if (interm_s == std::numeric_limits<uint>::max())
+		throw cuba_runtime_error("intermediate state: overflow!");
+	return interm_s++;
+}
 
 /////////////////////////////////////////////////////////////////////////
-/// PART 2. The data structure for aggregate configuration
+/// PART 3. The data structure for aggregate configuration
 ///
 /////////////////////////////////////////////////////////////////////////
 

@@ -360,8 +360,20 @@ inline bool operator!=(const explicit_config_tid& g1,
  *  - accept: the accept state is a state. Its id is defined between the
  *    IDs of start states and those of intermediate states, e.g., initial
  *    0..5, accept 6, states 7..9
+ *
+ *  - interm_states: we also maintain a data structure
  */
-using store_automaton = finite_automaton;
+class store_automaton: public finite_automaton {
+public:
+	store_automaton(const fsa_state_set& states, const fsa_alphabet& alphabet,
+			const fsa_delta& transitions, const fsa_state_set& start,
+			const fsa_state& accept);
+	~store_automaton();
+
+	static fsa_state create_interm_state();
+private:
+	static fsa_state interm_s;
+};
 
 /**
  * Define a symbolic configuration

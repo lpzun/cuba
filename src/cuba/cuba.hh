@@ -52,10 +52,8 @@ public:
 private:
 
 	/// Post*(A): build pushdown store automaton
-	store_automaton create_store_automaton(const size_n i);
-	store_automaton create_init_automaton(const size_n i);
-	fsa_state create_accept_state(const fsa_state_set& states);
-	fsa_state create_interm_state(const fsa_state_set& states);
+	store_automaton create_init_automaton(const pushdown_automaton& P,
+			const pda_state q_I, const pda_stack& w);
 	store_automaton post_kleene(const store_automaton& A,
 			const pushdown_automaton& P);
 

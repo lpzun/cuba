@@ -130,11 +130,11 @@ using fsa_delta = unordered_map<fsa_state, set<fsa_transition>>;
 class finite_automaton {
 public:
 	finite_automaton(const fsa_state_set& states, const fsa_alphabet& alphabet,
-			const fsa_delta& transitions, const fsa_state_set& initials,
+			const fsa_delta& transitions, const fsa_state_set& start,
 			const fsa_state& accept);
 
 	finite_automaton(const fsa_state_set& states, const fsa_alphabet& alphabet,
-			const fsa_state_set& initials, const fsa_state& accept);
+			const fsa_state_set& start, const fsa_state& accept);
 
 	virtual ~finite_automaton();
 
