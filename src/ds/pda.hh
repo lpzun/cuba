@@ -1,8 +1,8 @@
 /**
- * @brief pds.hh
+ * @brief PDS.hh
  *
  * @date  : Sep 15, 2016
- * @author: lpzun
+ * @author: Peizun Liu
  */
 
 #ifndef DS_PDA_HH_
