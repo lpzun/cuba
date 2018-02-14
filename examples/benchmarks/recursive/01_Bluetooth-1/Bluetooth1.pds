@@ -1,0 +1,91 @@
+7
+# Thread counter
+# global
+#   0: p0
+PDA 0 1
+0 1 -> 0 1 1
+0 0 -> 0 1 0
+0 1 -> 0 -
+0 1 -> 0 1
+0 0 -> 0 0
+# Thread stopping_flag
+# global
+#   1: p1
+# local
+#   2: false-stop-flag
+#   3: true-stop-flag
+PDA 2 3
+1 2 -> 1 3
+1 2 -> 1 2
+1 3 -> 1 3
+# Thread stopping_event
+# global
+#   2: p2
+PDA 2 3
+2 3 -> 2 2
+2 3 -> 2 3
+2 2 -> 2 2
+# Thread stop-D
+# global
+#   2: p2
+# local
+#   4: n0
+#   5: n1
+#   6: e_Dcrement
+#   7: release
+PDA 4 7
+3 4 -> 3 6 5
+3 5 -> 3 7
+# Thread request
+# g means a global variable
+#  4: g_0
+#  5: g_1
+#  6: g_-1
+# local variables
+#  8: e
+#  9: e_Increment
+#  10: n
+#  11: n_Work
+#  12: n_End_work
+#  13: e_Decrement
+#  14: Abort
+#  15: n'
+#  16: n''
+#  17: n'''
+PDA 8 17
+4 8 -> 4 9 10
+5 8 -> 5 9 10
+6 8 -> 6 9 10
+4 10 -> 4 11
+4 11 -> 4 12
+4 12 -> 4 13
+4 12 -> 4 14
+4 10 -> 4 13
+5 10 -> 5 13
+6 10 -> 6 13
+4 9 -> 6 -
+5 9 -> 6 -
+6 9 -> 6 -
+4 9 -> 4 15
+5 9 -> 5 15
+6 9 -> 6 15
+4 15 -> 4 -
+5 15 -> 5 -
+6 15 -> 6 -
+# function decrement
+3 13 -> 3 16
+4 13 -> 4 16
+5 13 -> 5 16
+6 13 -> 6 16
+3 16 -> 3 -
+4 16 -> 4 -
+5 16 -> 5 -
+6 16 -> 6 -
+3 16 -> 3 17
+4 16 -> 4 17
+5 16 -> 5 17
+6 16 -> 6 17
+3 17 -> 3 -
+4 17 -> 4 -
+5 17 -> 5 -
+6 17 -> 6 -
