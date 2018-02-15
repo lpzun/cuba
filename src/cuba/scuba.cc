@@ -9,11 +9,12 @@
 
 namespace cuba {
 /**
- * constructor
+ * Constructor for symbolic version of CUBA; calling base_cuba
+ *   Set up the initial global state, target state, concurrent pushdown
+ *   system and the overapproximation of reachable top configurations.
  * @param initl: initial global state
  * @param final: final global state
  * @param filename: input CPDs
- * @param n: the number of threads, for parameterized system only
  */
 symbolic_cuba::symbolic_cuba(const string& initl, const string& final,
 		const string& filename) :
@@ -26,15 +27,9 @@ symbolic_cuba::symbolic_cuba(const string& initl, const string& final,
 symbolic_cuba::~symbolic_cuba() {
 }
 
-/////////////////////////////////////////////////////////////////////////
-/// PART 1. The following are the definitions for context-unbounded
-/// analysis.
-/////////////////////////////////////////////////////////////////////////
-
 /**
  * The procedure of context-bounded analysis
- * @param n: the number of threads
- * @param k: the number of context switches
+ * @param k_bound: the upper bounds of contexts
  */
 void symbolic_cuba::context_unbounded_analysis(const size_k k_bound) {
 	/// step 1: set up the initial configurations
@@ -54,13 +49,12 @@ void symbolic_cuba::context_unbounded_analysis(const size_k k_bound) {
 	}
 }
 
-/// a pair of configuration used in QR algorithm
 /**
  * This is the main procedure to do the context-bounded analysis. It implements
  * the algorithm in QR'05 paper.
- * @param k  : the upper bound of context switches
+ * @param k_bound: the upper bound of context switches
  * @param c_I: the initial symbolic configuration
- * @return a set of reachable symbolic configuration
+ * @return bool
  */
 bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 		const symbolic_state& c_I) {
@@ -127,10 +121,10 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 
 /**
  *
- * build the reachability automation for an initial state of a PDA
+ * Build the pushdown store automation for an initial state of a PDA
  * @param c: an initial configuration
  * @param PDA
- * @return
+ * @return store_automaton
  */
 store_automaton symbolic_cuba::create_init_automaton(
 		const pushdown_automaton& P, const pda_state q_I, const pda_stack& w) {
@@ -159,9 +153,9 @@ store_automaton symbolic_cuba::create_init_automaton(
 }
 
 /**
- * Post*(A): all reachable states from states represented by A
- * @param A
- * @return a finite automaton
+ * Post*(A): compute all reachable states from states represented by A
+ * @param A a store automaton
+ * @return store_automaton
  */
 store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
 		const pushdown_automaton& P) {
@@ -250,12 +244,11 @@ store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
 }
 
 /**
- * To determine whether c is reachable in the PDA
+ * To determine whether c is reachable in the PDA. It returns true if c is
+ * reachable and false otherwise.
  * @param A: a reachability automaton
  * @param c: a configuration
  * @return bool
- *         true : if c is reachable
- *         false: otherwise.
  */
 bool symbolic_cuba::is_recongnizable(const store_automaton& A,
 		const thread_state& c) {
@@ -290,6 +283,9 @@ bool symbolic_cuba::is_recongnizable(const store_automaton& A,
 /**
  * Determine the equivalence of two finite automatons. This implementation
  * is based on the Hopcroft-Karp algorithm.
+ *
+ * TODO: need to implement it, but please keep in mind that the algorithm
+ * is very inefficient.
  * @param A1
  * @param A2
  * @return bool
@@ -301,9 +297,9 @@ bool symbolic_cuba::is_equivalent(const store_automaton& A1,
 
 /**
  * This procedure projects all states g such that {g| exist w. <g, w> in L(A)}.
- *
+ * It returns a set of states.
  * @param A
- * @return a list of states
+ * @return set<fsa_state>
  */
 set<fsa_state> symbolic_cuba::project_Q(const store_automaton& A) {
 	/// A precise but also inefficient way to extract all initial states
@@ -321,11 +317,12 @@ set<fsa_state> symbolic_cuba::project_Q(const store_automaton& A) {
 }
 
 /**
- * This is to compute all states which has a path to the accept state
+ * This is to compute all states which has a path to the accept state.
+ * It returns the set of initial states which can reach the accept state.
  * @param root: the accept state
  * @param adj : adjacency list of automaton
  * @param initials: the set of initial states
- * @return the set of initial states which can reach the accept state
+ * @return set<fsa_state>
  */
 set<fsa_state> symbolic_cuba::BFS_visit(const fsa_state& root,
 		const unordered_map<fsa_state, deque<fsa_state>>& adj,
@@ -364,13 +361,13 @@ set<fsa_state> symbolic_cuba::BFS_visit(const fsa_state& root,
 }
 
 /**
- * This procedure is to composite a symbolic configuration.
- * Please keep in mind that a symbolic configuration represents
- * a set of concrete configurations.
- * @param q_I: an initial state
- * @param automata: a list of automata
- * @param idx
- * @return symbolic configuration
+ * This procedure is to composite a symbolic state.
+ * Please keep in mind that a symbolic state represents a set of concrete states.
+ * @param q_I an initial state
+ * @param Ai  an active automaton
+ * @param automata a vector of automata
+ * @param i thread i is the active one
+ * @return symbolic_state
  */
 symbolic_state symbolic_cuba::compose(const pda_state& q_I,
 		const store_automaton& Ai, const vector<store_automaton>& automata,
@@ -389,9 +386,9 @@ symbolic_state symbolic_cuba::compose(const pda_state& q_I,
 /**
  * This is the rename procedure: it rename the state state of A, if any,
  * to q_I.
- * @param A
- * @param q
- * @return a store automaton
+ * @param A   a store automaton
+ * @param q_I an initial shared state
+ * @return store_automaton
  */
 store_automaton symbolic_cuba::rename(const store_automaton& A,
 		const pda_state& q_I) {
@@ -497,11 +494,12 @@ store_automaton symbolic_cuba::anonymize_by_rename(const store_automaton& A,
 /////////////////////////////////////////////////////////////////////////
 
 /**
- * Determine whether top configuration converges or not
- * @param R
- * @param k
- * @param top_R
- * @return
+ * Determine whether reaching a convergence in k contexts. It returns true
+ * if converges, false otherwise.
+ * @param R_k  the global states reached in kth context.
+ * @param k    current context is k
+ * @param top_R the set of reachable visible states
+ * @return bool
  */
 bool symbolic_cuba::converge(const vector<deque<symbolic_state>>& R,
 		const size_k k, vector<set<visible_state>>& top_R) {
@@ -517,10 +515,9 @@ bool symbolic_cuba::converge(const vector<deque<symbolic_state>>& R,
 }
 
 /**
- * Determine if OS3 converges or not
+ * Determine if OS3 converges or not. Return true if OS3 converges, and
+ * false otherwise.
  * @return bool
- *         true : if OS3 converges
- *         false: otherwise
  */
 bool symbolic_cuba::is_convergent() {
 	for (const auto& s : generators) {
@@ -531,7 +528,7 @@ bool symbolic_cuba::is_convergent() {
 }
 
 /**
- *
+ * Extract the visible states from a list of global states
  * @param R
  * @param topped_R
  * @return

@@ -14,7 +14,7 @@ We generate the CUBA documentation with doxygen. Here is the organization of thi
 
 ### Generate the documentation
 
-- Make sure you have doxygen installed on your machine. Then, run
+- Make sure you have [doxygen](http://www.doxygen.org/) installed on your machine. Then, run
 
 >     make
 
@@ -24,5 +24,5 @@ We generate the CUBA documentation with doxygen. Here is the organization of thi
 
 ### Remark
 
-For now, we only generate the documentation in _html_ format. 
+For now, we only generate the documentation in __html__ format. 
 

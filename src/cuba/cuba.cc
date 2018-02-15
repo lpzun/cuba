@@ -9,11 +9,13 @@
 
 namespace cuba {
 /**
- * constructor
+ * Constructor
+ *   Set up the initial global state, target state, concurrent pushdown
+ *   system and the overapproximation of reachable top configurations.
+ *
  * @param initl initial global state
  * @param final final global state
- * @param filename: input CPDs
- * @param n: the number of threads, for parameterized system only
+ * @param filename input CPDs
  */
 base_cuba::base_cuba(const string& initl, const string& final,
 		const string& filename) :
@@ -22,7 +24,6 @@ base_cuba::base_cuba(const string& initl, const string& final,
 	final_c = parser::parse_input_cfg(final);
 	CPDA = parser::parse_input_cpds(filename);
 
-	/// set up overapproximation of reachable top configurations
 	generator gen(initl, filename);
 	generators = gen.get_generators();
 }

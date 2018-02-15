@@ -9,11 +9,13 @@
 
 namespace cuba {
 /**
- * constructor
+ * Constructor for explicit version of CUBA; calling base_cuba
+ *   Set up the initial global state, target state, concurrent pushdown
+ *   system and the overapproximation of reachable top configurations.
+ *
  * @param initl initial global state
  * @param final final global state
- * @param filename: input CPDs
- * @param n: the number of threads, for parameterized system only
+ * @param filename input CPDs
  */
 explicit_cuba::explicit_cuba(const string& initl, const string& final,
 		const string& filename) :
@@ -29,7 +31,6 @@ explicit_cuba::~explicit_cuba() {
 
 /**
  * The procedure of context-bounded analysis
- * @param n: the number of threads
  * @param k: the number of context switches
  */
 void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
@@ -54,12 +55,13 @@ void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
 
 /**
  * This procedure is to compute the set of reachable thread/global states
- * of a concurrent program P with up to k contexts.
+ * of a concurrent program P with up to k contexts. It returns true if a
+ * bad state is reachable -- if specify; false otherwise. So, true implies
+ * we found a bug, while false implies the program is correct.
+ *
  * @param k_bound: the upper bound of contexts
  * @param c_I    : the initial global states
  * @return bool
- *         true : a bad state is reachable, if specify
- *         false: all bad states are unreachable
  */
 bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		const explicit_state& c_I) {
@@ -138,9 +140,11 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 }
 
 /**
- * step forward, to compute the direct successors of tau
- * @param tau: a global configuration
- * @return a list of successors, aka. global configurations
+ * Step forward, to compute the direct successors of tau. It returns a list
+ * of successors, aka. global states
+ * @param tau a global state
+ * @param is_switch
+ * @return
  */
 antichain explicit_cuba::step(const explicit_state_tid& tau,
 		const bool is_switch) {
@@ -170,11 +174,12 @@ antichain explicit_cuba::step(const explicit_state_tid& tau,
 }
 
 /**
- *
- * @param q
- * @param W
- * @param tid
- * @param successors
+ * Step forward, to compute the direct successors of tau by executing the thread
+ * identified by tid. It returns a list of successors, aka. global states
+ * @param q a shared state
+ * @param W a stack for thread tid
+ * @param tid thread ID
+ * @param successors to store all successors
  */
 void explicit_cuba::step(const pda_state& q, const stack_vec& W, const uint tid,
 		antichain& successors) {
@@ -216,11 +221,13 @@ void explicit_cuba::step(const pda_state& q, const stack_vec& W, const uint tid,
 }
 
 /**
- *
+ * Insert explicit_state_tid c to the set of reachable global states R.
+ * It returns false if explicit_state_tid c has been reached, and true
+ * otherwise.
  * @param R
  * @param k
  * @param c
- * @return
+ * @return bool
  */
 bool explicit_cuba::update_R(vector<vector<antichain>>& R, const size_k k,
 		const explicit_state_tid& c) {
@@ -234,9 +241,12 @@ bool explicit_cuba::update_R(vector<vector<antichain>>& R, const size_k k,
 }
 
 /**
- * Determine whether reaching a convergence in k contexts
- * @param R
- * @return
+ * Determine whether reaching a convergence in k contexts. It returns true
+ * if converges, false otherwise.
+ * @param R_k  the global states reached in kth context.
+ * @param k    current context is k
+ * @param top_R the set of reachable visible states
+ * @return bool
  */
 bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
 		vector<set<visible_state>>& top_R) {
@@ -275,10 +285,9 @@ bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
 }
 
 /**
- * Determine if OS3 converges or not
+ * Determine if OS3 converges or not. Return true if OS3 converges, and
+ * false otherwise.
  * @return bool
- *         true : if OS3 converges
- *         false: otherwise
  */
 bool explicit_cuba::is_convergent() {
 	for (const auto& s : generators) {
@@ -328,7 +337,7 @@ bool explicit_cuba::is_reachable(const explicit_state_tid& tau,
 }
 
 /**
- * set thread state (s,l) as reachable
+ * Mark the visible thread state (s,l) as reachable
  * @param s
  * @param l
  */
@@ -338,9 +347,9 @@ void explicit_cuba::marking(const pda_state& s, const pda_alpha& l) {
 }
 
 /**
- * Obtain the top of configuration
+ * Extract tau's visible state
  * @param tau
- * @return
+ * @return visible_state
  */
 visible_state explicit_cuba::top_mapping(const explicit_state_tid& tau) {
 	vector<pda_alpha> W(tau.get_stacks().size());
@@ -354,7 +363,7 @@ visible_state explicit_cuba::top_mapping(const explicit_state_tid& tau) {
 }
 
 /**
- * Cycle detection
+ * This procedure implements the finite context reachability.
  * @param tid
  * @return bool
  */
@@ -378,12 +387,12 @@ bool explicit_cuba::finite_context_reachability(const size_n tid) {
 }
 
 /**
- *
+ * A subrontine of FCR: call by finite_context_reachability(const size_n tid).
  * @param tid
  * @param c
  * @param visit
  * @param trace
- * @return
+ * @return bool
  */
 bool explicit_cuba::finite_context_reachability(const size_n tid,
 		const thread_visible_state& s, stack<pda_alpha>& W,

@@ -15,8 +15,7 @@ new: clean default
 ##################################
 # Targets Region (do not change) #
 ##################################
-$(BASE): 
-       doxygen $(DOXYFILE)
+$(BASE): doxygen $(DOXYFILE)
 
 ############################
 # Cleaning (do not change) #

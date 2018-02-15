@@ -15,32 +15,32 @@ using namespace ruba;
 
 namespace cuba {
 
-using antichain = deque<explicit_state_tid>;
-
 /////////////////////////////////////////////////////////////////////////
-/// PART 1. The following are the base class for context-unbounded
-/// analysis.
+/// base_cuba: the base class for context-unbounded analysis. Classes
+/// symbolic_cuba and explicit_cuba are inherited from it.
 /////////////////////////////////////////////////////////////////////////
 class base_cuba {
 public:
 	base_cuba(const string& initl, const string& final, const string& filename);
 	virtual ~base_cuba();
 	virtual void context_unbounded_analysis(const size_k k_bound = 0) = 0;
-protected:
-	explicit_state initl_c;
-	explicit_state final_c;
-	concurrent_pushdown_automata CPDA;
-	/// 1.1 <generators>: the overapproximation of the set of reachable
-	///     popped top configurations
-	vector<set<visible_state>> generators;
-	vector<vector<bool>> reachable_T;
 
-private:
+protected:
+	/// explicit initial state
+	explicit_state initl_c;
+	/// explicit target state
+	explicit_state final_c;
+	/// concurrent pushdown system
+	concurrent_pushdown_automata CPDA;
+	/// generators: used for determining the convergence
+	vector<set<visible_state>> generators;
+	/// used for marking the set of reachable thread states, only supporting
+	/// parameterized system for now
+	vector<vector<bool>> reachable_T;
 };
 
 /////////////////////////////////////////////////////////////////////////
-/// PART 2. The following class is the symbolic version for
-/// context-unbounded analysis.
+/// symbolic_cuba: A symbolic version for context-unbounded analysis.
 /////////////////////////////////////////////////////////////////////////
 class symbolic_cuba: public base_cuba {
 public:
@@ -94,14 +94,13 @@ private:
 	vector<vector<pda_alpha>> cross_product(const vector<set<pda_alpha>>& tops);
 };
 
-/////////////////////////////////////////////////////////////////////////
-/// PART 3. The following class is the explicit version for
-/// context-unbounded analysis.
-/////////////////////////////////////////////////////////////////////////
 
-/**
- * The class of explicit CUBA
- */
+/// To store unordering explicit states
+using antichain = deque<explicit_state_tid>;
+
+/////////////////////////////////////////////////////////////////////////
+/// explicit_cuba: An explicit version for context-unbounded analysis.
+/////////////////////////////////////////////////////////////////////////
 class explicit_cuba: public base_cuba {
 public:
 	explicit_cuba(const string& initl, const string& final,
