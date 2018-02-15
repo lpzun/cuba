@@ -16,12 +16,12 @@
 ###########################################################################
 # Override these variables (or add new ones) locally
 APP	         = cuba # the name of application
-SATDIR       = src# /usr/local/Z3#                                             # config your z3 include here
-ILIBS        =#-lz-L $(SATDIR)/lib -lz3#                                  -lm
+SATDIR       = src#
+ILIBS        =#
 IINCLUDE     =-I$(SATDIR)/utils/ -I$(SATDIR)/cuba/ -I$(SATDIR)/ds/ -I $(SATDIR)/wuba/#
 
 #ISTD	     = -std=c++0x                                                 # for old cpp standard
-ISTD	     = -std=c++11
+ISTD	         = -std=c++11
 
 BINDIR       = build
 OBJDIR       = obj

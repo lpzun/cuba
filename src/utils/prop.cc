@@ -1,8 +1,8 @@
 /**
- * @brief prop.cc
+ * prop.cc
  *
  * @date  : Aug 29, 2016
- * @author: lpzun
+ * @author: TODO
  */
 
 #include "prop.hh"

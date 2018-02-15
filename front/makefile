@@ -1,8 +1,8 @@
 ###########################################################################
 # This is the makefile for boolean program parser: BoPP                   #
-# 																		  #
-# @author: 	Peizun Liu													  #
-# @Copyright: 	It belongs to Thomas Wahl's group in CAR Lab, CCIS, NEU	  #
+# 																		#
+# @author: 	<Anonymous> 													#
+# @Copyright: 	It belongs to <Anonymous>'s group in CAR Lab, CCIS, NEU	#
 ###########################################################################
 
 #========================================

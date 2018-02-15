@@ -1,8 +1,8 @@
 /**
  * cuba.cc
  *
- * @date  : Aug 28, 2016
- * @author: Peizun Liu
+ * @date   Aug 28, 2016
+ * @author TODO
  */
 
 #include "cuba.hh"

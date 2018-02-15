@@ -1,9 +1,9 @@
 /******************************************************************************
  * Synopsis	 [CUBA: Context-UnBounded Analysis for Concurrent Programs]
  *
- * Developer [Peizun Liu]
+ * Developer [<Anonymous> Developer]
  *
- * (C) 2017 - 2018 Peizun Liu, Northeastern University, United States
+ * (C) 2017 - 2018 <Anonymous> Developer
  *
  * All rights reserved. Redistribution and use in source and binary forms,
  * with or without modification, are permitted provided that the following
@@ -19,7 +19,7 @@
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgment:
  *
- *    This product includes software developed by Peizun Liu @ Thomas Wahl's
+ *    This product includes software developed by <Anonymous> @ <Anonymous>'s
  *    group, Northeastern University, United States and its contributors.
  *
  * 4. Neither the name of the University nor the names of its contributors

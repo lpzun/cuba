@@ -1,8 +1,8 @@
 /**
- * @brief cuba.hh
+ * cuba.hh
  *
- * @date  : Aug 28, 2016
- * @author: Peizun Liu
+ * @date   Aug 28, 2016
+ * @author TODO
  */
 
 #ifndef CUBA_CUBA_HH_
@@ -15,7 +15,7 @@ using namespace ruba;
 
 namespace cuba {
 
-using antichain = deque<explicit_config_tid>;
+using antichain = deque<explicit_state_tid>;
 
 /////////////////////////////////////////////////////////////////////////
 /// PART 1. The following are the base class for context-unbounded
@@ -114,21 +114,21 @@ private:
 
 	bool k_bounded_reachability(const size_k k_bound,
 			const explicit_state& c_I);
-	antichain step(const explicit_config_tid& tau, const bool is_switch);
+	antichain step(const explicit_state_tid& tau, const bool is_switch);
 	void step(const pda_state& q, const stack_vec& W, const uint tid,
 			antichain& successors);
 	bool update_R(vector<vector<antichain>>& R, const size_k k,
-			const explicit_config_tid& c);
+			const explicit_state_tid& c);
 
 	/// determine convergence, reachability of a target and so on
 	bool converge(const vector<antichain>& R, const size_k k,
 			vector<set<visible_state>>& top_R);
 	bool is_convergent();
-	bool is_reachable(const explicit_config_tid& tau, const size_k k,
+	bool is_reachable(const explicit_state_tid& tau, const size_k k,
 			vector<vector<antichain>>& R);
 	void marking(const pda_state& s, const pda_alpha& l);
 
-	visible_state top_mapping(const explicit_config_tid& tau);
+	visible_state top_mapping(const explicit_state_tid& tau);
 
 	/// determine the finite context reachability
 	bool finite_context_reachability(const size_n tid);

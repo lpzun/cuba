@@ -1,8 +1,8 @@
 /**
  * Write-(Un)bounded Analysis
  *
- * @date  : Jan 1, 2018
- * @author: Peizun Liu
+ * @date   Jan 1, 2018
+ * @author TODO
  */
 
 #ifndef WUBA_WUBA_HH_

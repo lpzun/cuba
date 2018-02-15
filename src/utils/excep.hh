@@ -1,8 +1,8 @@
 /**
- * @name excep.hh
+ * excep.hh
  *
  * @date Jan 12, 2015
- * @author Peizun Liu
+ * @author TODO
  */
 
 #ifndef EXCEP_HH_

@@ -142,7 +142,7 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
  * @param tau: a global configuration
  * @return a list of successors, aka. global configurations
  */
-antichain explicit_cuba::step(const explicit_config_tid& tau,
+antichain explicit_cuba::step(const explicit_state_tid& tau,
 		const bool is_switch) {
 	antichain successors;
 	/// step 1: if context switches already reach to the upper bound
@@ -223,7 +223,7 @@ void explicit_cuba::step(const pda_state& q, const stack_vec& W, const uint tid,
  * @return
  */
 bool explicit_cuba::update_R(vector<vector<antichain>>& R, const size_k k,
-		const explicit_config_tid& c) {
+		const explicit_state_tid& c) {
 	/// step 2.1.2: discard it if tau is already explored
 	if (is_reachable(c, k, R))
 		return false;
@@ -305,7 +305,7 @@ bool explicit_cuba::is_convergent() {
  * @param R
  * @return bool
  */
-bool explicit_cuba::is_reachable(const explicit_config_tid& tau,
+bool explicit_cuba::is_reachable(const explicit_state_tid& tau,
 		const size_k curr_k, vector<vector<antichain>>& R) {
 	/// step 1: retrieve the shared state of tau
 	const auto& q = tau.get_state();
@@ -342,7 +342,7 @@ void explicit_cuba::marking(const pda_state& s, const pda_alpha& l) {
  * @param tau
  * @return
  */
-visible_state explicit_cuba::top_mapping(const explicit_config_tid& tau) {
+visible_state explicit_cuba::top_mapping(const explicit_state_tid& tau) {
 	vector<pda_alpha> W(tau.get_stacks().size());
 	for (size_n i = 0; i < tau.get_stacks().size(); ++i) {
 		if (tau.get_stacks()[i].empty())

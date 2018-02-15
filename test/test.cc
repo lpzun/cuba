@@ -1,6 +1,6 @@
 ///============================================================================
 /// Name        : Context-UnBounded Analysis Concurrent Software
-/// Author      : Peizun Liu
+/// Author      : <Anonymous>
 /// Version     :
 /// Copyright   : Your copyright notice
 /// Description : Hello World in C++, Ansi-style

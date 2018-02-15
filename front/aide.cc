@@ -1,8 +1,8 @@
 /**
- * @brief bopp.cc
+ * bopp.cc
  *
- * @date  : Jan 12, 2016
- * @author: lpzun
+ * @date   Jan 12, 2016
+ * @author TODO
  */
 
 #include "aide.hh"

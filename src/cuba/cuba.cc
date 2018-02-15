@@ -1,8 +1,9 @@
 /**
- * The implementation of base_cuba class
+ * base_cuba
+ *    The implementation of base_cuba class
  *
- * @date  : Jun 13, 2017
- * @author: Peizun Liu
+ * @date   Jun 13, 2017
+ * @author TODO
  */
 #include "cuba.hh"
 

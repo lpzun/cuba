@@ -1,8 +1,8 @@
 /**
  * Explicit write-(un)bounded analysis
  *
- * @date  : Jan 1, 2018
- * @author: Peizun Liu
+ * @date   Jan 1, 2018
+ * @author TODO
  */
 #include "wuba.hh"
 

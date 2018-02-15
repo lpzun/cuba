@@ -2,7 +2,7 @@
  * Symbolic write-unbounded analysis
  *
  * @date  : Jan 2, 2018
- * @author: Peizun Liu
+ * @author: TODO
  */
 
 #include "wuba.hh"

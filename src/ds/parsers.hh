@@ -1,8 +1,8 @@
-/*
+/**
  * parsers.hh
  *
- *  Created on: Jan 1, 2018
- *      Author: lpzun
+ *  @date: Jan 1, 2018
+ *  @author: TODO
  */
 
 #ifndef DS_PARSERS_HH_

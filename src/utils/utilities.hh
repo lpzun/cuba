@@ -1,8 +1,8 @@
 /**
- * @brief utilities.hh
+ * utilities.hh
  *
- * @date  : Aug 29, 2016
- * @author: lpzun
+ * @date   Aug 29, 2016
+ * @author TODO
  */
 
 #ifndef UTILS_UTILITIES_HH_

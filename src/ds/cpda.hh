@@ -1,8 +1,8 @@
 /******************************************************************************
- * @brief cpda.hh
+ * cpda.hh
  *
  * @date  : Aug 27, 2016
- * @author: Peizun Liu
+ * @author: TODO
  *
  * This file defines the data structures of a pushdown system (PDS), and a
  * concurrent pushdown system (CPDS):
@@ -10,7 +10,7 @@
  * of control states Q, the stack alphabet L, and the pushdown program D,
  * respectively.
  *   2. A CPDS over n threads is a tuple (Q, L, D1, ..., Dn) such that, for
- * each i, (Q, L, Di) is a PDS.
+ * each i = 1..n, (Q, L, Di) is a PDS.
  ******************************************************************************/
 
 #ifndef DS_CPDA_HH_
@@ -25,37 +25,23 @@ namespace ruba {
 using size_n = ushort;
 /// the size of context switches
 using size_k = ushort;
-
+/// thread id
 using id_thread_state = uint;
 
 using id_thread = size_n;
 using ctx_bound = size_k;
-
-/////////////////////////////////////////////////////////////////////////
-/// PART 1. global state and concrete configuration definitions are from
-/// here.
-///
-/// global state:
-/// concrete configuration: a concrete configuration of PDA
-///
-/////////////////////////////////////////////////////////////////////////
 
 /**
  * concurrent pushdown automaton
  */
 using concurrent_pushdown_automata = vector<pushdown_automaton>;
 
-/////////////////////////////////////////////////////////////////////////
-/// PART 1. global state and concrete configuration definitions are from
-/// here.
-///
-/// global state:
-/// concrete configuration: a concrete configuration of PDA
-///
-/////////////////////////////////////////////////////////////////////////
 /// the set of stacks in CPDS
 using stack_vec = vector<pda_stack>;
 
+/**
+ * Visible state
+ */
 class visible_state {
 public:
 	visible_state(const pda_state& s, const size_n& n);
@@ -76,78 +62,79 @@ private:
 };
 
 /**
- * overloading operator <<: print a global state
- * @param os
- * @param c
- * @return bool
+ * overloading operator << to print a visible state
+ * @param os an output stream
+ * @param s  a visible state
+ * @return a reference to output stream
  */
-inline ostream& operator<<(ostream& os, const visible_state& g) {
-	os << "(" << g.get_state() << prop::SHARED_LOCAL_DELIMITER;
-	if (g.get_local().size() > 0) {
-		if (g.get_local()[0] == alphabet::EPSILON)
+inline ostream& operator<<(ostream& os, const visible_state& s) {
+	os << "(" << s.get_state() << prop::SHARED_LOCAL_DELIMITER;
+	if (s.get_local().size() > 0) {
+		if (s.get_local()[0] == alphabet::EPSILON)
 			os << alphabet::OPT_EPSILON;
 		else
-			os << g.get_local()[0];
+			os << s.get_local()[0];
 	}
-	for (uint i = 1; i < g.get_local().size(); ++i) {
+	for (uint i = 1; i < s.get_local().size(); ++i) {
 		cout << ",";
-		if (g.get_local()[i] == alphabet::EPSILON)
+		if (s.get_local()[i] == alphabet::EPSILON)
 			os << alphabet::OPT_EPSILON;
 		else
-			os << g.get_local()[i];
+			os << s.get_local()[i];
 	}
 	cout << ")";
 	return os;
 }
 
 /**
- * overloading operator <
- * @param g1
- * @param g2
+ * overloading operator <, return true if s1 < s2 and false otherwise
+ * @param s1 a visible state
+ * @param s2 a visible state
  * @return bool
  */
-inline bool operator<(const visible_state& g1, const visible_state& g2) {
-	if (g1.get_state() == g2.get_state()) {
-		return algs::compare(g1.get_local(), g2.get_local()) == -1;
+inline bool operator<(const visible_state& s1, const visible_state& s2) {
+	if (s1.get_state() == s2.get_state()) {
+		return algs::compare(s1.get_local(), s2.get_local()) == -1;
 	}
-	return g1.get_state() < g2.get_state();
+	return s1.get_state() < s2.get_state();
 }
 
 /**
- * overloading operator >
- * @param g1
- * @param g2
+ * overloading operator >, return true if s1 > s2 and false otherwise
+ * @param s1 a visible state
+ * @param s2 a visible state
  * @return bool
  */
-inline bool operator>(const visible_state& g1, const visible_state& g2) {
-	return g2 < g1;
+inline bool operator>(const visible_state& s1, const visible_state& s2) {
+	return s2 < s1;
 }
 
 /**
- * overloading operator ==
- * @param g1
- * @param g2
+ * overloading operator ==, return true if s1 == s2 and false otherwise
+ * @param s1 a visible state
+ * @param s2 a visible state
  * @return bool
  */
-inline bool operator==(const visible_state& g1, const visible_state& g2) {
-	if (g1.get_state() == g2.get_state()) {
-		return algs::compare(g1.get_local(), g2.get_local()) == 0;
+inline bool operator==(const visible_state& s1, const visible_state& s2) {
+	if (s1.get_state() == s2.get_state()) {
+		return algs::compare(s1.get_local(), s2.get_local()) == 0;
 	}
 	return false;
 }
 
 /**
- * overloading operator !=
- * @param g1
- * @param g2
+ * overloading operator !=, return true if s1 != s2 and false otherwise
+ * @param s1 a visible state
+ * @param s2 a visible state
  * @return bool
  */
-inline bool operator!=(const visible_state& g1, const visible_state& g2) {
-	return !(g1 == g2);
+inline bool operator!=(const visible_state& s1, const visible_state& s2) {
+	return !(s1 == s2);
 }
 
 /**
- * A configuration (s|w1,...,wn) of a CPDS is an element of Qx(L*)^n
+ * Explicit state of a CPDS is of the form (s|w1,...,wn). It is an element
+ * of Qx(L*)^n, where n represents a number of threads
  */
 class explicit_state {
 public:
@@ -174,7 +161,7 @@ private:
 
 /**
  * overloading operator <<: print a configuration of the CPDS
- * @param os
+ * @param os an output
  * @param c
  * @return ostream
  */
@@ -239,19 +226,21 @@ inline bool operator!=(const explicit_state& g1, const explicit_state& g2) {
 }
 
 /**
- *
+ * Explicit state -- with thread id and contexts -- of a CPDS is of the form
+ * (id,k,s|w1,...,wn). It is an element of Q x (L*)^n, where n represents a
+ * number of threads
  */
-class explicit_config_tid: public explicit_state {
+class explicit_state_tid: public explicit_state {
 public:
-	explicit_config_tid(const pda_state& s, const size_n& n);
-	explicit_config_tid(const id_thread& id, const ctx_bound& k,
+	explicit_state_tid(const pda_state& s, const size_n& n);
+	explicit_state_tid(const id_thread& id, const ctx_bound& k,
 			const pda_state& s, const size_n& n);
-	explicit_config_tid(const id_thread& id, const pda_state& s,
+	explicit_state_tid(const id_thread& id, const pda_state& s,
 			const stack_vec& W);
-	explicit_config_tid(const id_thread& id, const ctx_bound& k,
+	explicit_state_tid(const id_thread& id, const ctx_bound& k,
 			const pda_state& s, const stack_vec& W);
-	explicit_config_tid(const explicit_config_tid& c);
-	~explicit_config_tid();
+	explicit_state_tid(const explicit_state_tid& c);
+	~explicit_state_tid();
 
 	ctx_bound get_context_k() const {
 		return k;
@@ -266,17 +255,19 @@ public:
 	}
 
 private:
-	id_thread id; /// the active thread that reach current configuration
-	ctx_bound k; /// the number of context switches used to reach current configuration
+	/// to mark the active thread that reach current state
+	id_thread id;
+	/// the number of contexts used to reach current state
+	ctx_bound k;
 };
 
 /**
  * overloading operator <<: print a configuration of the CPDS
- * @param os
- * @param c
+ * @param os an output stream
+ * @param c  an explicit_state_id
  * @return ostream
  */
-inline ostream& operator<<(ostream& os, const explicit_config_tid& c) {
+inline ostream& operator<<(ostream& os, const explicit_state_tid& c) {
 	if (c.get_thread_id() == c.get_stacks().size())
 		os << "t=" << "* ";
 	else
@@ -291,35 +282,35 @@ inline ostream& operator<<(ostream& os, const explicit_config_tid& c) {
 }
 
 /**
- * overloading the operator <
+ * overloading the operator <, return true if g1 < g2 and false otherwise
  * @param g1
  * @param g2
  * @return bool
  */
-inline bool operator<(const explicit_config_tid& g1,
-		const explicit_config_tid& g2) {
+inline bool operator<(const explicit_state_tid& g1,
+		const explicit_state_tid& g2) {
 	return g1.top() < g2.top();
 }
 
 /**
- * overloading the operator >
+ * overloading the operator >, return true if g1 > g2 and false otherwise
  * @param g1
  * @param g2
  * @return bool
  */
-inline bool operator>(const explicit_config_tid& g1,
-		const explicit_config_tid& g2) {
+inline bool operator>(const explicit_state_tid& g1,
+		const explicit_state_tid& g2) {
 	return g2 < g1;
 }
 
 /**
- * overloading the operator ==
+ * overloading the operator ==, return true if g1 == g2 and false otherwise
  * @param g1
  * @param g2
  * @return bool
  */
-inline bool operator==(const explicit_config_tid& g1,
-		const explicit_config_tid& g2) {
+inline bool operator==(const explicit_state_tid& g1,
+		const explicit_state_tid& g2) {
 	if (g1.get_state() == g2.get_state()) {
 		auto iw1 = g1.get_stacks().cbegin();
 		auto iw2 = g2.get_stacks().cbegin();
@@ -334,23 +325,18 @@ inline bool operator==(const explicit_config_tid& g1,
 }
 
 /**
- * overloading the operator !=
+ * overloading the operator !=, return true if g1 != g2 and false otherwise
  * @param g1
  * @param g2
  * @return bool
  */
-inline bool operator!=(const explicit_config_tid& g1,
-		const explicit_config_tid& g2) {
+inline bool operator!=(const explicit_state_tid& g1,
+		const explicit_state_tid& g2) {
 	return !(g1 == g2);
 }
 
-/////////////////////////////////////////////////////////////////////////
-/// PART 2. The data structure for symbolic configuration
-///
-/////////////////////////////////////////////////////////////////////////
 
 /**
- * @IMPORTANT:
  *
  * Define a pushdown store automaton. A pushdown store automaton is a
  * finite automaton, with the following specific features:
@@ -361,7 +347,7 @@ inline bool operator!=(const explicit_config_tid& g1,
  *    IDs of start states and those of intermediate states, e.g., initial
  *    0..5, accept 6, states 7..9
  *
- *  - interm_states: we also maintain a data structure
+ *  - a static variable interm_s: to generate an intermediate state
  */
 class store_automaton: public finite_automaton {
 public:
@@ -376,7 +362,9 @@ private:
 };
 
 /**
- * Define a symbolic configuration
+ * Symbolic state of a CPDS is of the form (s|A1,...,An), where Ai is a
+ * pushdown store automaton -- a symbolic representation -- of reachable
+ * thread states.
  */
 class symbolic_state {
 public:
@@ -394,10 +382,18 @@ public:
 	}
 
 private:
+	/// a share state or control state
 	pda_state q;
+	/// a vector of pushdown store automaton
 	vector<store_automaton> W;
 };
 
+/**
+ * overloading operator << to print a symbolic state
+ * @param os an output stream
+ * @param c  a symbolic state
+ * @return ostream
+ */
 inline ostream& operator<<(ostream& os, const symbolic_state& c) {
 	os << "<" << c.get_state() << "|";
 	if (c.get_automata().size() > 0) {
@@ -414,10 +410,11 @@ inline ostream& operator<<(ostream& os, const symbolic_state& c) {
 	}
 	return os;
 }
-/**
- * Defining the top of configuration, which is a global state
- */
+/// A finite machine: used for overapproximate reachable visible states.
+/// We definite a finite state machine in the form of adjacency list.
 using finite_machine = map<thread_visible_state, deque<transition<thread_visible_state, thread_visible_state>>>;
+
+/// Concurrent finite machine: a vector of finite state machine
 using concurrent_finite_machine = vector<finite_machine>;
 
 /**

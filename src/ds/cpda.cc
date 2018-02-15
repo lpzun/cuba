@@ -2,7 +2,7 @@
  * state.cc
  *
  * @date  : Aug 27, 2016
- * @author: Peizun Liu
+ * @author: TODO
  */
 
 #include "cpda.hh"
@@ -177,7 +177,7 @@ visible_state explicit_state::top() {
  * @param s
  * @param n
  */
-explicit_config_tid::explicit_config_tid(const pda_state& s, const size_n& n) :
+explicit_state_tid::explicit_state_tid(const pda_state& s, const size_n& n) :
 		explicit_state(s, n), id(0), k(0) {
 
 }
@@ -189,7 +189,7 @@ explicit_config_tid::explicit_config_tid(const pda_state& s, const size_n& n) :
  * @param s
  * @param n
  */
-explicit_config_tid::explicit_config_tid(const id_thread& id,
+explicit_state_tid::explicit_state_tid(const id_thread& id,
 		const ctx_bound& k, const pda_state& s, const size_n& n) :
 		explicit_state(s, n), id(id), k(k) {
 
@@ -201,7 +201,7 @@ explicit_config_tid::explicit_config_tid(const id_thread& id,
  * @param s
  * @param W
  */
-explicit_config_tid::explicit_config_tid(const id_thread& id,
+explicit_state_tid::explicit_state_tid(const id_thread& id,
 		const pda_state& s, const stack_vec& W) :
 		explicit_state(s, W), id(id), k(0) {
 
@@ -214,19 +214,19 @@ explicit_config_tid::explicit_config_tid(const id_thread& id,
  * @param s
  * @param W
  */
-explicit_config_tid::explicit_config_tid(const id_thread& id,
+explicit_state_tid::explicit_state_tid(const id_thread& id,
 		const ctx_bound& k, const pda_state& s, const stack_vec& W) :
 		explicit_state(s, W), id(id), k(k) {
 
 }
 
-explicit_config_tid::explicit_config_tid(const explicit_config_tid& c) :
+explicit_state_tid::explicit_state_tid(const explicit_state_tid& c) :
 		explicit_state(c.get_state(), c.get_stacks()), id(c.get_thread_id()), k(
 				c.get_context_k()) {
 
 }
 
-explicit_config_tid::~explicit_config_tid() {
+explicit_state_tid::~explicit_state_tid() {
 
 }
 /////////////////////////////////////////////////////////////////////////

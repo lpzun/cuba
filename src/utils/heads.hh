@@ -2,7 +2,7 @@
  * heads.hh
  *
  *  @date  : Jun 25, 2015
- *  @author: Peizun Liu
+ *  @author: TODO
  */
 
 #ifndef HEADS_HH_

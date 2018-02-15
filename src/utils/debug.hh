@@ -1,10 +1,10 @@
 /**
- * @brief using it for debugging
+ * Using it for debugging
  *
  * @name debug.hh
  *
  * @date  : Oct 2, 2013
- * @author: Peizun Liu
+ * @author: TODO
  */
 
 #ifndef DEBUG_HH_

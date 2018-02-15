@@ -1,8 +1,8 @@
 /**
- * @brief pds.cc
+ * pds.cc
  *
  * @date  : Sep 15, 2016
- * @author: lpzun
+ * @author: TODO
  */
 
 #include "pda.hh"

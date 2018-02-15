@@ -1,9 +1,8 @@
 /**
- * @brief prop.hh
- * This is a property class
+ * prop.hh This is a property class
  *
- * @date  : Aug 29, 2016
- * @author: lpzun
+ * @date   Aug 29, 2016
+ * @author TODO
  */
 
 #ifndef UTILS_PROP_HH_
