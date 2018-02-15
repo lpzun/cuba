@@ -42,12 +42,10 @@
 
 #include "cmd.hh"
 #include "cuba.hh"
-#include "wuba.hh"
 
 using namespace std;
 using namespace cmd;
 using namespace cuba;
-using namespace wuba;
 
 /**
  *
@@ -109,17 +107,8 @@ int main(const int argc, const char * const * const argv) {
 			cout << "sequential computation is not set up yet! \n";
 		} else {
 			cout << "concurrent mode......\n";
-			if (resource == "W") { /// WBA or WUBA
-				cout << "write-(un)bounded analysis......\n";
-				if (is_explicit) {
-					cout << "explicit exploration......\n";
-					explicit_wuba ewuba(initl, final, filename);
-					ewuba.write_bounded_analysis(k);
-				} else {
-					cout << "symbolic exploration......\n";
-					symbolic_wuba swuba(initl, final, filename);
-					swuba.write_bounded_analysis(k);
-				}
+			if (resource == "W") {
+
 			} else { /// CBA or CUBA
 				cout << "context-(un)bounded analysis...\n";
 				if (is_explicit) {
