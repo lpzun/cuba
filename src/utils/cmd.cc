@@ -341,9 +341,9 @@ void cmd_line::create_argument_list() {
 			(string("the type of resource-unbounded analysis (default = C):\n") /// row 1
 			.append(string(28, ' ')).append(
 					" \'C\': CBA or CUBA (context-(un)bounded analysis)\n") /// row 2
-			.append(string(28, ' ')).append(
-					" \'W\': WBA or WUBA (write-(un)bounded analysis)")).c_str(),
-			""); /// row 3
+//			.append(string(28, ' ')).append(
+//					" \'W\': WBA or WUBA (write-(un)bounded analysis)") /// row 3
+			).c_str(), ""); /// row 3
 	this->add_option(get_opt_index(opt_type::CON), "-k", "--res-bound",
 			(string("resource bound, ").append(
 					"performing resource-unbounded analysis if specify nothing\n") /// row 1
@@ -381,8 +381,8 @@ string cmd_line::create_version_info() {
 	.append("-----------------------------------------------------------\n") ///
 	.append("* *    Interprocedural Context-Unbounded Analysis for   * *\n") ///
 	.append("* *               Concurrent Programs                   * *\n") ///
-	.append("* *          Peizun Liu @ Thomas Wahl's Group           * *\n") ///
-	.append("* *       Northeastern University, United States        * *\n") ///
+	.append("* *          <Anonymous> @ <Anonymous>'s Group          * *\n") ///
+	.append("* *                  <Anonymous>                        * *\n") ///
 //	.append("* *                            Build Date @ ").append(
 //	__DATE__).append(" * *\n")
 	.append("-----------------------------------------------------------\n");

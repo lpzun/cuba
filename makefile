@@ -20,7 +20,7 @@ SATDIR       = src#
 ILIBS        =#
 IINCLUDE     =-I$(SATDIR)/utils/ -I$(SATDIR)/cuba/ -I$(SATDIR)/ds/ -I $(SATDIR)/wuba/#
 
-#ISTD	     = -std=c++0x                                                 # for old cpp standard
+#ISTD	     = -std=c++0x                    # for old cpp standard
 ISTD	         = -std=c++11
 
 BINDIR       = build
