@@ -30,4 +30,4 @@ We generate the CUBA documentation with doxygen. The configuration file is `cuba
 
 ### Remark
 
-For now, we only generate the documentation in __html__ format.   
+For now, we only generate the documentation in __html__ format.

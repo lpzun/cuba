@@ -97,7 +97,6 @@ int main(const int argc, const char * const * const argv) {
 				cmd_line::get_opt_index(opt_type::OTHER), "--cmd-line");
 		prop::OPT_PRINT_ALL = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--all");
-		cout << filename << " " << initl << " " << final << endl;
 		if (mode == "O") {
 			cout << "Overapproximation mode\n";
 			cout << filename << " " << initl << "\n";

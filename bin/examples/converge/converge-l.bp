@@ -2,7 +2,7 @@ bool x;
 
 void foo() {
     if (*)
-        foo();
+      call foo();
     while (x) {
     }
     x = true;
@@ -10,7 +10,7 @@ void foo() {
 
 void bar() {
     if (*)
-        bar();
+      call bar();
     while (!x) {
     }
     x = false;

@@ -57,11 +57,13 @@ void generator::context_insensitive(const visible_state& initl,
 		this->print_approximation(generators);
 
 		/// Print Concurrent FSM
-		for (const auto& fsm : CFSM) {
-			for (const auto& adjlist : fsm)
-				for (const auto& r : adjlist.second)
-					cout << r << "\n";
-		}
+		DBG_STD(
+			for (const auto& fsm : CFSM) {
+				for (const auto& adjlist : fsm)
+					for (const auto& r : adjlist.second)
+						cout << r << "\n";
+			}
+		)
 	}
 }
 
