@@ -5,7 +5,7 @@ void thr1() {
 	if (x) {
 	    lock(x);
 3		x = 0;
-4		thr1();
+4		call thr1();
 5	}
 }
 
