@@ -70,17 +70,16 @@ int main(const int argc, const char * const * const argv) {
 				cmd_line::get_opt_index(opt_type::PROB), "--initial");
 		const string& final = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--target");
-		const string& mode = cmd.arg_value(
-				cmd_line::get_opt_index(opt_type::PROB), "--mode");
+		const string& mode = "C";
 
-		prop::OPT_PRINT_ADJ = cmd.arg_bool(
-				cmd_line::get_opt_index(opt_type::PROB), "--list-input");
+//		prop::OPT_PRINT_ADJ = cmd.arg_bool(
+//				cmd_line::get_opt_index(opt_type::PROB), "--list-input");
 		prop::OPT_PROB_REACHABILITY = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::PROB), "--reachability");
 
 		/// Sequential Mode
-		prop::OPT_SEQ_ATM = cmd.arg_bool(cmd_line::get_opt_index(opt_type::SEQ),
-				"--automaton");
+//		prop::OPT_SEQ_ATM = cmd.arg_bool(cmd_line::get_opt_index(opt_type::SEQ),
+//				"--automaton");
 
 		/// Concurrent Mode
 		const string& resource = cmd.arg_value(

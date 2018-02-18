@@ -257,9 +257,12 @@ void cmd_line::print_usage_info(const string& prog_name, const ushort& indent,
 //			<< widthify("check given program", 0, alignment::LEFTJUST);
 
 	for (size_t i = 0; i < types.size(); i++) {
-		out << types[i] << "\n";
 		auto iopts = cmd_options.find(i);
-		if (iopts != cmd_options.end())
+		auto iswts = cmd_switches.find(i);
+//		if (iopts == cmd_options.end() && iswts == cmd_switches.end())
+//			continue;
+		out << types[i] << "\n";
+		if (iopts != cmd_options.end()) {
 			for (auto iopt = iopts->second.begin(); iopt != iopts->second.end();
 					++iopt) {
 				out << " "
@@ -279,9 +282,8 @@ void cmd_line::print_usage_info(const string& prog_name, const ushort& indent,
 										this->name_width + 2), 0,
 								alignment::LEFTJUST) << "\n";
 			}
-
-		auto iswts = cmd_switches.find(i);
-		if (iswts != cmd_switches.end())
+		}
+		if (iswts != cmd_switches.end()) {
 			for (auto iswt = iswts->second.begin(); iswt != iswts->second.end();
 					++iswt) {
 				out << " "
@@ -292,7 +294,7 @@ void cmd_line::print_usage_info(const string& prog_name, const ushort& indent,
 						<< widthify(iswt->get_meaning(), 0, alignment::LEFTJUST)
 						<< "\n";
 			}
-
+		}
 		out << endl;
 	}
 }
@@ -318,11 +320,11 @@ void cmd_line::create_argument_list() {
 	this->add_option(get_opt_index(opt_type::PROB), "-f", "--input-file",
 			"an input pushdown system", "X");
 	this->add_option(get_opt_index(opt_type::PROB), "-i", "--initial",
-			"an initial global state", "0|0,0");
+			"an initial state", "0|0,0");
 	this->add_option(get_opt_index(opt_type::PROB), "-a", "--target",
-			"a  target  global state", "0|0,0");
-	this->add_switch(get_opt_index(opt_type::PROB), "-l", "--list-input",
-			"show the input pushdown system");
+			"a target state", "0|0,0");
+//	this->add_switch(get_opt_index(opt_type::PROB), "-l", "--list-input",
+//			"show the input pushdown system");
 //	this->add_option(get_opt_index(opt_type::PROB), "-m", "--mode",
 //			(string("input program mode (default = C):\n") //
 //			+ string(28, ' ') + " \'S\': sequential mode\n" //
@@ -330,11 +332,11 @@ void cmd_line::create_argument_list() {
 //					+ string(28, ' ') + " \'O\': overapproximation mode" //
 //			).c_str(), "");
 	this->add_switch(get_opt_index(opt_type::PROB), "-r", "--reachability",
-			"check the reachability of the given target");
+			"check the reachability of the given target state");
 
-	/// sequential mode
-	this->add_switch(get_opt_index(opt_type::SEQ), "-atm", "--automaton",
-			"show the pushdown store automaton");
+//	/// sequential mode
+//	this->add_switch(get_opt_index(opt_type::SEQ), "-atm", "--automaton",
+//			"show the pushdown store automaton");
 
 	/// concurrent mode
 	this->add_option(get_opt_index(opt_type::CON), "-s", "--resource",
