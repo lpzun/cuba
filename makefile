@@ -16,17 +16,20 @@
 ###########################################################################
 # Override these variables (or add new ones) locally
 APP	         = cuba # the name of application
-SATDIR       = src#
+
+############## dirs
+SRCDIR       = src
+DOCDIR       = doc
+BINDIR       = build
+OBJDIR       = obj
+SRCDIRS      = $(shell find $(SRCDIR) -name '*.$(CSUFF)' -exec dirname {} \; | uniq)
+
+############## libs and includes
 ILIBS        =#
-IINCLUDE     =-I$(SATDIR)/utils/ -I$(SATDIR)/cuba/ -I$(SATDIR)/ds/ -I $(SATDIR)/wuba/#
+IINCLUDE     =-I$(SRCDIR)/utils/ -I$(SRCDIR)/cuba/ -I$(SRCDIR)/ds/ -I $(SRCDIR)/wuba/#
 
 #ISTD	     = -std=c++0x                    # for old cpp standard
 ISTD	         = -std=c++11
-
-BINDIR       = build
-OBJDIR       = obj
-SRCDIR       = src
-SRCDIRS      = $(shell find $(SRCDIR) -name '*.$(CSUFF)' -exec dirname {} \; | uniq)
 
 CSUFF        = cc
 #CSUFF       = c
@@ -50,6 +53,8 @@ LIBS         =$(ILIBS)#                                   -lm
 EXPORT       = CCOMP=$(CCOMP) FLAGS="$(FLAGS)"
 
 DISTCLEAN    =#                                   any additional commands to be executed by the distclean command (like cleaning sub directories)
+
+DOXYGEN = doxygen
 
 #####################################
 # 2. Private Region (do not change) #
@@ -77,12 +82,14 @@ LFLAGS   = $(FLAGS) $(LDIRS)
 RERROR   = { echo "error in recursive make robjects";  exit 1; }
 DERROR   = { echo "error in recursive make distclean"; exit 1; }
 
+.PHONY: default edit doc clean distclean
+
 default: $(DEFAULT)
 
 edit:
 	editor $(EDITFILES) &
 
-new: clean default
+new: clean default doc docclean
 
 distnew: distclean default
 
@@ -103,6 +110,9 @@ $(DEFAULT): $(OBJECTS) #robjects
 
 $(OBJECTS): %.o: %.$(CSUFF) $(HEADERS)
 	$(CCOMP) $(CFLAGS) $< -c -o $@
+	
+doc:
+	$(DOXYGEN) $(DOCDIR)/cuba.doxyfile
 
 robjects:
 	$(foreach VAR,$(ROBJVARS),$(MAKE) -C $(dir $(firstword $($(VAR)))) $(EXPORT) $(notdir $($(VAR))) || $(RERROR);)
@@ -110,12 +120,15 @@ robjects:
 ############################
 # Cleaning (do not change) #
 ############################
-clean: 	CLEANOBJS
+clean: CLEANOBJS
 
 distclean: clean CLEANOBJS
 	rm -rf $(BINDIR)
 	$(foreach DIR,$(RDIRS),$(MAKE) -C $(DIR) $(EXPORT) distclean || $(DERROR);)
 	$(DISTCLEAN)
+	
+docclean:
+	rm -rf html/
 
 CLEANOBJS:
 	@$(call clean-obj)
