@@ -47,7 +47,7 @@ concurrent_finite_machine parser::parse_input_cfsm(const string& filename) {
 vector<vector<string>> parser::read_input_cpds(const string& filename,
 		set<pda_state>& states) {
 	if (filename == "X")
-		throw cuba_runtime_error("Please assign the input file!");
+		throw cuba_runtime_error("Please assign a correct input CPDS!");
 
 	/// original input file, possibly with comments
 	ifstream org_in(filename.c_str());

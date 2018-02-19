@@ -36,13 +36,14 @@ explicit_cuba::~explicit_cuba() {
 void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
 	bool cycle = false;
 	size_n tid = 0;
+	/*
 	while (tid < CPDA.size()) {
 		if (finite_context_reachability(tid)) {
 			cycle = true;
 			break;
 		}
 		++tid;
-	}
+	}*/
 	if (cycle) {
 		cout << "Finite-context reachability is unsatisfiable...\n";
 		return;

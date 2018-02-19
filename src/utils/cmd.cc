@@ -257,10 +257,10 @@ void cmd_line::print_usage_info(const string& prog_name, const ushort& indent,
 //			<< widthify("check given program", 0, alignment::LEFTJUST);
 
 	for (size_t i = 0; i < types.size(); i++) {
+		if (i == 2)
+			continue;
 		auto iopts = cmd_options.find(i);
 		auto iswts = cmd_switches.find(i);
-//		if (iopts == cmd_options.end() && iswts == cmd_switches.end())
-//			continue;
 		out << types[i] << "\n";
 		if (iopts != cmd_options.end()) {
 			for (auto iopt = iopts->second.begin(); iopt != iopts->second.end();
@@ -339,20 +339,20 @@ void cmd_line::create_argument_list() {
 //			"show the pushdown store automaton");
 
 	/// concurrent mode
-	this->add_option(get_opt_index(opt_type::CON), "-s", "--resource",
-			(string("the type of resource-unbounded analysis (default = C):\n") /// row 1
-			.append(string(28, ' ')).append(
-					" \'C\': CBA or CUBA (context-(un)bounded analysis)") /// row 2
+//	this->add_option(get_opt_index(opt_type::CON), "-s", "--resource",
+//			(string("the type of resource-unbounded analysis (default = C):\n") /// row 1
+//			.append(string(28, ' ')).append(
+//					" \'C\': CBA or CUBA (context-(un)bounded analysis)") /// row 2
 //			.append(string(28, ' ')).append(
 //					" \'W\': WBA or WUBA (write-(un)bounded analysis)") /// row 3
-			).c_str(), ""); /// row 3
+//			).c_str(), ""); /// row 3
 	this->add_option(get_opt_index(opt_type::CON), "-k", "--res-bound",
 			(string("resource bound, ").append(
-					"performing resource-unbounded analysis if specify nothing\n") /// row 1
-			.append(string(27, ' ')).append(
-					"Per parameter -s, it has different meanings:\n") /// row 2
-			.append(string(29, ' ')).append(
-					"if -s = \'C\', then k represents the context bound") ///
+					"performing resource-unbounded analysis if specify nothing") /// row 1
+//			.append(string(27, ' ')).append(
+//					"Per parameter -s, it has different meanings:\n") /// row 2
+//			.append(string(29, ' ')).append(
+//					"if -s = \'C\', then k represents the context bound") ///
 //			.append("\n") ///
 //			.append(string(29, ' ')).append(
 //					"if -s = \'W\', then k represents the write access bound") ///
@@ -360,11 +360,11 @@ void cmd_line::create_argument_list() {
 	this->add_switch(get_opt_index(opt_type::CON), "-x", "--explicit",
 			"run the explicit exploration assuming finite resource reachability holds");
 
-	/// other options
-	this->add_switch(get_opt_index(opt_type::OTHER), "-cmd", "--cmd-line",
-			"show the command line");
+//	/// other options
+//	this->add_switch(get_opt_index(opt_type::OTHER), "-cmd", "--cmd-line",
+//			"show the command line");
 	this->add_switch(get_opt_index(opt_type::OTHER), "-all", "--all",
-			"show all of above messages");
+			"print output, including states and visible states, in each round");
 	this->add_switch(get_opt_index(opt_type::OTHER), SHORT_VERSION_OPT,
 			LONG_VERSION_OPT, "show version information and exit");
 }

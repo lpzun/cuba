@@ -81,9 +81,7 @@ int main(const int argc, const char * const * const argv) {
 //		prop::OPT_SEQ_ATM = cmd.arg_bool(cmd_line::get_opt_index(opt_type::SEQ),
 //				"--automaton");
 
-		/// Concurrent Mode
-		const string& resource = cmd.arg_value(
-				cmd_line::get_opt_index(opt_type::CON), "--resource");
+/// Concurrent Mode
 		const string& k_bound = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::CON), "--res-bound");
 		size_k k = k_bound.size() == 0 ? 0 : std::stoul(k_bound);
@@ -92,10 +90,9 @@ int main(const int argc, const char * const * const argv) {
 				cmd_line::get_opt_index(opt_type::CON), "--explicit");
 
 		/// Other Options
-		prop::OPT_PRINT_CMD = cmd.arg_bool(
-				cmd_line::get_opt_index(opt_type::OTHER), "--cmd-line");
 		prop::OPT_PRINT_ALL = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--all");
+
 		if (mode == "O") {
 			cout << "Overapproximation mode\n";
 			cout << filename << " " << initl << "\n";
@@ -105,31 +102,27 @@ int main(const int argc, const char * const * const argv) {
 			cout << "sequential computation is not set up yet! \n";
 		} else {
 			cout << "concurrent mode......\n";
-			if (resource == "W") {
-
-			} else { /// CBA or CUBA
-				cout << "context-(un)bounded analysis...\n";
-				if (is_explicit) {
-					cout << "explicit exploration......\n";
-					explicit_cuba ecuba(initl, final, filename);
-					ecuba.context_unbounded_analysis(k);
-				} else {
-					cout << "symbolic exploration......\n";
-					symbolic_cuba scuba(initl, final, filename);
-					scuba.context_unbounded_analysis(k);
-				}
+			cout << "context-(un)bounded analysis...\n";
+			if (is_explicit) {
+				cout << "explicit exploration mode......\n";
+				explicit_cuba ecuba(initl, final, filename);
+				ecuba.context_unbounded_analysis(k);
+			} else {
+				cout << "symbolic exploration mode......\n";
+				symbolic_cuba scuba(initl, final, filename);
+				scuba.context_unbounded_analysis(k);
 			}
 			cout << "======================================" << endl;
 		}
 
 	} catch (const cmd::cmd_runtime_error& e) {
-		e.what();
+		cerr << "ERROR: " << e.what() << endl;
 	} catch (const ruba::cuba_runtime_error& e) {
-		e.what();
+		cerr << "ERROR: " << e.what() << endl;
 	} catch (const ruba::cuba_exception& e) {
-		e.what();
+		cerr << "ERROR: " << e.what() << endl;
 	} catch (const std::exception& e) {
-		e.what();
+		cerr << "ERROR: " << e.what() << endl;
 	}
 	return 0;
 }
