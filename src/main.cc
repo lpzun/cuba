@@ -119,6 +119,7 @@ int main(const int argc, const char * const * const argv) {
 					scuba.context_unbounded_analysis(k);
 				}
 			}
+			cout << "======================================" << endl;
 		}
 
 	} catch (const cmd::cmd_runtime_error& e) {

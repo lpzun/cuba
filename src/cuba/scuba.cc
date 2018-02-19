@@ -43,9 +43,12 @@ void symbolic_cuba::context_unbounded_analysis(const size_k k_bound) {
 
 	/// step 2: perform context-unbounded analysis
 	cout << "\n" << "Initial configuration: " << cfg_I << endl;
-	auto is_reachable = context_bounded_analysis(k_bound, cfg_I);
-	if (prop::OPT_PROB_REACHABILITY && is_reachable) {
-		cout << final_c << " is reachable!" << endl;
+	const auto convergent = context_bounded_analysis(k_bound, cfg_I);
+	if (prop::OPT_PROB_REACHABILITY) {
+		if (reachable)
+			cout << "=> " << final_c << " is reachable!" << endl;
+		else if (convergent)
+			cout << "=> " << final_c << " is unreachable!" << endl;
 	}
 }
 
@@ -58,28 +61,28 @@ void symbolic_cuba::context_unbounded_analysis(const size_k k_bound) {
  */
 bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 		const symbolic_state& c_I) {
-	/// Step 1: declare the data structures used in this procedure:
-	///
-	/// 1.1 <currLevel> = S_{k} \ S_{k-1}: the set of symbolic configurations
-	/// which are reached in the kth context for processing. It's initialized
-	/// as { <q_I|(A1_I, ..., An_I)> }.
+/// Step 1: declare the data structures used in this procedure:
+///
+/// 1.1 <currLevel> = S_{k} \ S_{k-1}: the set of symbolic configurations
+/// which are reached in the kth context for processing. It's initialized
+/// as { <q_I|(A1_I, ..., An_I)> }.
 	deque<symbolic_state> currLevel;
 	currLevel.emplace_back(c_I);
-	/// 1.2 <k>: contexts, k = 0 represents the initial configuration c_I
+/// 1.2 <k>: contexts, k = 0 represents the initial configuration c_I
 	size_k k = 0;
-	/// 1.3 <global_R>: the set of reachable global configurations.
-	/// We obtain this by computing the symbolic configurations.
+/// 1.3 <global_R>: the set of reachable global configurations.
+/// We obtain this by computing the symbolic configurations.
 	vector<deque<symbolic_state>> global_R;
 	global_R.reserve(k_bound + 1);
 	global_R.emplace_back(deque<symbolic_state> { c_I });
-	/// 1.4 <top_R>: the set of reachable tops of configurations.
-	/// We obtain this by computing the symbolic configurations.
+/// 1.4 <top_R>: the set of reachable tops of configurations.
+/// We obtain this by computing the symbolic configurations.
 	vector<set<visible_state>> top_R(thread_visible_state::S);
-	/// Compute top_R_0
+/// Compute top_R_0
 	converge(global_R, k, top_R);
-	/// Step 2: compute all reachable configurations with up to k_bound
-	/// contexts. If k_bound = 0, the procedure will either loops until R/top_R
-	/// collapses or forever.
+/// Step 2: compute all reachable configurations with up to k_bound
+/// contexts. If k_bound = 0, the procedure will either loops until R/top_R
+/// collapses or forever.
 	while (k_bound == 0 || k < k_bound) {
 		/// <nextLevel> = S_{k+1} \ S_{k}: the set of symbolic configurations
 		/// reached in the (k+1)st context. It's initialized as empty.
@@ -102,6 +105,11 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 			}
 		}
 
+		/// if reachability and the target visible state is reachable
+		if (prop::OPT_PROB_REACHABILITY && reachable) {
+			break;
+		}
+
 		/// step 2.2 if all elements in currLevel has been processed, then move
 		/// onto the (k + 1)st context.
 		currLevel.swap(nextLevel), ++k;
@@ -111,11 +119,9 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 		if (converge(global_R, k, top_R)) {
 			cout << "=> sequence top_R collapses at " << (k == 0 ? k : k - 1)
 					<< "\n";
-			cout << "======================================" << endl;
 			return true;
 		}
 	}
-	cout << "======================================" << endl;
 	return false;
 }
 
@@ -128,10 +134,10 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
  */
 store_automaton symbolic_cuba::create_init_automaton(
 		const pushdown_automaton& P, const pda_state q_I, const pda_stack& w) {
-	/// step 1: the set of intermeidate states
+/// step 1: the set of intermeidate states
 	fsa_state_set states;
 
-	/// step 3: set up the set of transitions
+/// step 3: set up the set of transitions
 	fsa_delta delta;
 
 	auto q = q_I;
@@ -147,7 +153,7 @@ store_automaton symbolic_cuba::create_init_automaton(
 		states.emplace(_q);
 		delta[q].emplace(q, _q, alphabet::EPSILON);
 	}
-	/// step 4: set up the accept state
+/// step 4: set up the accept state
 	const auto q_F = *states.rbegin();
 	return store_automaton(states, P.get_alphas(), delta, { q_I }, q_F);
 }
@@ -174,7 +180,7 @@ store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
 	deque<fsa_transition> worklist;
 	fsa_delta epsilon_R; /// used to handle epsilon transitions
 
-	/// initialize the worklist
+/// initialize the worklist
 	for (const auto& trans : A.get_transitions()) {
 		for (const auto& t : trans.second) {
 			worklist.emplace_back(t);
@@ -302,8 +308,8 @@ bool symbolic_cuba::is_equivalent(const store_automaton& A1,
  * @return set<fsa_state>
  */
 set<fsa_state> symbolic_cuba::project_Q(const store_automaton& A) {
-	/// A precise but also inefficient way to extract all initial states
-	/// I comment it away
+/// A precise but also inefficient way to extract all initial states
+/// I comment it away
 	/**
 	 unordered_map<fsa_state, deque<fsa_state>> transpose;
 	 for (const auto& p : A.get_transitions()) {
@@ -329,11 +335,11 @@ set<fsa_state> symbolic_cuba::BFS_visit(const fsa_state& root,
 		const fsa_state_set& initials) {
 	set<fsa_state> Q;
 
-	/// Mark whether a state is already visited or not:
-	/// to avoid a cycle
+/// Mark whether a state is already visited or not:
+/// to avoid a cycle
 	unordered_set<fsa_state> explored;
 
-	/// the worklist
+/// the worklist
 	queue<fsa_state> worklist;
 	worklist.push(root);
 	while (!worklist.empty()) {
@@ -538,6 +544,9 @@ uint symbolic_cuba::top_mapping(const deque<symbolic_state>& R,
 	uint cnt_new_top_cfg = 0;
 	for (const auto& c : R) {
 		for (const auto& top_c : top_mapping(c)) {
+			if (prop::OPT_PROB_REACHABILITY && top_c == final_c) {
+				reachable = true;
+			}
 			auto ret = topped_R[top_c.get_state()].emplace(top_c);
 			if (ret.second) {
 				cout << string(2, ' ') << top_c << "\n";

@@ -322,7 +322,7 @@ void cmd_line::create_argument_list() {
 	this->add_option(get_opt_index(opt_type::PROB), "-i", "--initial",
 			"an initial state", "0|0,0");
 	this->add_option(get_opt_index(opt_type::PROB), "-a", "--target",
-			"a target state", "0|0,0");
+			"a target visible state", "0|0,0");
 //	this->add_switch(get_opt_index(opt_type::PROB), "-l", "--list-input",
 //			"show the input pushdown system");
 //	this->add_option(get_opt_index(opt_type::PROB), "-m", "--mode",

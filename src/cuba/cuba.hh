@@ -26,10 +26,11 @@ public:
 	virtual void context_unbounded_analysis(const size_k k_bound = 0) = 0;
 
 protected:
+	bool reachable;
 	/// explicit initial state
 	explicit_state initl_c;
 	/// explicit target state
-	explicit_state final_c;
+	visible_state final_c;
 	/// concurrent pushdown system
 	concurrent_pushdown_automata CPDA;
 	/// generators: used for determining the convergence
@@ -37,6 +38,9 @@ protected:
 	/// used for marking the set of reachable thread states, only supporting
 	/// parameterized system for now
 	vector<vector<bool>> reachable_T;
+
+private:
+	visible_state top_mapping(const explicit_state& tau);
 };
 
 /////////////////////////////////////////////////////////////////////////
