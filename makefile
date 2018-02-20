@@ -63,7 +63,7 @@ DOXYGEN = doxygen
 ifeq ($(CSUFF),cc)
   HSUFF        = hh
   TSUFF        = CC
-  CCOMP        = clang++
+  CCOMP        = g++
 else
   HSUFF        = h
   TSUFF        = C
