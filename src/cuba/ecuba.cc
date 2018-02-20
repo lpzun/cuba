@@ -2,7 +2,7 @@
  * @brief explore.cc
  *
  * @date  : Sep 28, 2016
- * @author: lpzun
+ * @author: <anonymous>
  */
 
 #include "cuba.hh"
@@ -35,15 +35,16 @@ explicit_cuba::~explicit_cuba() {
  */
 void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
 	bool cycle = false;
+
+
 	size_n tid = 0;
-	/*
 	while (tid < CPDA.size()) {
 		if (finite_context_reachability(tid)) {
 			cycle = true;
 			break;
 		}
 		++tid;
-	}*/
+	}
 	if (cycle) {
 		cout << "Finite-context reachability is unsatisfiable...\n";
 		return;
@@ -122,8 +123,8 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		/// step 2.2: convergence detection
 		/// 2.2.1: OS1 collapses
 		if (nextLevel.size() == 0) {
-			cout << "=> sequence R and T(R) collapses at "
-					<< (k == 0 ? k : k - 1) << "\n";
+			cout << "=> sequence T(R) collapses at " << (k == 0 ? k : k - 1)
+					<< "\n";
 			return true;
 		}
 
