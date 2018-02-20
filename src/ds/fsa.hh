@@ -67,8 +67,8 @@ private:
  */
 inline ostream& operator<<(ostream& os, const fsa_transition& r) {
 	os << "(" << r.get_src() << ",";
-	if (r.get_label() == -1)
-		os << 'e';
+	if (r.get_label() == alphabet::EPSILON)
+		os << alphabet::OPT_EPSILON;
 	else
 		os << r.get_label();
 	os << "," << r.get_dst() << ")";
