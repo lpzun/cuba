@@ -34,21 +34,14 @@ explicit_cuba::~explicit_cuba() {
  * @param k: the number of context switches
  */
 void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
-	bool cycle = false;
-
-
-	size_n tid = 0;
-	while (tid < CPDA.size()) {
+	for (size_n tid = 0; tid < CPDA.size(); ++tid) {
 		if (finite_context_reachability(tid)) {
-			cycle = true;
-			break;
+			cout << "Finite-context reachability is unsatisfiable...\n";
+			cout << "Please use symbolic CUBA...\n";
+			return;
 		}
-		++tid;
 	}
-	if (cycle) {
-		cout << "Finite-context reachability is unsatisfiable...\n";
-		return;
-	}
+
 	const auto convergent = k_bounded_reachability(k_bound, initl_c);
 	if (prop::OPT_PROB_REACHABILITY) {
 		if (reachable)
@@ -379,18 +372,19 @@ visible_state explicit_cuba::top_mapping(const explicit_state_tid& tau) {
  * @return bool
  */
 bool explicit_cuba::finite_context_reachability(const size_n tid) {
+	const auto& PDA = CPDA[tid];
 	map<thread_visible_state, bool> visit;
 	map<thread_visible_state, bool> trace;
-	for (const auto& p : CPDA[tid].get_program()) {
+	for (const auto& p : PDA.get_program()) {
 		visit[p.first] = false;
 		trace[p.first] = false;
 	}
 
-	for (const auto& p : CPDA[tid].get_program()) {
+	for (const auto& p : PDA.get_program()) {
 		stack<pda_alpha> W;
 		W.push(p.first.get_alpha());
 		if (!visit[p.first]
-				&& finite_context_reachability(tid, p.first, W, visit, trace)) {
+				&& finite_context_reachability(PDA, p.first, W, visit, trace)) {
 			return true;
 		}
 	}
@@ -400,23 +394,25 @@ bool explicit_cuba::finite_context_reachability(const size_n tid) {
 /**
  * A subrontine of FCR: call by finite_context_reachability(const size_n tid).
  * @param tid
- * @param c
+ * @param s
+ * @param W
  * @param visit
  * @param trace
- * @return bool
+ * @return
  */
-bool explicit_cuba::finite_context_reachability(const size_n tid,
+bool explicit_cuba::finite_context_reachability(const pushdown_automaton& PDA,
 		const thread_visible_state& s, stack<pda_alpha>& W,
 		map<thread_visible_state, bool>& visit,
 		map<thread_visible_state, bool>& trace) {
 	visit[s] = true;
 	trace[s] = true;
-	auto ifind = CPDA[tid].get_program().find(s);
-	if (ifind != CPDA[tid].get_program().end()) {
+	auto ifind = PDA.get_program().find(s);
+	if (ifind != PDA.get_program().end()) {
 		for (const auto rid : ifind->second) {
-			const auto& r = CPDA[tid].get_actions()[rid];
+			const auto& r = PDA.get_actions()[rid];
 			const auto& dst = r.get_dst();
-			W.pop();
+			if (!W.empty())
+				W.pop();
 			switch (r.get_oper_type()) {
 			case type_stack_operation::PUSH: {
 				W.push(dst.get_stack().get_worklist()[1]);
@@ -424,7 +420,8 @@ bool explicit_cuba::finite_context_reachability(const size_n tid,
 			}
 				break;
 			case type_stack_operation::OVERWRITE: {
-				W.push(dst.get_stack().top());
+				if (!dst.get_stack().empty())
+					W.push(dst.get_stack().top());
 			}
 				break;
 			default: {
@@ -435,7 +432,7 @@ bool explicit_cuba::finite_context_reachability(const size_n tid,
 				continue;
 			thread_visible_state t(dst.get_state(), W.top());
 			if (!visit[t]
-					&& finite_context_reachability(tid, t, W, visit, trace)) {
+					&& finite_context_reachability(PDA, t, W, visit, trace)) {
 				return true;
 			} else if (trace[t]) {
 				if (W.size() > 1)

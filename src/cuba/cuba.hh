@@ -98,7 +98,6 @@ private:
 	vector<vector<pda_alpha>> cross_product(const vector<set<pda_alpha>>& tops);
 };
 
-
 /// To store unordering explicit states
 using antichain = deque<explicit_state_tid>;
 
@@ -135,7 +134,7 @@ private:
 
 	/// determine the finite context reachability
 	bool finite_context_reachability(const size_n tid);
-	bool finite_context_reachability(const size_n tid,
+	bool finite_context_reachability(const pushdown_automaton& PDA,
 			const thread_visible_state& s, stack<pda_alpha>& W,
 			map<thread_visible_state, bool>& visit,
 			map<thread_visible_state, bool>& trace);
