@@ -9,7 +9,7 @@ void adder() {
 5     bool status = increment();
 6     if (status) {
 7         assert(!stopped);
-		  decrement(); // fix the bug
+28		  decrement(); // fix the bug
 }
 8     decrement();
 }
