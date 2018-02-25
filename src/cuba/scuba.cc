@@ -118,8 +118,7 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 		global_R.emplace_back(currLevel); /// k + 1 now
 		/// step 2.4 convergence detection for top_R
 		if (converge(global_R, k, top_R)) {
-			cout << "=> sequence T(R) collapses at " << (k == 0 ? k : k - 1)
-					<< "\n";
+			cout << prop::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1) << "\n";
 			return true;
 		}
 	}
@@ -181,7 +180,7 @@ store_automaton symbolic_cuba::post_kleene(const store_automaton& A,
 	deque<fsa_transition> worklist;
 	fsa_delta epsilon_R; /// used to handle epsilon transitions
 
-/// initialize the worklist
+	/// initialize the worklist
 	for (const auto& trans : A.get_transitions()) {
 		for (const auto& t : trans.second) {
 			worklist.emplace_back(t);
@@ -510,13 +509,13 @@ store_automaton symbolic_cuba::anonymize_by_rename(const store_automaton& A,
  */
 bool symbolic_cuba::converge(const vector<deque<symbolic_state>>& R,
 		const size_k k, vector<set<visible_state>>& top_R) {
-	cout << "======================================\n";
+	cout << prop::MSG_SEPARATOR;
 	cout << "context " << k << "\n";
 	const auto cnt_new_top_cfg = top_mapping(R[k], top_R);
 	if (cnt_new_top_cfg == 0) {
 		if (is_convergent())
 			return true;
-		cout << "=> sequence top_R plateaus at " << k << "\n";
+		cout << prop::MSG_TR_PLATEAU_AT_K << k << "\n";
 	}
 	return false;
 }

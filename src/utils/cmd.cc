@@ -122,6 +122,12 @@ void cmd_line::get_command_line(const int argc,
  * @param args
  */
 void cmd_line::get_command_line(const string& app, const vector<string>& args) {
+
+	cout << app << " ";
+	for (int i = 0; i < args.size(); ++i)
+		cout << args[i] << " ";
+	cout << endl;
+
 	for (auto iarg = args.begin(); iarg != args.end(); ++iarg) {
 		const string& arg = *iarg;
 		if (arg == SHORT_HELP_OPT || arg == LONG_HELP_OPT) {

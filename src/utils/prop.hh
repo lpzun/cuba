@@ -29,6 +29,11 @@ public:
 	static const char SHARED_LOCAL_DELIMITER;
 	static const char STACK_DELIMITER;
 	static const char THREAD_DELIMITER;
+
+	static string MSG_SEPARATOR;
+	static string MSG_TR_PLATEAU_AT_K;
+	static string MSG_TR_COLLAPSE_AT_K;
+	static string MSG_NUM_VISIBLE_STATES;
 };
 
 } /* namespace ruba */

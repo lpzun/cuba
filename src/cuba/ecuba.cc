@@ -117,14 +117,12 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		/// step 2.2: convergence detection
 		/// 2.2.1: OS1 collapses
 		if (nextLevel.size() == 0) {
-			cout << "=> sequence T(R) collapses at " << (k == 0 ? k : k - 1)
-					<< "\n";
+			cout << prop::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1) << "\n";
 			return true;
 		}
 
 		if (converge(global_R[k], k, top_R)) {
-			cout << "=> sequence T(R) collapses at " << (k == 0 ? k : k - 1)
-					<< "\n";
+			cout << prop::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1) << "\n";
 			return true;
 		}
 		/// if reachability and the target visible state is reachable
@@ -250,7 +248,7 @@ bool explicit_cuba::update_R(vector<vector<antichain>>& R, const size_k k,
  */
 bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
 		vector<set<visible_state>>& top_R) {
-	cout << "======================================\n";
+	cout << prop::MSG_SEPARATOR;
 	cout << "context " << k << "\n";
 	/// the number of new reachable top states
 	uint cnt_new_top_cfg = 0;
@@ -279,12 +277,12 @@ bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
 				cout << "\n";
 		}
 	}
-	cout << "the number of new visible states: " << cnt_new_top_cfg << "\n";
+	cout << prop::MSG_NUM_VISIBLE_STATES << cnt_new_top_cfg << "\n";
 	if (cnt_new_top_cfg == 0) {
 		if (is_convergent()) {
 			return true;
 		}
-		cout << "=> sequence T(R) plateaus at " << k << "\n";
+		cout << prop::MSG_TR_PLATEAU_AT_K << k << "\n";
 	}
 	return false;
 }

@@ -29,4 +29,10 @@ const char prop::SHARED_LOCAL_DELIMITER = '|';
 const char prop::STACK_DELIMITER = '.';
 const char prop::THREAD_DELIMITER = ',';
 
-} /* namespace ruba */
+string prop::MSG_SEPARATOR = "======================================\n";
+string prop::MSG_TR_PLATEAU_AT_K = "=> sequence T(R) plateaus at ";
+string prop::MSG_TR_COLLAPSE_AT_K = "=> sequence T(R) collapses at ";
+string prop::MSG_NUM_VISIBLE_STATES = "the number of new visible states: ";
+
+}
+/* namespace ruba */
