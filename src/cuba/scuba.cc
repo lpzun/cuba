@@ -10,11 +10,11 @@
 namespace cuba {
 /**
  * Constructor for symbolic version of CUBA; calling base_cuba
- *   Set up the initial global state, target state, concurrent pushdown
- *   system and the overapproximation of reachable top configurations.
+ * Set up the initial global state, target state, concurrent pushdown
+ * system and the overapproximation of reachable top configurations.
  * @param initl: initial global state
  * @param final: final global state
- * @param filename: input CPDs
+ * @param filename: the input CPDS
  */
 symbolic_cuba::symbolic_cuba(const string& initl, const string& final,
 		const string& filename) :
