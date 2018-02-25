@@ -20,12 +20,17 @@ namespace cuba {
 base_cuba::base_cuba(const string& initl, const string& final,
 		const string& filename) :
 		reachable(false), initl_c(0, 1), final_c(0, 1), CPDA(), generators(), reachable_T() {
-	initl_c = parser::parse_input_cfg(initl);
-	final_c = top_mapping(parser::parse_input_cfg(final));
-
 	CPDA = parser::parse_input_cpds(filename);
 
-	generator gen(initl, filename);
+	string initl_s(initl);
+	if (initl_s.find("...") != std::string::npos)
+		initl_s = parser::create_default_states_in_str(CPDA.size());
+
+	initl_c = parser::parse_input_cfg(initl_s);
+	if (prop::OPT_PROB_REACHABILITY)
+		final_c = top_mapping(parser::parse_input_cfg(final));
+
+	generator gen(initl_s, filename);
 	generators = gen.get_generators();
 }
 

@@ -74,14 +74,12 @@ int main(const int argc, const char * const * const argv) {
 
 //		prop::OPT_PRINT_ADJ = cmd.arg_bool(
 //				cmd_line::get_opt_index(opt_type::PROB), "--list-input");
-		prop::OPT_PROB_REACHABILITY = cmd.arg_bool(
-				cmd_line::get_opt_index(opt_type::PROB), "--reachability");
+		if (!final.empty() && final.find("...") == std::string::npos)
+			prop::OPT_PROB_REACHABILITY = true;
 
-		/// Sequential Mode
-//		prop::OPT_SEQ_ATM = cmd.arg_bool(cmd_line::get_opt_index(opt_type::SEQ),
-//				"--automaton");
+		cout << final << "=========================\n";
 
-/// Concurrent Mode
+		/// Concurrent Mode
 		const string& k_bound = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::CON), "--res-bound");
 		size_k k = k_bound.size() == 0 ? 0 : std::stoul(k_bound);

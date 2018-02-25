@@ -1,19 +1,19 @@
 bool x = 1;
 
 void thr1() {
-2   unlock(x);
-	if (x) {
-	    lock(x);
-3		x = 0;
-4		call thr1();
-5	}
+   unlock(x);
+   if (x) {
+   	lock(x);
+	x = 0;
+	call thr1();
+	}
 }
 
 void thr2() {
-    lock(x);
-6   x = 1;
-    unlock(x);
-7	goto 6;
+	lock(x);
+	x = 1;
+	unlock(x);
+	goto 6;
 }
 
 void main() {

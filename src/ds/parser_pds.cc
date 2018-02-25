@@ -369,4 +369,18 @@ deque<string> parser::split(const string &s, const char delim) {
 	return elems;
 }
 
+/**
+ * Create a default state in string
+ * @param n
+ * @return string
+ */
+string parser::create_default_states_in_str(const size_n n) {
+	string s = "0|0";
+	for (size_n i = 1; i < n; ++i) {
+		s.push_back(',');
+		s.push_back('0');
+	}
+	return s;
+}
+
 } /* namespace ruba */
