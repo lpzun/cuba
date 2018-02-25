@@ -66,18 +66,16 @@ int main(const int argc, const char * const * const argv) {
 		/// Problem Instances
 		const string& filename = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--input-file");
+		if (filename == "X")
+			throw cuba_runtime_error("Please assign an input CPDS!");
+
 		const string& initl = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--initial");
+		if (initl == "X")
+			throw cuba_runtime_error("Please assign an initial state!");
+
 		const string& final = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--target");
-		const string& mode = "C";
-
-//		prop::OPT_PRINT_ADJ = cmd.arg_bool(
-//				cmd_line::get_opt_index(opt_type::PROB), "--list-input");
-		if (!final.empty() && final.find("...") == std::string::npos)
-			prop::OPT_PROB_REACHABILITY = true;
-
-		cout << final << "=========================\n";
 
 		/// Concurrent Mode
 		const string& k_bound = cmd.arg_value(
@@ -91,27 +89,14 @@ int main(const int argc, const char * const * const argv) {
 		prop::OPT_PRINT_ALL = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--all");
 
-		if (mode == "O") {
-			cout << "Overapproximation mode\n";
-			cout << filename << " " << initl << "\n";
-		} else if (mode == "S") {
-			cout << "sequential mode\n";
-			cout << filename << " " << initl << " " << final << "\n";
-			cout << "sequential computation is not set up yet! \n";
+		if (is_explicit) {
+			explicit_cuba ecuba(initl, final, filename);
+			ecuba.context_unbounded_analysis(k);
 		} else {
-			cout << "concurrent mode......\n";
-			cout << "context-(un)bounded analysis...\n";
-			if (is_explicit) {
-				cout << "explicit exploration mode......\n";
-				explicit_cuba ecuba(initl, final, filename);
-				ecuba.context_unbounded_analysis(k);
-			} else {
-				cout << "symbolic exploration mode......\n";
-				symbolic_cuba scuba(initl, final, filename);
-				scuba.context_unbounded_analysis(k);
-			}
-			cout << "======================================" << endl;
+			symbolic_cuba scuba(initl, final, filename);
+			scuba.context_unbounded_analysis(k);
 		}
+		cout << "======================================" << endl;
 
 	} catch (const cmd::cmd_runtime_error& e) {
 		cerr << "ERROR: " << e.what() << endl;

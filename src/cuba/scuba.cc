@@ -19,6 +19,7 @@ namespace cuba {
 symbolic_cuba::symbolic_cuba(const string& initl, const string& final,
 		const string& filename) :
 		base_cuba(initl, final, filename) {
+	cout << "symbolic exploration mode......\n";
 }
 
 /**

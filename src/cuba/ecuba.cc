@@ -20,6 +20,7 @@ namespace cuba {
 explicit_cuba::explicit_cuba(const string& initl, const string& final,
 		const string& filename) :
 		base_cuba(initl, final, filename) {
+	cout << "explicit exploration mode......\n";
 }
 
 /**

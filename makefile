@@ -20,7 +20,7 @@ APP	         = cuba # the name of application
 ############## dirs
 SRCDIR       = src
 DOCDIR       = doc
-BINDIR       = build
+BINDIR       = bin
 OBJDIR       = obj
 SRCDIRS      = $(shell find $(SRCDIR) -name '*.$(CSUFF)' -exec dirname {} \; | uniq)
 
@@ -123,7 +123,7 @@ robjects:
 clean: CLEANOBJS
 
 distclean: clean CLEANOBJS
-	rm -rf $(BINDIR)
+	rm -r $(BINDIR)/$(APP)
 	$(foreach DIR,$(RDIRS),$(MAKE) -C $(DIR) $(EXPORT) distclean || $(DERROR);)
 	$(DISTCLEAN)
 	

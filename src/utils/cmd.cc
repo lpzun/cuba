@@ -118,15 +118,14 @@ void cmd_line::get_command_line(const int argc,
 
 /**
  * @brief Parsing command line
- * @param prog
+ * @param app
  * @param args
  */
-void cmd_line::get_command_line(const string& prog,
-		const vector<string>& args) {
-	for (auto iarg = args.begin(), iend = args.end(); iarg != iend; ++iarg) {
+void cmd_line::get_command_line(const string& app, const vector<string>& args) {
+	for (auto iarg = args.begin(); iarg != args.end(); ++iarg) {
 		const string& arg = *iarg;
 		if (arg == SHORT_HELP_OPT || arg == LONG_HELP_OPT) {
-			this->print_usage_info(prog);
+			this->print_usage_info(app);
 			throw help();
 		} else if (arg == SHORT_VERSION_OPT || arg == LONG_VERSION_OPT) {
 			cout << v_info << endl;
@@ -140,7 +139,9 @@ void cmd_line::get_command_line(const string& prog,
 							iopt != iopts->second.end() && flag; ++iopt) {
 						if (arg == iopt->get_short_name()
 								|| arg == iopt->get_long_name()) {
-							++iarg;   /// the next string is the value for arg
+							if (++iarg == args.end()) /// the next string is the value for arg
+								throw cmd_runtime_error(
+										"Please assign the args to " + arg);
 							iopt->set_value(*iarg);
 							if (flag)
 								flag = false;
@@ -251,10 +252,6 @@ void cmd_line::print_usage_info(const string& prog_name, const ushort& indent,
 					prog_name + " " + SHORT_HELP_OPT + " [" + LONG_HELP_OPT
 							+ "]", this->name_width, alignment::LEFTJUST)
 			<< widthify("show help message", 0, alignment::LEFTJUST);
-//	out << " "
-//			<< widthify(prog_name + " -f source.pds ", this->name_width,
-//					alignment::LEFTJUST)
-//			<< widthify("check given program", 0, alignment::LEFTJUST);
 
 	for (size_t i = 0; i < types.size(); i++) {
 		if (i == 2)
@@ -270,17 +267,14 @@ void cmd_line::print_usage_info(const string& prog_name, const ushort& indent,
 								iopt->get_short_name() + " ["
 										+ iopt->get_long_name() + "] arg",
 								this->name_width, alignment::LEFTJUST)
-						<< widthify(
-								widthify(
-										iopt->get_meaning()
-												+ (iopt->get_value().size()
-														> 0 ?
-														(" (default = "
-																+ iopt->get_value()
-																+ ")") :
-														""),
-										this->name_width + 2), 0,
-								alignment::LEFTJUST) << "\n";
+						/*<< widthify(
+						 iopt->get_meaning()
+						 + (iopt->get_value().size() > 0 ?
+						 (" (default = "
+						 + iopt->get_value()
+						 + ")") :
+						 ""), 0, alignment::LEFTJUST)*/
+						<< "\n";
 			}
 		}
 		if (iswts != cmd_switches.end()) {
@@ -320,49 +314,20 @@ void cmd_line::create_argument_list() {
 	this->add_option(get_opt_index(opt_type::PROB), "-f", "--input-file",
 			"an input pushdown system", "X");
 	this->add_option(get_opt_index(opt_type::PROB), "-i", "--initial",
-			"an initial state", "0|0,...,0");
+			"an initial state", "X");
 	this->add_option(get_opt_index(opt_type::PROB), "-a", "--target",
-			"a target visible state", "0|0,...,0");
-//	this->add_switch(get_opt_index(opt_type::PROB), "-l", "--list-input",
-//			"show the input pushdown system");
-//	this->add_option(get_opt_index(opt_type::PROB), "-m", "--mode",
-//			(string("input program mode (default = C):\n") //
-//			+ string(28, ' ') + " \'S\': sequential mode\n" //
-//					+ string(28, ' ') + " \'C\': concurrent mode\n" //
-//					+ string(28, ' ') + " \'O\': overapproximation mode" //
-//			).c_str(), "");
-	this->add_switch(get_opt_index(opt_type::PROB), "-r", "--reachability",
-			"check the reachability of the given target state");
-
-//	/// sequential mode
-//	this->add_switch(get_opt_index(opt_type::SEQ), "-atm", "--automaton",
-//			"show the pushdown store automaton");
+			"a target visible state, compute full reachability if specify nothing",
+			"X");
 
 	/// concurrent mode
-//	this->add_option(get_opt_index(opt_type::CON), "-s", "--resource",
-//			(string("the type of resource-unbounded analysis (default = C):\n") /// row 1
-//			.append(string(28, ' ')).append(
-//					" \'C\': CBA or CUBA (context-(un)bounded analysis)") /// row 2
-//			.append(string(28, ' ')).append(
-//					" \'W\': WBA or WUBA (write-(un)bounded analysis)") /// row 3
-//			).c_str(), ""); /// row 3
 	this->add_option(get_opt_index(opt_type::CON), "-k", "--res-bound",
 			(string("resource bound, ").append(
 					"performing resource-unbounded analysis if specify nothing") /// row 1
-//			.append(string(27, ' ')).append(
-//					"Per parameter -s, it has different meanings:\n") /// row 2
-//			.append(string(29, ' ')).append(
-//					"if -s = \'C\', then k represents the context bound") ///
-//			.append("\n") ///
-//			.append(string(29, ' ')).append(
-//					"if -s = \'W\', then k represents the write access bound") ///
 			), ""); /// row 4
 	this->add_switch(get_opt_index(opt_type::CON), "-x", "--explicit",
 			"run the explicit exploration assuming finite resource reachability holds");
 
-//	/// other options
-//	this->add_switch(get_opt_index(opt_type::OTHER), "-cmd", "--cmd-line",
-//			"show the command line");
+	/// other options
 	this->add_switch(get_opt_index(opt_type::OTHER), "-all", "--all",
 			"print output, including states and visible states, in each round");
 	this->add_switch(get_opt_index(opt_type::OTHER), SHORT_VERSION_OPT,
