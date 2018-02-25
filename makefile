@@ -131,10 +131,11 @@ docclean:
 	rm -rf html/
 
 CLEANOBJS:
-	@$(call clean-obj)
+	@$(call cleanObj)
 
 # description: for cleaning all objects
-define clean-obj
+define cleanObj
+	echo "delete object files..."
 	find . -name '*.o' -type f -delete
-	find . -name '*.~' -type f -delete
+	# find . -name '*.~' -type f -delete
 endef

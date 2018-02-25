@@ -273,13 +273,7 @@ void cmd_line::print_usage_info(const string& prog_name, const ushort& indent,
 								iopt->get_short_name() + " ["
 										+ iopt->get_long_name() + "] arg",
 								this->name_width, alignment::LEFTJUST)
-						/*<< widthify(
-						 iopt->get_meaning()
-						 + (iopt->get_value().size() > 0 ?
-						 (" (default = "
-						 + iopt->get_value()
-						 + ")") :
-						 ""), 0, alignment::LEFTJUST)*/
+						<< widthify(iopt->get_meaning(), 0, alignment::LEFTJUST)
 						<< "\n";
 			}
 		}
