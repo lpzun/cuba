@@ -1,17 +1,17 @@
-bool x = 1;
+bool x := 1;
 
 void thr1() {
    unlock(x);
    if (x) {
-   	lock(x);
-	x = 0;
+    lock(x);
+	x := 0;
 	call thr1();
 	}
 }
 
 void thr2() {
 	lock(x);
-	x = 1;
+	x := 1;
 	unlock(x);
 	goto 6;
 }
