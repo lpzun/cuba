@@ -1,5 +1,5 @@
 /**
- * @brief PDS.hh
+ * Pushdown automaton
  *
  * @date  : Sep 15, 2016
  * @author: TODO

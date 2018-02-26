@@ -1,5 +1,5 @@
 /**
- * @brief fsa.hh
+ * Finite-state automaton
  *
  * @date  : Sep 15, 2016
  * @author: TODO

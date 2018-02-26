@@ -1,5 +1,5 @@
 /**
- * Using it for debugging
+ * For debugging
  *
  * @name debug.hh
  *

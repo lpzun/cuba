@@ -19,7 +19,6 @@ APP	         = cuba # the name of application
 
 ############## dirs
 SRCDIR       = src
-DOCDIR       = doc
 BINDIR       = bin
 OBJDIR       = obj
 SRCDIRS      = $(shell find $(SRCDIR) -name '*.$(CSUFF)' -exec dirname {} \; | uniq)
@@ -89,7 +88,7 @@ default: $(DEFAULT)
 edit:
 	editor $(EDITFILES) &
 
-new: clean default doc docclean
+new: clean default
 
 distnew: distclean default
 
@@ -110,9 +109,6 @@ $(DEFAULT): $(OBJECTS) #robjects
 
 $(OBJECTS): %.o: %.$(CSUFF) $(HEADERS)
 	$(CCOMP) $(CFLAGS) $< -c -o $@
-	
-doc:
-	$(DOXYGEN) $(DOCDIR)/cuba.doxyfile
 
 robjects:
 	$(foreach VAR,$(ROBJVARS),$(MAKE) -C $(dir $(firstword $($(VAR)))) $(EXPORT) $(notdir $($(VAR))) || $(RERROR);)
@@ -126,9 +122,6 @@ distclean: clean CLEANOBJS
 	rm -r $(BINDIR)/$(APP)
 	$(foreach DIR,$(RDIRS),$(MAKE) -C $(DIR) $(EXPORT) distclean || $(DERROR);)
 	$(DISTCLEAN)
-	
-docclean:
-	rm -rf html/
 
 CLEANOBJS:
 	@$(call cleanObj)

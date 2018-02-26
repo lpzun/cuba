@@ -1,5 +1,5 @@
 /**
- * @brief pds_parser.cc
+ * PDS parser
  *
  * @date  : Aug 30, 2016
  * @author: TODO
