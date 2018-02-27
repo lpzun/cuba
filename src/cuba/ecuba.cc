@@ -38,7 +38,7 @@ void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
 	for (size_n tid = 0; tid < CPDA.size(); ++tid) {
 		if (finite_context_reachability(tid)) {
 			cout << "Finite-context reachability is unsatisfiable...\n";
-			cout << "Please use symbolic CUBA...\n";
+			cout << "WARNING: Please use symbolic CUBA...\n";
 			return;
 		}
 	}
