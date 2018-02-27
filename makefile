@@ -119,7 +119,7 @@ robjects:
 clean: CLEANOBJS
 
 distclean: clean CLEANOBJS
-	rm -r $(BINDIR)/$(APP)
+	rm -f $(BINDIR)/$(APP)
 	$(foreach DIR,$(RDIRS),$(MAKE) -C $(DIR) $(EXPORT) distclean || $(DERROR);)
 	$(DISTCLEAN)
 

@@ -321,8 +321,8 @@ void cmd_line::create_argument_list() {
 
 	/// concurrent mode
 	this->add_option(get_opt_index(opt_type::CON), "-k", "--res-bound",
-			(string("resource bound, ").append(
-					"performing resource-unbounded analysis if unspecified") /// row 1
+			(string("context bound, ").append(
+					"performing context-unbounded analysis if unspecified") /// row 1
 			), ""); /// row 4
 	this->add_switch(get_opt_index(opt_type::CON), "-x", "--explicit",
 			"run the explicit exploration assuming finite context reachability holds");
