@@ -119,12 +119,12 @@ void cmd_line::get_command_line(const int argc,
 /**
  * @brief Parsing command line
  * @param app
- * @param args
+ * @param arg
  */
 void cmd_line::get_command_line(const string& app, const vector<string>& args) {
 
 	cout << app << " ";
-	for (int i = 0; i < args.size(); ++i)
+	for (size_t i = 0; i < args.size(); ++i)
 		cout << args[i] << " ";
 	cout << endl;
 
@@ -147,7 +147,7 @@ void cmd_line::get_command_line(const string& app, const vector<string>& args) {
 								|| arg == iopt->get_long_name()) {
 							if (++iarg == args.end()) /// the next string is the value for arg
 								throw cmd_runtime_error(
-										"Please assign the args to " + arg);
+										"Please specify the args to " + arg);
 							iopt->set_value(*iarg);
 							if (flag)
 								flag = false;
@@ -316,20 +316,20 @@ void cmd_line::create_argument_list() {
 	this->add_option(get_opt_index(opt_type::PROB), "-i", "--initial",
 			"an initial state", "X");
 	this->add_option(get_opt_index(opt_type::PROB), "-a", "--target",
-			"a target visible state, compute full reachability if specify nothing",
+			"a target visible state, compute full reachability if unspecified",
 			"X");
 
 	/// concurrent mode
 	this->add_option(get_opt_index(opt_type::CON), "-k", "--res-bound",
 			(string("resource bound, ").append(
-					"performing resource-unbounded analysis if specify nothing") /// row 1
+					"performing resource-unbounded analysis if unspecified") /// row 1
 			), ""); /// row 4
 	this->add_switch(get_opt_index(opt_type::CON), "-x", "--explicit",
-			"run the explicit exploration assuming finite resource reachability holds");
+			"run the explicit exploration assuming finite context reachability holds");
 
 	/// other options
-	this->add_switch(get_opt_index(opt_type::OTHER), "-all", "--all",
-			"print output, including states and visible states, in each round");
+	this->add_switch(get_opt_index(opt_type::OTHER), "-p", "--print-all",
+			"print all output, including states and visible states, in each round");
 	this->add_switch(get_opt_index(opt_type::OTHER), SHORT_VERSION_OPT,
 			LONG_VERSION_OPT, "show version information and exit");
 }

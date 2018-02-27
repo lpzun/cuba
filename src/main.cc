@@ -67,12 +67,12 @@ int main(const int argc, const char * const * const argv) {
 		const string& filename = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--input-file");
 		if (filename == "X")
-			throw cuba_runtime_error("Please assign an input CPDS!");
+			throw cuba_runtime_error("Please specify an input CPDS!");
 
 		const string& initl = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--initial");
 		if (initl == "X")
-			throw cuba_runtime_error("Please assign an initial state!");
+			throw cuba_runtime_error("Please specify an initial state!");
 
 		const string& final = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--target");
@@ -87,7 +87,7 @@ int main(const int argc, const char * const * const argv) {
 
 		/// Other Options
 		prop::OPT_PRINT_ALL = cmd.arg_bool(
-				cmd_line::get_opt_index(opt_type::OTHER), "--all");
+				cmd_line::get_opt_index(opt_type::OTHER), "--print-all");
 
 		if (is_explicit) {
 			explicit_cuba ecuba(initl, final, filename);
@@ -96,7 +96,7 @@ int main(const int argc, const char * const * const argv) {
 			symbolic_cuba scuba(initl, final, filename);
 			scuba.context_unbounded_analysis(k);
 		}
-		cout << "======================================" << endl;
+		cout << prop::MSG_SEPARATOR;
 
 	} catch (const cmd::cmd_runtime_error& e) {
 		cerr << "ERROR: " << e.what() << endl;
