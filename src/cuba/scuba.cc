@@ -43,7 +43,7 @@ void symbolic_cuba::context_unbounded_analysis(const size_k k_bound) {
 	symbolic_state cfg_I(initl_c.get_state(), W);
 
 	/// step 2: perform context-unbounded analysis
-	cout << "\n" << "Initial configuration: " << cfg_I << endl;
+	cout << "Initial symbolic state: " << cfg_I << endl;
 	const auto convergent = context_bounded_analysis(k_bound, cfg_I);
 	if (prop::OPT_PROB_REACHABILITY) {
 		if (reachable)
