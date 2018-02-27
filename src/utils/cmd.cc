@@ -339,7 +339,7 @@ void cmd_line::create_argument_list() {
  */
 string cmd_line::create_version_info() {
 	string info = ""; ///
-	info ///.append("-----------------------------------------------------------\n") ///
+	info ///
 	.append("* *       _/_/_/    _/    _/    _/_/_/_/      _/_/_/    * *\n") ///
 	.append("* *     _/         _/    _/    _/     _/    _/    _/    * *\n") ///
 	.append("* *    _/         _/    _/    _/_/_/_/     _/_/_/_/     * *\n") ///
@@ -351,8 +351,6 @@ string cmd_line::create_version_info() {
 	.append("* *               Concurrent Programs                   * *\n") ///
 	.append("* *          <Anonymous> @ <Anonymous>'s Group          * *\n") ///
 	.append("* *                  <Anonymous>                        * *\n") ///
-//	.append("* *                            Build Date @ ").append(
-//	__DATE__).append(" * *\n")
 	.append("-----------------------------------------------------------\n");
 	return info;
 }
