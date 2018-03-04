@@ -20,7 +20,7 @@ namespace cuba {
 explicit_cuba::explicit_cuba(const string& initl, const string& final,
 		const string& filename) :
 		base_cuba(initl, final, filename) {
-	cout << "explicit exploration mode......\n";
+	cout << logger::MSG_EXP_EXPLORATION;
 }
 
 /**
@@ -38,7 +38,7 @@ void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
 	for (size_n tid = 0; tid < CPDA.size(); ++tid) {
 		if (finite_context_reachability(tid)) {
 			cout << "Finite-context reachability is unsatisfiable...\n";
-			cout << "WARNING: Please use symbolic CUBA...\n";
+			cout << logger::MSG_WARNING << "Please use symbolic CUBA...\n";
 			return;
 		}
 	}
@@ -117,12 +117,14 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		/// step 2.2: convergence detection
 		/// 2.2.1: OS1 collapses
 		if (nextLevel.size() == 0) {
-			cout << logger::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1) << "\n";
+			cout << logger::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1)
+					<< "\n";
 			return true;
 		}
 
 		if (converge(global_R[k], k, top_R)) {
-			cout << logger::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1) << "\n";
+			cout << logger::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1)
+					<< "\n";
 			return true;
 		}
 		/// if reachability and the target visible state is reachable

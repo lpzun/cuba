@@ -124,18 +124,14 @@ int main(const int argc, const char * const * const argv) {
 					explicit_wuba ewuba(initl, final, filename);
 					ewuba.write_bounded_analysis(k);
 				} else {
-					cout << "symbolic exploration......\n";
 					symbolic_wuba swuba(initl, final, filename);
 					swuba.write_bounded_analysis(k);
 				}
 			} else { /// CBA or CUBA
-				cout << "context-(un)bounded analysis...\n";
 				if (is_explicit) {
-					cout << "explicit exploration......\n";
 					explicit_cuba ecuba(initl, final, filename);
 					ecuba.context_unbounded_analysis(k);
 				} else {
-					cout << "symbolic exploration......\n";
 					symbolic_cuba scuba(initl, final, filename);
 					scuba.context_unbounded_analysis(k);
 				}

@@ -49,6 +49,10 @@ public:
 
 	static string MSG_ERROR;
 	static string MSG_WARNING;
+
+	static string MSG_EXP_EXPLORATION;
+	static string MSG_SYM_EXPLORATION;
+
 	static string MSG_SEPARATOR;
 	static string MSG_TR_PLATEAU_AT_K;
 	static string MSG_TR_COLLAPSE_AT_K;

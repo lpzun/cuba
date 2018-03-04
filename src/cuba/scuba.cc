@@ -19,7 +19,7 @@ namespace cuba {
 symbolic_cuba::symbolic_cuba(const string& initl, const string& final,
 		const string& filename) :
 		base_cuba(initl, final, filename) {
-	cout << "symbolic exploration mode......\n";
+	cout << logger::MSG_SYM_EXPLORATION;
 }
 
 /**
@@ -118,7 +118,8 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 		global_R.emplace_back(currLevel); /// k + 1 now
 		/// step 2.4 convergence detection for top_R
 		if (converge(global_R, k, top_R)) {
-			cout << logger::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1) << "\n";
+			cout << logger::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1)
+					<< "\n";
 			return true;
 		}
 	}
