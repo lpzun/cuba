@@ -29,4 +29,5 @@ const char prop::SHARED_LOCAL_DELIMITER = '|';
 const char prop::STACK_DELIMITER = '.';
 const char prop::THREAD_DELIMITER = ',';
 
-} /* namespace ruba */
+}
+/* namespace ruba */

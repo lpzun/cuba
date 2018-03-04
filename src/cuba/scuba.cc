@@ -10,15 +10,16 @@
 namespace cuba {
 /**
  * Constructor for symbolic version of CUBA; calling base_cuba
- *   Set up the initial global state, target state, concurrent pushdown
- *   system and the overapproximation of reachable top configurations.
+ * Set up the initial global state, target state, concurrent pushdown
+ * system and the overapproximation of reachable top configurations.
  * @param initl: initial global state
  * @param final: final global state
- * @param filename: input CPDs
+ * @param filename: the input CPDS
  */
 symbolic_cuba::symbolic_cuba(const string& initl, const string& final,
 		const string& filename) :
 		base_cuba(initl, final, filename) {
+	cout << "symbolic exploration mode......\n";
 }
 
 /**
@@ -42,10 +43,13 @@ void symbolic_cuba::context_unbounded_analysis(const size_k k_bound) {
 	symbolic_state cfg_I(initl_c.get_state(), W);
 
 	/// step 2: perform context-unbounded analysis
-	cout << "\n" << "Initial configuration: " << cfg_I << endl;
-	auto is_reachable = context_bounded_analysis(k_bound, cfg_I);
-	if (prop::OPT_PROB_REACHABILITY && is_reachable) {
-		cout << final_c << " is reachable!" << endl;
+	cout << "Initial symbolic state: " << cfg_I << endl;
+	const auto convergent = context_bounded_analysis(k_bound, cfg_I);
+	if (prop::OPT_PROB_REACHABILITY) {
+		if (reachable)
+			cout << "=> " << final_c << " is reachable!" << endl;
+		else if (convergent)
+			cout << "=> " << final_c << " is unreachable!" << endl;
 	}
 }
 
@@ -102,6 +106,11 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 			}
 		}
 
+		/// if reachability and the target visible state is reachable
+		if (prop::OPT_PROB_REACHABILITY && reachable) {
+			break;
+		}
+
 		/// step 2.2 if all elements in currLevel has been processed, then move
 		/// onto the (k + 1)st context.
 		currLevel.swap(nextLevel), ++k;
@@ -109,13 +118,10 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 		global_R.emplace_back(currLevel); /// k + 1 now
 		/// step 2.4 convergence detection for top_R
 		if (converge(global_R, k, top_R)) {
-			cout << "=> sequence top_R collapses at " << (k == 0 ? k : k - 1)
-					<< "\n";
-			cout << "======================================" << endl;
+			cout << logger::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1) << "\n";
 			return true;
 		}
 	}
-	cout << "======================================" << endl;
 	return false;
 }
 
@@ -503,13 +509,13 @@ store_automaton symbolic_cuba::anonymize_by_rename(const store_automaton& A,
  */
 bool symbolic_cuba::converge(const vector<deque<symbolic_state>>& R,
 		const size_k k, vector<set<visible_state>>& top_R) {
-	cout << "======================================\n";
+	cout << logger::MSG_SEPARATOR;
 	cout << "context " << k << "\n";
 	const auto cnt_new_top_cfg = top_mapping(R[k], top_R);
 	if (cnt_new_top_cfg == 0) {
 		if (is_convergent())
 			return true;
-		cout << "=> sequence top_R plateaus at " << k << "\n";
+		cout << logger::MSG_TR_PLATEAU_AT_K << k << "\n";
 	}
 	return false;
 }
@@ -538,6 +544,9 @@ uint symbolic_cuba::top_mapping(const deque<symbolic_state>& R,
 	uint cnt_new_top_cfg = 0;
 	for (const auto& c : R) {
 		for (const auto& top_c : top_mapping(c)) {
+			if (prop::OPT_PROB_REACHABILITY && top_c == final_c) {
+				reachable = true;
+			}
 			auto ret = topped_R[top_c.get_state()].emplace(top_c);
 			if (ret.second) {
 				cout << string(2, ' ') << top_c << "\n";

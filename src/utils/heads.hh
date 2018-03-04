@@ -34,8 +34,8 @@
 #include <algorithm>
 #include <memory>
 
-#include "debug.hh"
 #include "excep.hh"
+#include "log.hh"
 
 using std::string;
 

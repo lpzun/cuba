@@ -78,7 +78,7 @@ int main(const int argc, const char * const * const argv) {
 
 		const string& final = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--target");
-				
+
 		const string& mode = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--mode");
 
@@ -92,10 +92,10 @@ int main(const int argc, const char * const * const argv) {
 		/// Concurrent Mode
 		const string& resource = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::CON), "--resource");
-				
+
 		const string& k_bound = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::CON), "--res-bound");
-				
+
 		size_k k = k_bound.size() == 0 ? 0 : std::stoul(k_bound);
 
 		const bool is_explicit = cmd.arg_bool(
@@ -104,10 +104,10 @@ int main(const int argc, const char * const * const argv) {
 		/// Other Options
 		prop::OPT_PRINT_CMD = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--cmd-line");
-				
+
 		prop::OPT_PRINT_ALL = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--print-all");
-				
+
 		if (mode == "O") {
 			cout << "Overapproximation mode\n";
 			cout << filename << " " << initl << "\n";
@@ -143,13 +143,13 @@ int main(const int argc, const char * const * const argv) {
 		}
 
 	} catch (const cmd::cmd_runtime_error& e) {
-		cerr << "ERROR: " << e.what() << endl;
+		cerr << logger::MSG_ERROR << e.what() << endl;
 	} catch (const ruba::cuba_runtime_error& e) {
-		cerr << "ERROR: " << e.what() << endl;
+		cerr << logger::MSG_ERROR << e.what() << endl;
 	} catch (const ruba::cuba_exception& e) {
-		cerr << "ERROR: " << e.what() << endl;
+		cerr << logger::MSG_ERROR << e.what() << endl;
 	} catch (const std::exception& e) {
-		cerr << "ERROR: " << e.what() << endl;
+		cerr << logger::MSG_ERROR << e.what() << endl;
 	}
 	return 0;
 }

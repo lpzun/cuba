@@ -1,5 +1,5 @@
 /**
- * @brief explore.cc
+ * Explicit CUBA
  *
  * @date  : Sep 28, 2016
  * @author: lpzun
@@ -11,7 +11,7 @@ namespace cuba {
 /**
  * Constructor for explicit version of CUBA; calling base_cuba
  *   Set up the initial global state, target state, concurrent pushdown
- *   system and the overapproximation of reachable top configurations.
+ *   system and the overapproximation of reachable top states.
  *
  * @param initl initial global state
  * @param final final global state
@@ -20,6 +20,7 @@ namespace cuba {
 explicit_cuba::explicit_cuba(const string& initl, const string& final,
 		const string& filename) :
 		base_cuba(initl, final, filename) {
+	cout << "explicit exploration mode......\n";
 }
 
 /**
@@ -34,30 +35,27 @@ explicit_cuba::~explicit_cuba() {
  * @param k: the number of context switches
  */
 void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
-	bool cycle = false;
-	size_n tid = 0;
-	while (tid < CPDA.size()) {
+	for (size_n tid = 0; tid < CPDA.size(); ++tid) {
 		if (finite_context_reachability(tid)) {
-			cycle = true;
-			break;
+			cout << "Finite-context reachability is unsatisfiable...\n";
+			cout << "WARNING: Please use symbolic CUBA...\n";
+			return;
 		}
-		++tid;
 	}
-	if (cycle) {
-		cout << "Finite-context reachability is unsatisfiable...\n";
-		return;
-	}
-	const auto is_reachable = k_bounded_reachability(k_bound, initl_c);
-	if (prop::OPT_PROB_REACHABILITY && is_reachable) {
-		cout << final_c << " is reachable!" << endl;
+
+	const auto convergent = k_bounded_reachability(k_bound, initl_c);
+	if (prop::OPT_PROB_REACHABILITY) {
+		if (reachable)
+			cout << "=> " << final_c << " is reachable!" << endl;
+		else if (convergent)
+			cout << "=> " << final_c << " is unreachable!" << endl;
 	}
 }
 
 /**
  * This procedure is to compute the set of reachable thread/global states
- * of a concurrent program P with up to k contexts. It returns true if a
- * bad state is reachable -- if specify; false otherwise. So, true implies
- * we found a bug, while false implies the program is correct.
+ * of a concurrent program P with up to k contexts. It returns true if
+ * observation sequence converges, false otherwise.
  *
  * @param k_bound: the upper bound of contexts
  * @param c_I    : the initial global states
@@ -72,22 +70,22 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 	/// initialized as { <q_I | (w1_I, ..., wn_I> }
 	antichain currLevel;
 	currLevel.emplace_back(CPDA.size(), c_I.get_state(), c_I.get_stacks());
-	/// 1.2 <k>: contexts, k = 0 represented the initial configurations c_I
+	/// 1.2 <k>: contexts, k = 0 represented the initial states c_I
 	size_k k = 0;
-	/// 1.3 <global_R>: the sequences of reachable global configurations.
+	/// 1.3 <global_R>: the sequences of reachable global states.
 	vector<vector<antichain>> global_R;
 	global_R.reserve(k_bound + 1);
 	global_R.emplace_back(vector<antichain>(thread_visible_state::S));
 	global_R[k][c_I.get_state()].emplace_back(CPDA.size(), c_I.get_state(),
 			c_I.get_stacks());
 
-	/// 1.4 <top_R>: the sequences of visible configurations. We obtained the
+	/// 1.4 <top_R>: the sequences of visible states. We obtained the
 	/// sequence from R directly.
 	vector<set<visible_state>> top_R(thread_visible_state::S);
-	/// step 2: compute all reachable configurations with up to k_bound contexts.
+	/// step 2: compute all reachable states with up to k_bound contexts.
 	while (k_bound == 0 || k <= k_bound) {
 		/// step 2.0 <nextLevel> = R_{k+1} \ R_{k}: the set of explicit
-		/// configurations reached in the (k+1)st context. It's initialized
+		/// states reached in the (k+1)st context. It's initialized
 		/// as empty.
 		antichain nextLevel;
 		/// step 2.1: compute nextLevel, or R_{k+1}: iterate over all elements
@@ -119,19 +117,19 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		/// step 2.2: convergence detection
 		/// 2.2.1: OS1 collapses
 		if (nextLevel.size() == 0) {
-			cout << "=> sequence R and T(R) collapses at "
-					<< (k == 0 ? k : k - 1) << "\n";
-			cout << "======================================" << endl;
+			cout << logger::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1) << "\n";
 			return true;
 		}
 
 		if (converge(global_R[k], k, top_R)) {
-			cout << "=> sequence T(R) collapses at " << (k == 0 ? k : k - 1)
-					<< "\n";
-			cout << "======================================" << endl;
+			cout << logger::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1) << "\n";
 			return true;
 		}
-		/// step 2.3: if all configurations in currLevel have been processed,
+		/// if reachability and the target visible state is reachable
+		if (prop::OPT_PROB_REACHABILITY && reachable) {
+			break;
+		}
+		/// step 2.3: if all states in currLevel have been processed,
 		/// then move onto the (k+1)st contexts.
 		currLevel.swap(nextLevel), ++k;
 	}
@@ -250,20 +248,25 @@ bool explicit_cuba::update_R(vector<vector<antichain>>& R, const size_k k,
  */
 bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
 		vector<set<visible_state>>& top_R) {
-	cout << "======================================\n";
+	cout << logger::MSG_SEPARATOR;
 	cout << "context " << k << "\n";
-	/// the number of new reachable top configurations
+	/// the number of new reachable top states
 	uint cnt_new_top_cfg = 0;
 	for (uint q = 0; q < (uint) thread_visible_state::S; ++q) {
 		for (const auto& c : R_k[q]) {
 			if (prop::OPT_PRINT_ALL)
 				cout << string(2, ' ') << c;
 			const auto& top_c = top_mapping(c);
+
+			/// if reachability and the target visible state is reachable
+			if (prop::OPT_PROB_REACHABILITY && top_c == final_c) {
+				reachable = true;
+			}
 			const auto& ret = top_R[c.get_state()].emplace(top_c);
 			if (ret.second) {
 				if (prop::OPT_PRINT_ALL)
 					cout << " : " << top_c;
-				/// find a new top configuration
+				/// find a new top state
 				++cnt_new_top_cfg;
 				/// updating approx_X
 				auto ifind = generators[top_c.get_state()].find(top_c);
@@ -274,12 +277,12 @@ bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
 				cout << "\n";
 		}
 	}
-	cout << "the number of new visible states: " << cnt_new_top_cfg << "\n";
+	cout << logger::MSG_NUM_VISIBLE_STATES << cnt_new_top_cfg << "\n";
 	if (cnt_new_top_cfg == 0) {
 		if (is_convergent()) {
 			return true;
 		}
-		cout << "=> sequence T(R) plateaus at " << k << "\n";
+		cout << logger::MSG_TR_PLATEAU_AT_K << k << "\n";
 	}
 	return false;
 }
@@ -368,18 +371,19 @@ visible_state explicit_cuba::top_mapping(const explicit_state_tid& tau) {
  * @return bool
  */
 bool explicit_cuba::finite_context_reachability(const size_n tid) {
+	const auto& PDA = CPDA[tid];
 	map<thread_visible_state, bool> visit;
 	map<thread_visible_state, bool> trace;
-	for (const auto& p : CPDA[tid].get_program()) {
+	for (const auto& p : PDA.get_program()) {
 		visit[p.first] = false;
 		trace[p.first] = false;
 	}
 
-	for (const auto& p : CPDA[tid].get_program()) {
+	for (const auto& p : PDA.get_program()) {
 		stack<pda_alpha> W;
 		W.push(p.first.get_alpha());
 		if (!visit[p.first]
-				&& finite_context_reachability(tid, p.first, W, visit, trace)) {
+				&& finite_context_reachability(PDA, p.first, W, visit, trace)) {
 			return true;
 		}
 	}
@@ -389,23 +393,25 @@ bool explicit_cuba::finite_context_reachability(const size_n tid) {
 /**
  * A subrontine of FCR: call by finite_context_reachability(const size_n tid).
  * @param tid
- * @param c
+ * @param s
+ * @param W
  * @param visit
  * @param trace
- * @return bool
+ * @return
  */
-bool explicit_cuba::finite_context_reachability(const size_n tid,
+bool explicit_cuba::finite_context_reachability(const pushdown_automaton& PDA,
 		const thread_visible_state& s, stack<pda_alpha>& W,
 		map<thread_visible_state, bool>& visit,
 		map<thread_visible_state, bool>& trace) {
 	visit[s] = true;
 	trace[s] = true;
-	auto ifind = CPDA[tid].get_program().find(s);
-	if (ifind != CPDA[tid].get_program().end()) {
+	auto ifind = PDA.get_program().find(s);
+	if (ifind != PDA.get_program().end()) {
 		for (const auto rid : ifind->second) {
-			const auto& r = CPDA[tid].get_actions()[rid];
+			const auto& r = PDA.get_actions()[rid];
 			const auto& dst = r.get_dst();
-			W.pop();
+			if (!W.empty())
+				W.pop();
 			switch (r.get_oper_type()) {
 			case type_stack_operation::PUSH: {
 				W.push(dst.get_stack().get_worklist()[1]);
@@ -413,7 +419,8 @@ bool explicit_cuba::finite_context_reachability(const size_n tid,
 			}
 				break;
 			case type_stack_operation::OVERWRITE: {
-				W.push(dst.get_stack().top());
+				if (!dst.get_stack().empty())
+					W.push(dst.get_stack().top());
 			}
 				break;
 			default: {
@@ -424,7 +431,7 @@ bool explicit_cuba::finite_context_reachability(const size_n tid,
 				continue;
 			thread_visible_state t(dst.get_state(), W.top());
 			if (!visit[t]
-					&& finite_context_reachability(tid, t, W, visit, trace)) {
+					&& finite_context_reachability(PDA, t, W, visit, trace)) {
 				return true;
 			} else if (trace[t]) {
 				if (W.size() > 1)
