@@ -16,20 +16,20 @@
 ###########################################################################
 # Override these variables (or add new ones) locally
 APP	         = cuba # the name of application
-SATDIR       = src#
-ILIBS        =#
-IINCLUDE     =-I$(SATDIR)/utils/ -I$(SATDIR)/cuba/ -I$(SATDIR)/ds/ -I $(SATDIR)/wuba/#
 
-#ISTD	     = -std=c++0x                                                 # for old cpp standard
-ISTD	         = -std=c++11
-
-BINDIR       = build
-OBJDIR       = obj
+############## dirs
 SRCDIR       = src
+BINDIR       = bin
+OBJDIR       = obj
 SRCDIRS      = $(shell find $(SRCDIR) -name '*.$(CSUFF)' -exec dirname {} \; | uniq)
 
+############## libs and includes
+ILIBS        =#
+IINCLUDE     =-I$(SRCDIR)/utils/ -I$(SRCDIR)/cuba/ -I$(SRCDIR)/ds/ -I $(SRCDIR)/wuba/#
+
+ISTD	         = -std=c++11
+
 CSUFF        = cc
-#CSUFF       = c
 
 DEFAULT      = $(BASE)
 EDITFILES    = test.$(TSUFF) $(wildcard *.$(HSUFF)) $(wildcard *.$(CSUFF)) $(BASE).$(CSUFF)
@@ -41,7 +41,6 @@ IDIRS        =#                                   -I$(C)
 HEADERS      = $(wildcard *.$(HSUFF))#            may set to a single .h file if only one specific file is compiled
 
 # For linking:
-#BASE         = $(firstword $(BASES))#             executable (final compilation). If directory contains several .c files, redefine this
 BASE         = $(BINDIR)/$(APP)
 ROBJVARS     =
 LDIRS        =#
@@ -50,6 +49,8 @@ LIBS         =$(ILIBS)#                                   -lm
 EXPORT       = CCOMP=$(CCOMP) FLAGS="$(FLAGS)"
 
 DISTCLEAN    =#                                   any additional commands to be executed by the distclean command (like cleaning sub directories)
+
+DOXYGEN = doxygen
 
 #####################################
 # 2. Private Region (do not change) #
@@ -76,6 +77,8 @@ CFLAGS   = $(FLAGS) $(IDIRS) $(IINCLUDE)#
 LFLAGS   = $(FLAGS) $(LDIRS)
 RERROR   = { echo "error in recursive make robjects";  exit 1; }
 DERROR   = { echo "error in recursive make distclean"; exit 1; }
+
+.PHONY: default edit doc clean distclean
 
 default: $(DEFAULT)
 
@@ -110,18 +113,19 @@ robjects:
 ############################
 # Cleaning (do not change) #
 ############################
-clean: 	CLEANOBJS
+clean: CLEANOBJS
 
 distclean: clean CLEANOBJS
-	rm -rf $(BINDIR)
+	rm -f $(BINDIR)/$(APP)
 	$(foreach DIR,$(RDIRS),$(MAKE) -C $(DIR) $(EXPORT) distclean || $(DERROR);)
 	$(DISTCLEAN)
 
 CLEANOBJS:
-	@$(call clean-obj)
+	@$(call cleanObj)
 
 # description: for cleaning all objects
-define clean-obj
+define cleanObj
+	echo "delete object files..."
 	find . -name '*.o' -type f -delete
-	find . -name '*.~' -type f -delete
+	# find . -name '*.~' -type f -delete
 endef
