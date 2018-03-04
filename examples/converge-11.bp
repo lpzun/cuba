@@ -1,0 +1,26 @@
+// shared variable
+ decl x;
+
+// Thread 1 will run foo
+ void foo() {
+    if (*)
+      call foo();
+    while (x) {
+    }
+    x := true;
+ }
+
+// Thread 2 will run bar
+ void bar() {
+    if (*)
+      call bar();
+    while (!x) {
+    }
+    x := false;
+ }
+
+// program entry point
+ void main() {
+    create_thread(&foo);
+    create_thread(&bar);
+ }

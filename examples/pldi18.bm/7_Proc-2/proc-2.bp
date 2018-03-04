@@ -1,0 +1,40 @@
+// This is an example from S. Chaki et al (TACAS'06)
+decl s1 = false; // s1: x < 10
+decl s2 = false;
+void thr1() {
+0:	s1 := false; 
+1:	call proc();
+2:	return;	
+}
+
+void proc() {
+   decl l1, l2
+3:	if (s1)
+4:		s2 := true;
+	else
+5:		call proc();
+    // Predicate generate some code
+    skip;
+    l1 := s1;
+    l2 := s2;
+    skip;
+6:	return;
+}
+
+void thr2() {
+7:	while (!s2); // block
+    skip;
+    skip;
+8:	assert(s2);
+    skip;
+9:	return;
+}
+
+void main() {
+	thread_create(&thr1);
+	thread_create(&thr1);
+	thread_create(&thr2);
+	thread_create(&thr2);
+	return;
+}
+
