@@ -2,14 +2,11 @@
 
 We generate the CUBA documentation with doxygen. Here is the organization of this folder:
 
-
-- __README.md__ :)
-
 - __makefile__ a make file for generating the documentation
 
 - __cuba.doxyfile__ a configuration file
 
-- __html__ a folder which contains a generated documentation
+- __html__ a folder which contains a generated html format documentation
 
 
 ### Generate the documentation
@@ -18,7 +15,7 @@ We generate the CUBA documentation with doxygen. Here is the organization of thi
 
 >     make
 
-- To clean up the old documentation, you can run the following command
+- Run the following command to clean the documentation, 
 
 >     make clean
 
