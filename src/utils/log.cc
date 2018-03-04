@@ -1,8 +1,8 @@
-/*
+/**
  * log.cc
  *
  * @date  : Mar 4, 2018
- * @author: lpzun
+ * @author: Peizun Liu
  */
 
 #include <log.hh>

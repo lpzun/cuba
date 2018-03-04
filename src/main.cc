@@ -118,9 +118,7 @@ int main(const int argc, const char * const * const argv) {
 		} else {
 			cout << "concurrent mode......\n";
 			if (resource == "W") { /// WBA or WUBA
-				cout << "write-(un)bounded analysis......\n";
 				if (is_explicit) {
-					cout << "explicit exploration......\n";
 					explicit_wuba ewuba(initl, final, filename);
 					ewuba.write_bounded_analysis(k);
 				} else {

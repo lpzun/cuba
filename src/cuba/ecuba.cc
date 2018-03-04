@@ -2,7 +2,7 @@
  * Explicit CUBA
  *
  * @date  : Sep 28, 2016
- * @author: lpzun
+ * @author: Peizun Liu
  */
 
 #include "cuba.hh"
