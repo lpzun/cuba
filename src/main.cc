@@ -68,17 +68,22 @@ int main(const int argc, const char * const * const argv) {
 		/// Problem Instances
 		const string& filename = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--input-file");
+		if (filename == "X")
+			throw cuba_runtime_error("Please specify an input CPDS!");
+
 		const string& initl = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--initial");
+		if (initl == "X")
+			throw cuba_runtime_error("Please specify an initial state!");
+
 		const string& final = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--target");
+				
 		const string& mode = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--mode");
 
 		prop::OPT_PRINT_ADJ = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::PROB), "--list-input");
-		prop::OPT_PROB_REACHABILITY = cmd.arg_bool(
-				cmd_line::get_opt_index(opt_type::PROB), "--reachability");
 
 		/// Sequential Mode
 		prop::OPT_SEQ_ATM = cmd.arg_bool(cmd_line::get_opt_index(opt_type::SEQ),
@@ -87,8 +92,10 @@ int main(const int argc, const char * const * const argv) {
 		/// Concurrent Mode
 		const string& resource = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::CON), "--resource");
+				
 		const string& k_bound = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::CON), "--res-bound");
+				
 		size_k k = k_bound.size() == 0 ? 0 : std::stoul(k_bound);
 
 		const bool is_explicit = cmd.arg_bool(
@@ -97,9 +104,10 @@ int main(const int argc, const char * const * const argv) {
 		/// Other Options
 		prop::OPT_PRINT_CMD = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--cmd-line");
+				
 		prop::OPT_PRINT_ALL = cmd.arg_bool(
-				cmd_line::get_opt_index(opt_type::OTHER), "--all");
-		cout << filename << " " << initl << " " << final << endl;
+				cmd_line::get_opt_index(opt_type::OTHER), "--print-all");
+				
 		if (mode == "O") {
 			cout << "Overapproximation mode\n";
 			cout << filename << " " << initl << "\n";
@@ -135,13 +143,13 @@ int main(const int argc, const char * const * const argv) {
 		}
 
 	} catch (const cmd::cmd_runtime_error& e) {
-		e.what();
+		cerr << "ERROR: " << e.what() << endl;
 	} catch (const ruba::cuba_runtime_error& e) {
-		e.what();
+		cerr << "ERROR: " << e.what() << endl;
 	} catch (const ruba::cuba_exception& e) {
-		e.what();
+		cerr << "ERROR: " << e.what() << endl;
 	} catch (const std::exception& e) {
-		e.what();
+		cerr << "ERROR: " << e.what() << endl;
 	}
 	return 0;
 }

@@ -118,53 +118,53 @@ void cmd_line::get_command_line(const int argc,
 
 /**
  * @brief Parsing command line
- * @param prog
+ * @param app
  * @param args
  */
-void cmd_line::get_command_line(const string& prog,
-		const vector<string>& args) {
-	for (auto iarg = args.begin(), iend = args.end(); iarg != iend; ++iarg) {
+void cmd_line::get_command_line(const string& app, const vector<string>& args) {
+	for (auto iarg = args.begin(); iarg != args.end(); ++iarg) {
 		const string& arg = *iarg;
 		if (arg == SHORT_HELP_OPT || arg == LONG_HELP_OPT) {
-			this->print_usage_info(prog);
+			this->print_usage_info(app);
 			throw help();
 		} else if (arg == SHORT_VERSION_OPT || arg == LONG_VERSION_OPT) {
 			cout << v_info << endl;
 			throw help();
 		} else {
-			bool flag = true;
-			for (ushort i = 0; i < types.size() && flag; ++i) {
+			for (ushort i = 0; i < types.size(); ++i) {
+
 				auto iopts = cmd_options.find(i);
-				if (iopts != cmd_options.end())
+				if (iopts != cmd_options.end()) {
 					for (auto iopt = iopts->second.begin();
-							iopt != iopts->second.end() && flag; ++iopt) {
+							iopt != iopts->second.end(); ++iopt) {
 						if (arg == iopt->get_short_name()
 								|| arg == iopt->get_long_name()) {
-							++iarg;   /// the next string is the value for arg
+							if (++iarg == args.end()) /// the next string is the value for arg
+								throw cmd_runtime_error(
+										"Please specify the args to " + arg);
 							iopt->set_value(*iarg);
-							if (flag)
-								flag = false;
 						}
 					}
+				}
 
 				auto iswts = cmd_switches.find(i);
-				if (iswts != cmd_switches.end())
+				if (iswts != cmd_switches.end()) {
 					for (auto iswt = iswts->second.begin();
-							iswt != iswts->second.end() && flag; ++iswt) {
+							iswt != iswts->second.end(); ++iswt) {
 						if (arg == iswt->get_short_name()
 								|| arg == iswt->get_long_name()) {
 							iswt->set_value(true);
-							if (flag)
-								flag = false;
 						}
 					}
+				}
 
 			}
-			if (flag)
-				throw cmd_runtime_error(
-						"cmd_line::get_command_line: " + arg
-								+ ": no such keyword argument.\n"
-								+ help_message);
+			/*
+			 if (flag)
+			 throw cmd_runtime_error(
+			 "cmd_line::get_command_line: " + arg
+			 + ": no such keyword argument.\n"
+			 + help_message);*/
 		}
 	}
 }
@@ -251,10 +251,6 @@ void cmd_line::print_usage_info(const string& prog_name, const ushort& indent,
 					prog_name + " " + SHORT_HELP_OPT + " [" + LONG_HELP_OPT
 							+ "]", this->name_width, alignment::LEFTJUST)
 			<< widthify("show help message", 0, alignment::LEFTJUST);
-//	out << " "
-//			<< widthify(prog_name + " -f source.pds ", this->name_width,
-//					alignment::LEFTJUST)
-//			<< widthify("check given program", 0, alignment::LEFTJUST);
 
 	for (size_t i = 0; i < types.size(); i++) {
 		out << types[i] << "\n";
@@ -268,16 +264,13 @@ void cmd_line::print_usage_info(const string& prog_name, const ushort& indent,
 										+ iopt->get_long_name() + "] arg",
 								this->name_width, alignment::LEFTJUST)
 						<< widthify(
-								widthify(
-										iopt->get_meaning()
-												+ (iopt->get_value().size()
-														> 0 ?
-														(" (default = "
-																+ iopt->get_value()
-																+ ")") :
-														""),
-										this->name_width + 2), 0,
-								alignment::LEFTJUST) << "\n";
+								iopt->get_meaning()
+										+ (iopt->get_value().size() > 0 ?
+												(" (default = "
+														+ iopt->get_value()
+														+ ")") :
+												""), 0, alignment::LEFTJUST)
+						<< "\n";
 			}
 
 		auto iswts = cmd_switches.find(i);
@@ -316,11 +309,12 @@ void cmd_line::create_argument_list() {
 
 	/// problem instance
 	this->add_option(get_opt_index(opt_type::PROB), "-f", "--input-file",
-			"an input pushdown system", "X");
+			"an input pushdown system", "");
 	this->add_option(get_opt_index(opt_type::PROB), "-i", "--initial",
-			"an initial global state", "0|0,0");
+			"an initial global state", "");
 	this->add_option(get_opt_index(opt_type::PROB), "-a", "--target",
-			"a  target  global state", "0|0,0");
+			"a target visible state, compute full reachability if unspecified",
+			"");
 	this->add_switch(get_opt_index(opt_type::PROB), "-l", "--list-input",
 			"show the input pushdown system");
 	this->add_option(get_opt_index(opt_type::PROB), "-m", "--mode",
@@ -329,8 +323,6 @@ void cmd_line::create_argument_list() {
 					+ string(28, ' ') + " \'C\': concurrent mode\n" //
 					+ string(28, ' ') + " \'O\': overapproximation mode" //
 			).c_str(), "");
-	this->add_switch(get_opt_index(opt_type::PROB), "-r", "--reachability",
-			"check the reachability of the given target");
 
 	/// sequential mode
 	this->add_switch(get_opt_index(opt_type::SEQ), "-atm", "--automaton",
@@ -346,9 +338,9 @@ void cmd_line::create_argument_list() {
 			""); /// row 3
 	this->add_option(get_opt_index(opt_type::CON), "-k", "--res-bound",
 			(string("resource bound, ").append(
-					"performing resource-unbounded analysis if specify nothing\n") /// row 1
-			.append(string(27, ' ')).append(
-					"Per parameter -s, it has different meanings:\n") /// row 2
+					"performing resource-unbounded analysis if unspecified\n") /// row 1
+			.append(string(26, ' ')).append(
+					"Per the value of -s, the resource bound could mean:\n") /// row 2
 			.append(string(29, ' ')).append(
 					"if -s = \'C\', then k represents the context bound\n") ///
 			.append(string(29, ' ')).append(
@@ -358,10 +350,10 @@ void cmd_line::create_argument_list() {
 			"run the explicit exploration assuming finite resource reachability holds");
 
 	/// other options
-	this->add_switch(get_opt_index(opt_type::OTHER), "-cmd", "--cmd-line",
+	this->add_switch(get_opt_index(opt_type::OTHER), "-c", "--cmd-line",
 			"show the command line");
-	this->add_switch(get_opt_index(opt_type::OTHER), "-all", "--all",
-			"show all of above messages");
+	this->add_switch(get_opt_index(opt_type::OTHER), "-p", "--print-all",
+			"print all output, including states and visible states, in each round");
 	this->add_switch(get_opt_index(opt_type::OTHER), SHORT_VERSION_OPT,
 			LONG_VERSION_OPT, "show version information and exit");
 }
