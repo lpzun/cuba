@@ -1,5 +1,5 @@
 /**
- * @brief pds_parser.cc
+ * PDS parser
  *
  * @date  : Aug 30, 2016
  * @author: TODO
@@ -46,9 +46,6 @@ concurrent_finite_machine parser::parse_input_cfsm(const string& filename) {
  */
 vector<vector<string>> parser::read_input_cpds(const string& filename,
 		set<pda_state>& states) {
-	if (filename == "X")
-		throw cuba_runtime_error("Please assign the input file!");
-
 	/// original input file, possibly with comments
 	ifstream org_in(filename.c_str());
 	if (!org_in.good())
@@ -60,7 +57,7 @@ vector<vector<string>> parser::read_input_cpds(const string& filename,
 	/// read the set of control states
 	if (!new_in.good())
 		throw cuba_runtime_error(
-				"Something wrong when reading the input file!");
+				"Something wrong when reading the input CPDS!");
 
 	/// parse the set of control states: MUST be in the first line
 	new_in >> thread_visible_state::S;
@@ -243,7 +240,7 @@ explicit_state parser::parse_input_cfg(const string& s) {
 			return parser::create_global_config_from_str(content);
 		} else {
 			throw cuba_runtime_error(
-					"parse_input_SS: input state file is unknown!");
+					"parse_input_SS: input state file does not exist!");
 		}
 	}
 	return parser::create_global_config_from_str(s);
@@ -259,7 +256,7 @@ explicit_state parser::create_global_config_from_str(const string& s_ts,
 		const char delim) {
 	const auto& vs_cfg = split(s_ts, delim);
 	if (vs_cfg.size() != 2) {
-		throw("The format of concrete configuration is wrong!");
+		throw("The format of input state is wrong!");
 	}
 
 	const auto& stacks = split(vs_cfg[1], prop::THREAD_DELIMITER);
@@ -286,7 +283,7 @@ thread_state parser::create_thread_config_from_str(const string& s_ts,
 		const char delim) {
 	const auto& vs_tg = split(s_ts, delim);
 	if (vs_tg.size() != 2) {
-		throw("The format of thread configuration is wrong!");
+		throw("The format of input thread state is wrong!");
 	}
 	const auto& symbols = split(vs_tg[1], prop::STACK_DELIMITER);
 	pda_stack w;
@@ -306,7 +303,7 @@ thread_visible_state parser::create_thread_state_from_str(const string& s_ts,
 		const char delim) {
 	deque<string> vs_ts = split(s_ts, delim);
 	if (vs_ts.size() != 2) {
-		throw("The format of thread state is wrong.");
+		throw("The format of input thread state is wrong.");
 	}
 	return thread_visible_state(std::stoi(vs_ts[0]), stoi(vs_ts[1]));
 }
@@ -367,6 +364,20 @@ deque<string> parser::split(const string &s, const char delim) {
 		elems.emplace_back(item);
 	}
 	return elems;
+}
+
+/**
+ * Create a default state in string
+ * @param n
+ * @return string
+ */
+string parser::create_default_states_in_str(const size_n n) {
+	string s = "0|0";
+	for (size_n i = 1; i < n; ++i) {
+		s.push_back(',');
+		s.push_back('0');
+	}
+	return s;
 }
 
 } /* namespace ruba */

@@ -1,5 +1,5 @@
 /**
- * parsers.hh
+ * PDS parser
  *
  *  @date: Jan 1, 2018
  *  @author: TODO
@@ -22,6 +22,8 @@ public:
 			const string& filename);
 	static concurrent_finite_machine parse_input_cfsm(const string& filename);
 	static explicit_state parse_input_cfg(const string& s);
+
+	static string create_default_states_in_str(const size_n n);
 
 private:
 	static vector<vector<string>> read_input_cpds(const string& filename,
