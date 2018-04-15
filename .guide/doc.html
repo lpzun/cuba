@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=windows-1252">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css" rel="stylesheet" href="css/project.css">
+    <link rel="stylesheet" href="css/navi.css">
+    <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+    <title>Artifact Evaluation Guide</title>
+  </head>
+  <body>
+    <div class="content">
+      <h2 align="center">Artifact:</h2>
+      <h3 align="center">CUBA: <p> Interprocedural Context-Unbounded Analysis of Concurrent Programs</h3>
+      <!--Navigation bar-->
+      <div id="cssmenu">
+	<ul>
+	  <li><a href='../index.html'>Checklist</a></li>
+	  <li><a href='tool.html'>Tool</a></li>
+	  <!--li class='active'><a href='doc.html'>Documentation</a></li-->
+	  <li><a href='input.html'>Input Syntax</a></li>
+	  <li><a href='tutorial.html'>Tutorial</a></li>
+	  <li><a href='experiments.html'>Experiments</a></li>
+	</ul>
+      </div>
+      <!--end of Navigation bar-->
+
+      <!-- customize your content begin here -->
+      <h3>Documentation</h3>
+      <div id="documentation">
+	See <a href="../cuba/doc/html/index.html">here</a> for the off-the-shelf documentation in <b>html</b> format.
+	<h4>Generate documentation</h4>
+	<p>
+	  The documentation is automatically generated using doxygen. To
+	  (re-)generate the documentation, you must
+	  have <a href="http://www.doxygen.org/">doxygen</a> installed on
+	  your machine. Asssuming you have unpacked the Artifact submission
+	  tarball and entered the top-level <code>artifact</code>
+	  directory,
+	  <ol start="1" type="a">
+	    <li><pre>cd cuba/doc</pre></li>
+	    <li><pre>make</pre></li>
+	  </ol>
+	  To remove the documentation, use <pre>make clean</pre>
+	</p>
+      </div>
+    </div>
+  </body>
+</html>

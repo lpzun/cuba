@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=windows-1252">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css" rel="stylesheet" href="css/project.css">
+    <link rel="stylesheet" href="css/navi.css">
+    <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+    <script src="script.js"></script>
+    <title>Artifact Evaluation Guide</title>
+  </head>
+  <body>
+    <div class="content">
+      <h2 align="center">Artifact:</h2>
+      <h3 align="center">CUBA: Interprocedural Context-Unbounded Analysis of Concurrent Programs</h3>
+      <!--Navigation bar-->
+    <div id="cssmenu">
+	<ul>
+	  <li><a href='../index.html'>Checklist</a></li>
+	  <li class='active'><a href='tool.html'>Tool</a></li>
+	  <!--li><a href='doc.html'>Documentation</a></li-->
+	  <li><a href='input.html'>Input Syntax</a></li>
+	  <li><a href='tutorial.html'>Tutorial</a></li>
+	  <li><a href='experiments.html'>Benchmarks</a></li>
+	</ul>
+    </div>
+      <!--end of Navigation bar-->
+
+      <!-- customize your content begin here -->
+      <div id="tool">
+	<h3>We include</h3>
+	<ul>
+	  <li>source code in the sub-directory <code>src/</code> (for browsing the source; for installation, see below).</li><br>
+	  <li>executable binaries for the following platforms (unzip using <code>unzip</code>):<br/></li>
+	</ul>
+	<table style="width:640px" align="center">
+	  <thead align="center">
+	    <tr>
+              <th>x86 Linux</th>
+              <th>x64 Linux</th>
+              <th>x64 Mac OSX</th>
+              <!--th>x86 Windows</th-->
+	    </tr>
+	  </thead>
+	  <tbody align="center">
+	    <tr>
+              <td class="centerText">
+		<a href="../bin/cuba-1.0-linux-x86.zip" download="cuba-1.0-linux-x86.zip">cuba-1.0-linux-x86.zip</a>
+              </td>
+              <td class="centerText">
+		<a href="../bin/cuba-1.0-linux-x64.zip" download="cuba-1.0-linux-x64.zip">cuba-1.0-linux-x64.zip</a>
+              </td>
+              <td class="centerText">
+		<a href="../bin/cuba-1.0-mac-osx.zip" download="cuba-1.0-mac-osx.zip">cuba-1.0-mac-osx.zip</a>
+              </td>
+
+              <!--td class="centerText">on request</td-->
+	    </tr>
+	  </tbody>
+	</table>
+	<h3>1. Installation<br></h3>
+	<b>Note:</b> CUBA is being developed in C++11. Make sure that your compiler supports C++11 or above. CUBA has been successfully compiled with <code>g++</code>, <code>clang</code> and <code>cygwin</code>. 
+	<h4>1.1 Install from source</h4>
+	The following assumes you have unpacked the Artifact submission and entered the top-level <code>artifact</code> directory.
+	<pre>
+make
+cd bin
+./cuba -h
+</pre>
+	After returning to the top-level <code>artifact</code> directory, you can use <code>make clean</code> to remove the object files. For a
+	thorough cleanup, which also removes the executable, use <code>make
+	distclean</code>.
+
+	<h4>1.2 Using the binaries</h4>
+	<ul>
+		<li>
+	Unpack the CUBA binary for your architecture from the <code>.zip</code> file above.
+	This will produce a single file, the executable for the platform you chose.</li>
+	<li>Run it.</li>
+	</ul>
+	<br>
+
+	The <code>Tutorial</code> tab contains more details about running the tool.
+      </div>
+
+
+      <h3>2. Programmer's Guide</h3>
+      <div id="documentation">
+	See <a href="../doc/html/index.html">here</a> for the off-the-shelf programmer's guide in <b>html</b> format.
+	<h4>Generate programmer's guide</h4>
+	<p>
+	  The documentation is automatically generated using doxygen. To
+	  (re-)generate the documentation, you must
+	  have <a href="http://www.doxygen.org/">doxygen</a> installed on
+	  your machine. Assuming you have unpacked the Artifact submission
+	  and entered the top-level <code>artifact</code>
+	  directory,
+	  <ol start="1" type="a">
+	    <li><pre>cd doc</pre></li>
+	    <li><pre>make</pre></li>
+	  </ol>
+	  To remove the documentation, use <pre>make clean</pre>
+	</p>
+      </div>
+    </div>
+  </body>
+</html>
