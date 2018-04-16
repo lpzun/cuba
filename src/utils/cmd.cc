@@ -349,8 +349,8 @@ string cmd_line::create_version_info() {
 	.append("-----------------------------------------------------------\n") ///
 	.append("* *    Interprocedural Context-Unbounded Analysis for   * *\n") ///
 	.append("* *               Concurrent Programs                   * *\n") ///
-	.append("* *          <Anonymous> @ <Anonymous>'s Group          * *\n") ///
-	.append("* *                  <Anonymous>                        * *\n") ///
+	.append("* *          Peizun Liu @ Thomas Wahl's Group           * *\n") ///
+	.append("* *           CCIS @ Northeastern University            * *\n") ///
 	.append("-----------------------------------------------------------\n");
 	return info;
 }
