@@ -6,7 +6,12 @@ void thr1() {
     lock(x);
 	x := 0;
 	call thr1();
+	do_something;
+	call foo();
 	}
+}
+
+void foo() {
 }
 
 void thr2() {

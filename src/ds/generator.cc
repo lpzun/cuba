@@ -50,7 +50,7 @@ void generator::context_insensitive(const visible_state& initl,
 	const auto& CFSM = parser::parse_input_cfsm(filename);
 	const auto& approx_Z = context_insensitive(initl, CFSM);
 
-	if (prop::OPT_PRINT_ALL) {
+	//if (prop::OPT_PRINT_ALL) {
 		cout << "Approximation Z:\n";
 		this->print_approximation(approx_Z);
 		cout << "G intersects Z:\n";
@@ -62,7 +62,7 @@ void generator::context_insensitive(const visible_state& initl,
 				for (const auto& r : adjlist.second)
 					cout << r << "\n";
 		}
-	}
+	//}
 }
 
 /**

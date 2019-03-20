@@ -151,17 +151,20 @@ pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
 finite_machine parser::parse_input_fsm(const vector<string>& sPDA) {
 	if (sPDA.size() == 0)
 		return finite_machine();
+
+	string matching = "";
 	{
 		istringstream iss(sPDA[0]);
 		string pda_mark;
 		pda_alpha start, end;
-		iss >> pda_mark >> start >> end;
+		iss >> pda_mark >> start >> end >> matching;
 		if (pda_mark != "PDA")
 			throw cuba_runtime_error("PDA input format error!");
 	}
 	set<pda_alpha> pop_candidate; /// collect all after-pop symbols
 	deque<uint> pop_action_id; /// collect pop action ids
 
+	auto matching_pairs = parse_matching_pairs(matching);
 	pop_candidate.emplace(alphabet::EPSILON);
 	finite_machine fsm;
 	for (uint i = 1; i < sPDA.size(); ++i) {
@@ -195,19 +198,48 @@ finite_machine parser::parse_input_fsm(const vector<string>& sPDA) {
 
 	for (const auto i : pop_action_id) {
 		pda_state s1;  /// source state
-		string l1;  /// source alpha
+		pda_alpha l1;  /// source alpha
 		string sep;    /// separator ->
 		pda_state s2;  /// destination state
 
 		istringstream iss(sPDA[i]);
 		iss >> s1 >> l1 >> sep >> s2;
-		thread_visible_state src(s1, parse_input_alpha(l1));
-		for (const auto l2 : pop_candidate) {
-			thread_visible_state dst(s2, l2);
+		thread_visible_state src(s1, l1);
+		if (prop::OPT_NESTED_MATCH) {
+			auto ifind = matching_pairs.find(l1);
+			if (ifind != matching_pairs.end()) {
+				thread_visible_state dst(s2, ifind->second);
+				fsm[src].emplace_back(src, dst, type_stack_operation::POP);
+			}
+			thread_visible_state dst(s2, alphabet::EPSILON);
 			fsm[src].emplace_back(src, dst, type_stack_operation::POP);
+		} else {
+			for (const auto l2 : pop_candidate) {
+				thread_visible_state dst(s2, l2);
+				fsm[src].emplace_back(src, dst, type_stack_operation::POP);
+			}
 		}
 	}
 	return fsm;
+}
+
+/**
+ *
+ * @param matching
+ * @return
+ */
+map<pda_alpha, pda_alpha> parser::parse_matching_pairs(const string& matching) {
+	map<pda_alpha, pda_alpha> matching_pairs;
+	istringstream iss(matching);
+	string pair = "";
+	while (std::getline(iss, pair, ',')) {
+		auto sep = pair.find(':');
+		auto popped = pair.substr(0, sep);
+		auto pushed = pair.substr(sep + 1);
+		cout << popped << ":" << pushed << endl;
+		matching_pairs.emplace(stoul(popped), stoul(pushed));
+	}
+	return matching_pairs;
 }
 
 /**

@@ -314,7 +314,7 @@ void cmd_line::create_argument_list() {
 			"an initial global state", "");
 	this->add_option(get_opt_index(opt_type::PROB), "-a", "--target",
 			"a target visible state, compute full reachability if unspecified",
-			"");
+			"X");
 	this->add_switch(get_opt_index(opt_type::PROB), "-l", "--list-input",
 			"show the input pushdown system");
 	this->add_option(get_opt_index(opt_type::PROB), "-m", "--mode",
@@ -348,6 +348,9 @@ void cmd_line::create_argument_list() {
 			""); /// row 4
 	this->add_switch(get_opt_index(opt_type::CON), "-x", "--explicit",
 			"run the explicit exploration assuming finite resource reachability holds");
+	this->add_switch(get_opt_index(opt_type::CON), "-w", "--nested-word",
+			"run the analysis with nested matching information");
+
 
 	/// other options
 	this->add_switch(get_opt_index(opt_type::OTHER), "-c", "--cmd-line",

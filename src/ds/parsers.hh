@@ -32,6 +32,9 @@ private:
 			const vector<string>& sPDA);
 	static finite_machine parse_input_fsm(const vector<string>& sPDA);
 
+	static map<pda_alpha, pda_alpha> parse_matching_pairs(
+			const string& matching);
+
 	static pda_alpha parse_input_alpha(const string& alpha);
 
 	static void remove_comments(istream& in, ostream& out,

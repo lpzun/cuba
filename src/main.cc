@@ -105,6 +105,9 @@ int main(const int argc, const char * const * const argv) {
 		prop::OPT_PRINT_CMD = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--cmd-line");
 
+		prop::OPT_NESTED_MATCH = cmd.arg_bool(
+				cmd_line::get_opt_index(opt_type::CON), "--nested-word");
+
 		prop::OPT_PRINT_ALL = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--print-all");
 
