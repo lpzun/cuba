@@ -24,6 +24,7 @@ public:
 	static bool OPT_PROB_REACHABILITY;
 	static bool OPT_SEQ_ATM;
 	static bool OPT_NESTED_MATCH;
+	static string OPT_MATCHING_FILE;
 
 	static const string COMMENT;
 

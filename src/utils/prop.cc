@@ -23,6 +23,7 @@ bool prop::OPT_PROB_REACHABILITY = false;
 
 bool prop::OPT_SEQ_ATM = false;
 bool prop::OPT_NESTED_MATCH = false;
+string prop::OPT_MATCHING_FILE = "X";
 
 const string prop::COMMENT = "#";
 

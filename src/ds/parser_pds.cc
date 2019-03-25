@@ -33,8 +33,15 @@ concurrent_finite_machine parser::parse_input_cfsm(const string& filename) {
 	concurrent_finite_machine CFSM;
 	set<pda_state> states;
 	const auto& sCPDA = read_input_cpds(filename, states);
-	for (auto pda : sCPDA) {
-		CFSM.emplace_back(parse_input_fsm(pda));
+	if (prop::OPT_NESTED_MATCH) {
+		const auto& sMATCH = read_input_matching(prop::OPT_MATCHING_FILE);
+		for (size_t i = 0; i < sCPDA.size(); ++i) {
+			CFSM.emplace_back(parse_input_fsm(sCPDA[i], sMATCH[i]));
+		}
+	} else {
+		for (size_t i = 0; i < sCPDA.size(); ++i) {
+			CFSM.emplace_back(parse_input_fsm(sCPDA[i]));
+		}
 	}
 	return CFSM;
 }
@@ -46,7 +53,7 @@ concurrent_finite_machine parser::parse_input_cfsm(const string& filename) {
  */
 vector<vector<string>> parser::read_input_cpds(const string& filename,
 		set<pda_state>& states) {
-	/// original input file, possibly with comments
+/// original input file, possibly with comments
 	ifstream org_in(filename.c_str());
 	if (!org_in.good())
 		throw cuba_runtime_error("Input file does not exist!");
@@ -54,12 +61,12 @@ vector<vector<string>> parser::read_input_cpds(const string& filename,
 	org_in.close();
 
 	ifstream new_in("/tmp/tmp.pds.no_comment");
-	/// read the set of control states
+/// read the set of control states
 	if (!new_in.good())
 		throw cuba_runtime_error(
 				"Something wrong when reading the input CPDS!");
 
-	/// parse the set of control states: MUST be in the first line
+/// parse the set of control states: MUST be in the first line
 	new_in >> thread_visible_state::S;
 	for (pda_state s = 0; s < thread_visible_state::S; ++s) {
 		states.emplace(s);
@@ -86,7 +93,7 @@ pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
 		const vector<string>& sPDA) {
 	if (sPDA.size() == 0)
 		return pushdown_automaton();
-	/// step 1: current PDA's stack symbols
+/// step 1: current PDA's stack symbols
 	set<pda_alpha> alphas;
 	{
 		istringstream iss(sPDA[0]);
@@ -101,7 +108,7 @@ pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
 		}
 	}
 
-	/// step 2: current PDA's actions and adjacency list
+/// step 2: current PDA's actions and adjacency list
 	vector<pda_action> actions;
 	adj_list program;
 	id_action trans_id = 0;
@@ -143,6 +150,52 @@ pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
 }
 
 /**
+ *
+ * @param filename
+ * @return
+ */
+vector<vector<string>> parser::read_input_matching(const string& filename) {
+	vector<vector<string>> sMATCH;
+	ifstream inwa(filename.c_str());
+	if (!inwa.good())
+		throw cuba_runtime_error("Matching file does not exist!");
+	string line;
+	while (std::getline(inwa, line)) {
+		if (line == "" || line.size() < 2) {
+			continue;
+		}
+		if (line.at(0) == 'P')
+			sMATCH.emplace_back(vector<string>());
+		sMATCH.back().emplace_back(line);
+	}
+	inwa.close();
+	return sMATCH;
+}
+
+/**
+ *
+ * @param matching
+ * @return
+ */
+map<pda_alpha, set<pda_alpha>> parser::parse_input_matching(
+		const vector<string>& sMATCH) {
+	map<pda_alpha, set<pda_alpha>> matching_pairs;
+	if (sMATCH.size() == 0)
+		return matching_pairs;
+	pda_alpha popped;
+	pda_alpha pushed;
+	string sep = "";
+	for (const auto& matching : sMATCH) {
+		if (matching.at(0) == 'P')
+			continue;
+		istringstream iss(matching);
+		iss >> popped >> pushed;
+		matching_pairs[popped].emplace(pushed);
+	}
+	return matching_pairs;
+}
+
+/**
  * Build a finite machine that is used for context-insensitive over-approximation.
  * @param states
  * @param sPDA
@@ -152,19 +205,16 @@ finite_machine parser::parse_input_fsm(const vector<string>& sPDA) {
 	if (sPDA.size() == 0)
 		return finite_machine();
 
-	string matching = "";
 	{
 		istringstream iss(sPDA[0]);
 		string pda_mark;
 		pda_alpha start, end;
-		iss >> pda_mark >> start >> end >> matching;
+		iss >> pda_mark >> start >> end;
 		if (pda_mark != "PDA")
 			throw cuba_runtime_error("PDA input format error!");
 	}
 	set<pda_alpha> pop_candidate; /// collect all after-pop symbols
 	deque<uint> pop_action_id; /// collect pop action ids
-
-	auto matching_pairs = parse_matching_pairs(matching);
 	pop_candidate.emplace(alphabet::EPSILON);
 	finite_machine fsm;
 	for (uint i = 1; i < sPDA.size(); ++i) {
@@ -205,41 +255,85 @@ finite_machine parser::parse_input_fsm(const vector<string>& sPDA) {
 		istringstream iss(sPDA[i]);
 		iss >> s1 >> l1 >> sep >> s2;
 		thread_visible_state src(s1, l1);
-		if (prop::OPT_NESTED_MATCH) {
-			auto ifind = matching_pairs.find(l1);
-			if (ifind != matching_pairs.end()) {
-				thread_visible_state dst(s2, ifind->second);
-				fsm[src].emplace_back(src, dst, type_stack_operation::POP);
-			}
-			thread_visible_state dst(s2, alphabet::EPSILON);
+		for (const auto l2 : pop_candidate) {
+			thread_visible_state dst(s2, l2);
 			fsm[src].emplace_back(src, dst, type_stack_operation::POP);
-		} else {
-			for (const auto l2 : pop_candidate) {
-				thread_visible_state dst(s2, l2);
-				fsm[src].emplace_back(src, dst, type_stack_operation::POP);
-			}
 		}
 	}
 	return fsm;
 }
 
 /**
- *
- * @param matching
- * @return
+ * Build a finite machine that is used for context-insensitive over-approximation.
+ * @param states
+ * @param sPDA
+ * @return a finite machine
  */
-map<pda_alpha, pda_alpha> parser::parse_matching_pairs(const string& matching) {
-	map<pda_alpha, pda_alpha> matching_pairs;
-	istringstream iss(matching);
-	string pair = "";
-	while (std::getline(iss, pair, ',')) {
-		auto sep = pair.find(':');
-		auto popped = pair.substr(0, sep);
-		auto pushed = pair.substr(sep + 1);
-		cout << popped << ":" << pushed << endl;
-		matching_pairs.emplace(stoul(popped), stoul(pushed));
+finite_machine parser::parse_input_fsm(const vector<string>& sPDA,
+		const vector<string>& sMATCH) {
+	if (sPDA.size() == 0)
+		return finite_machine();
+
+	{
+		istringstream iss(sPDA[0]);
+		string pda_mark;
+		pda_alpha start, end;
+		iss >> pda_mark >> start >> end;
+		if (pda_mark != "PDA")
+			throw cuba_runtime_error("PDA input format error!");
 	}
-	return matching_pairs;
+	deque<uint> pop_action_id; /// collect pop action ids
+
+	auto matching_pairs = parse_input_matching(sMATCH);
+	finite_machine fsm;
+	for (uint i = 1; i < sPDA.size(); ++i) {
+		/// three types of transition:
+		///   PUSH: (s1, l1) -> (s2, l2l3)
+		///   POP : (s1, l1) -> (s2, )
+		///   OVERWRITE: (s1, l1) -> (s2, l2)
+		pda_state s1;  /// source state
+		string l1;  /// source alpha
+		string sep;    /// separator ->
+		pda_state s2;  /// destination state
+		string l2, l3; /// destination alphabets. Note: using string here
+
+		istringstream iss(sPDA[i]);
+		iss >> s1 >> l1 >> sep >> s2 >> l2 >> l3;
+
+		/// source thread state
+		thread_visible_state src(s1, parse_input_alpha(l1));
+		/// destination thread configuration
+		if (parse_input_alpha(l3) != alphabet::NULLPTR) { /// push operation
+			thread_visible_state dst(s2, parse_input_alpha(l2));
+			fsm[src].emplace_back(src, dst, type_stack_operation::PUSH);
+		} else if (parse_input_alpha(l2) != alphabet::EPSILON) { /// overwrite operation
+			thread_visible_state dst(s2, parse_input_alpha(l2));
+			fsm[src].emplace_back(src, dst, type_stack_operation::OVERWRITE);
+		} else { /// pop operation
+			pop_action_id.emplace_back(i);
+		}
+	}
+
+	for (const auto i : pop_action_id) {
+		pda_state s1;  /// source state
+		pda_alpha l1;  /// source alpha
+		string sep;    /// separator ->
+		pda_state s2;  /// destination state
+
+		istringstream iss(sPDA[i]);
+		iss >> s1 >> l1 >> sep >> s2;
+		thread_visible_state src(s1, l1);
+		auto ifind = matching_pairs.find(l1);
+		if (ifind != matching_pairs.end()) {
+			for (const auto l2 : ifind->second) {
+				thread_visible_state dst(s2, l2);
+				fsm[src].emplace_back(src, dst, type_stack_operation::POP);
+			}
+		}
+		thread_visible_state dst(s2, alphabet::EPSILON);
+		fsm[src].emplace_back(src, dst, type_stack_operation::POP);
+	}
+	return fsm;
 }
 
 /**

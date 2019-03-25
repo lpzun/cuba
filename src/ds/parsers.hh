@@ -31,9 +31,12 @@ private:
 	static pushdown_automaton parse_input_pda(const set<pda_state>& states,
 			const vector<string>& sPDA);
 	static finite_machine parse_input_fsm(const vector<string>& sPDA);
+	static finite_machine parse_input_fsm(const vector<string>& sPDA,
+			const vector<string>& sMATCH);
 
-	static map<pda_alpha, pda_alpha> parse_matching_pairs(
-			const string& matching);
+	static vector<vector<string>> read_input_matching(const string& filename);
+	static map<pda_alpha, set<pda_alpha>> parse_input_matching(
+			const vector<string>& sMATCH);
 
 	static pda_alpha parse_input_alpha(const string& alpha);
 

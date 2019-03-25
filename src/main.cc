@@ -79,6 +79,13 @@ int main(const int argc, const char * const * const argv) {
 		const string& final = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--target");
 
+		prop::OPT_MATCHING_FILE = cmd.arg_value(
+				cmd_line::get_opt_index(opt_type::PROB), "--matching");
+		if (prop::OPT_MATCHING_FILE != "X") {
+			cout<<prop::OPT_MATCHING_FILE<<endl;
+			prop::OPT_NESTED_MATCH = true;
+		}
+
 		const string& mode = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--mode");
 
@@ -104,9 +111,6 @@ int main(const int argc, const char * const * const argv) {
 		/// Other Options
 		prop::OPT_PRINT_CMD = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--cmd-line");
-
-		prop::OPT_NESTED_MATCH = cmd.arg_bool(
-				cmd_line::get_opt_index(opt_type::CON), "--nested-word");
 
 		prop::OPT_PRINT_ALL = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--print-all");
