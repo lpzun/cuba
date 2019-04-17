@@ -114,18 +114,25 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 				nextLevel.emplace_back(_c);
 			}
 		}
+
+		/// if convergence detection is required, then
 		/// step 2.2: convergence detection
-		/// 2.2.1: OS1 collapses
+		///  2.2.1: OS1 collapses
 		if (nextLevel.size() == 0) {
-			cout << logger::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1)
-					<< "\n";
-			return true;
+			if (k_bound == 0) {
+				cout << logger::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1)
+						<< "\n";
+				return true;
+			}
 		}
 
+		///  2.2.2: OS3 collapses, i.e. T(R)
 		if (converge(global_R[k], k, top_R)) {
-			cout << logger::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1)
-					<< "\n";
-			return true;
+			if (k_bound == 0) {
+				cout << logger::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1)
+						<< "\n";
+				return true;
+			}
 		}
 		/// if reachability and the target visible state is reachable
 		if (prop::OPT_PROB_REACHABILITY && reachable) {

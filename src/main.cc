@@ -82,7 +82,7 @@ int main(const int argc, const char * const * const argv) {
 		prop::OPT_MATCHING_FILE = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--matching");
 		if (prop::OPT_MATCHING_FILE != "X") {
-			cout<<prop::OPT_MATCHING_FILE<<endl;
+			cout << prop::OPT_MATCHING_FILE << endl;
 			prop::OPT_NESTED_MATCH = true;
 		}
 
