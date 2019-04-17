@@ -39,6 +39,10 @@ protected:
 	/// parameterized system for now
 	vector<vector<bool>> reachable_T;
 
+	// file dump
+	string filename_global_R;
+	string filename_top_R;
+
 private:
 	visible_state top_mapping(const explicit_state& tau);
 };

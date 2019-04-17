@@ -115,6 +115,9 @@ int main(const int argc, const char * const * const argv) {
 		prop::OPT_PRINT_ALL = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--print-all");
 
+		prop::OPT_FILE_DUMP = cmd.arg_bool(
+				cmd_line::get_opt_index(opt_type::OTHER), "--file-dump");
+
 		if (mode == "O") {
 			cout << "Overapproximation mode\n";
 			cout << filename << " " << initl << "\n";

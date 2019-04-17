@@ -143,6 +143,29 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		currLevel.swap(nextLevel), ++k;
 	}
 
+	if (prop::OPT_FILE_DUMP) {
+		ofstream osR(filename_global_R);
+		if (osR.is_open()) {
+			for (int k = 0; k < global_R.size(); ++k) {
+				for (const auto& antichains : global_R[k]) {
+					for (const auto& t : antichains)
+						osR << t << "\n";
+				}
+			}
+			osR.close();
+		}
+
+		ofstream osTR(filename_top_R);
+		if (osTR.is_open()) {
+			for (int k = 0; k < top_R.size(); ++k) {
+				for (const auto& t : top_R[k]) {
+					osTR << t << "\n";
+				}
+			}
+			osTR.close();
+		}
+	}
+
 	return false;
 }
 

@@ -357,6 +357,8 @@ void cmd_line::create_argument_list() {
 			"show the command line");
 	this->add_switch(get_opt_index(opt_type::OTHER), "-p", "--print-all",
 			"print all output, including states and visible states, in each round");
+	this->add_switch(get_opt_index(opt_type::OTHER), "-d", "--file-dump",
+			"dump reachable global states and visible states, if applicable, to files");
 	this->add_switch(get_opt_index(opt_type::OTHER), SHORT_VERSION_OPT,
 			LONG_VERSION_OPT, "show version information and exit");
 }

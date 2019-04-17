@@ -76,13 +76,13 @@ inline ostream& operator<<(ostream& os, const visible_state& s) {
 			os << s.get_local()[0];
 	}
 	for (uint i = 1; i < s.get_local().size(); ++i) {
-		cout << ",";
+		os << ",";
 		if (s.get_local()[i] == alphabet::EPSILON)
 			os << alphabet::OPT_EPSILON;
 		else
 			os << s.get_local()[i];
 	}
-	cout << ")";
+	os << ")";
 	return os;
 }
 

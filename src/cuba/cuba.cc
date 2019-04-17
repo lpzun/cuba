@@ -19,7 +19,9 @@ namespace cuba {
  */
 base_cuba::base_cuba(const string& initl, const string& final,
 		const string& filename) :
-		reachable(false), initl_c(0, 1), final_c(0, 1), CPDA(), generators(), reachable_T() {
+		reachable(false), initl_c(0, 1), final_c(0, 1), CPDA(), ///
+		generators(), reachable_T(), ///
+		filename_global_R(""), filename_top_R("") {
 	CPDA = parser::parse_input_cpds(filename);
 
 	initl_c = parser::parse_input_cfg(initl);
@@ -32,6 +34,12 @@ base_cuba::base_cuba(const string& initl, const string& final,
 	generator gen(initl, filename);
 	generators = gen.get_generators();
 	cout << "context-(un)bounded analysis...\n";
+
+	if (prop::OPT_FILE_DUMP) {
+		auto idx = filename.find_first_of('.');
+		filename_global_R = filename.substr(0, idx) + "_global_R.txt";
+		filename_top_R = filename.substr(0, idx) + "_top_R.txt";
+	}
 }
 
 base_cuba::~base_cuba() {
