@@ -197,7 +197,7 @@ inline ostream& operator<<(ostream& os, const finite_automaton& fsa) {
 	 const int& j = r.get_dst() - fsa.get_initials().size();
 	 if (matrix[i][j].length() > 0)
 	 matrix[i][j].push_back(',');
-	 if (r.get_label() == -1)
+	 if (r.get_label() == alphabet::EPSILON)
 	 matrix[i][j] += "e";
 	 else
 	 matrix[i][j] += std::to_string(r.get_label());
