@@ -1,0 +1,33 @@
+1: decl s := 1;
+// thread 1
+void foo1() {
+  decl l1;
+  release_lock;
+2:   if (s) {
+       acquire_lock;
+       l1 := s; // l1 := *
+       s := 0;
+       call foo1();
+3:     // do_something
+4:  } else {
+       acquire_lock;
+       l1 := 0; // l1 := 0
+       call foo2();
+  }
+5:  return;
+}
+
+void foo2() {
+  decl := l2;
+  release_lock;
+  l2 := s;
+  // do_something;
+  return;
+}
+
+// thread 2
+   void bar() {
+8:   s := 1;
+9:   goto 8;
+   }
+

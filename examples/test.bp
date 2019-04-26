@@ -1,0 +1,33 @@
+var s: enum {0, 1, 2, 3}
+   // thread 1
+   void foo() {
+1:  wait(s == 0); s := 1;
+2:  wait(s == 3); s := 0; goto 1;
+   }
+ 
+ // thread 2
+   void bar() {
+3:  wait(s == 0 || s == 1 || s == 2);
+    if (s == 0) 
+        return;
+    else if (s == 1)
+        s := 2;
+    else // s == 2
+        goto 6;
+4:  wait(s == 2);
+    s := 3;
+    call bar();
+5:  wait(s == 0); return;
+6:  wait(s == 2); s := 4; call bar2();
+7:  wait(s == 1); do_something; // an assertion
+8:  wait(s == 1); return;   
+   }
+   
+   void bar2() {
+9:   wait(s == 1); return;    
+   }
+   
+   void main() {
+     thread_create(&foo);
+     thread_create(&bar);
+   }
