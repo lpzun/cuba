@@ -20,6 +20,7 @@ public:
 	static bool OPT_PRINT_ALL;
 	static bool OPT_PRINT_CMD;
 	static bool OPT_PRINT_ADJ;
+	static bool OPT_PRINT_TOP_R;
 
 	static bool OPT_PROB_REACHABILITY;
 	static bool OPT_SEQ_ATM;

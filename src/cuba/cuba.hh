@@ -123,8 +123,7 @@ private:
 			const explicit_state_tid& c);
 
 	/// determine convergence, reachability of a target and so on
-	bool converge(const vector<antichain>& R, const size_k k,
-			vector<set<visible_state>>& top_R);
+	bool converge(const vector<antichain>& R, const size_k k);
 	bool is_convergent();
 	bool is_reachable(const explicit_state_tid& tau, const size_k k,
 			vector<vector<antichain>>& R);
@@ -138,6 +137,10 @@ private:
 			const thread_visible_state& s, stack<pda_alpha>& W,
 			map<thread_visible_state, bool>& visit,
 			map<thread_visible_state, bool>& trace);
+
+	void dump_top_R(const bool dump_size_only) const;
+
+	vector<set<visible_state>> top_R; /// The sequences of visible states.
 };
 }
 /* namespace cuba */

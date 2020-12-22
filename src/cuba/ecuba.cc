@@ -19,7 +19,7 @@ namespace cuba {
  */
 explicit_cuba::explicit_cuba(const string& initl, const string& final,
 		const string& filename) :
-		base_cuba(initl, final, filename) {
+		base_cuba(initl, final, filename), top_R(thread_visible_state::S) {
 	cout << "explicit exploration mode......\n";
 }
 
@@ -45,11 +45,13 @@ void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
 
 	const auto convergent = k_bounded_reachability(k_bound, initl_c);
 	if (prop::OPT_PROB_REACHABILITY) {
-		if (reachable)
+		if (reachable) {
 			cout << "=> " << final_c << " is reachable!" << endl;
-		else if (convergent)
+		} else if (convergent) {
 			cout << "=> " << final_c << " is unreachable!" << endl;
+		}
 	}
+	this->dump_top_R(/*dump_size_only=*/true);
 }
 
 /**
@@ -81,7 +83,6 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 
 	/// 1.4 <top_R>: the sequences of visible states. We obtained the
 	/// sequence from R directly.
-	vector<set<visible_state>> top_R(thread_visible_state::S);
 	/// step 2: compute all reachable states with up to k_bound contexts.
 	while (k_bound == 0 || k <= k_bound) {
 		/// step 2.0 <nextLevel> = R_{k+1} \ R_{k}: the set of explicit
@@ -115,13 +116,20 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 			}
 		}
 		/// step 2.2: convergence detection
-		/// 2.2.1: OS1 collapses
-		if (nextLevel.size() == 0) {
+		/// 2.2.1: OS3 collapses
+		if (converge(global_R[k], k)) {
 			cout << prop::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1) << "\n";
 			return true;
 		}
-
-		if (converge(global_R[k], k, top_R)) {
+		/// 2.2.2: OS1 collapses
+		if (nextLevel.size() == 0) {
+			for (auto state = 0; state < generators.size(); ++state) {
+				cout << ":PL: state = " << state;
+				for (const auto & gen : generators[state]) {
+					cout << "  " << gen << "\n";
+				}
+				cout << "\n";
+			}
 			cout << prop::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1) << "\n";
 			return true;
 		}
@@ -177,7 +185,7 @@ antichain explicit_cuba::step(const explicit_state_tid& tau,
  * @param q a shared state
  * @param W a stack for thread tid
  * @param tid thread ID
- * @param successors to store all successors
+ * @param successors: to store all successors
  */
 void explicit_cuba::step(const pda_state& q, const stack_vec& W, const uint tid,
 		antichain& successors) {
@@ -243,11 +251,9 @@ bool explicit_cuba::update_R(vector<vector<antichain>>& R, const size_k k,
  * if converges, false otherwise.
  * @param R_k  the global states reached in kth context.
  * @param k    current context is k
- * @param top_R the set of reachable visible states
  * @return bool
  */
-bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
-		vector<set<visible_state>>& top_R) {
+bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k) {
 	cout << prop::MSG_SEPARATOR;
 	cout << "context " << k << "\n";
 	/// the number of new reachable top states
@@ -270,8 +276,10 @@ bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
 				++cnt_new_top_cfg;
 				/// updating approx_X
 				auto ifind = generators[top_c.get_state()].find(top_c);
-				if (ifind != generators[top_c.get_state()].end())
+				if (ifind != generators[top_c.get_state()].end()) {
+					cout << " :PL: ............... generator = " << *ifind;
 					generators[top_c.get_state()].erase(ifind);
+				}
 			}
 			if (prop::OPT_PRINT_ALL)
 				cout << "\n";
@@ -280,6 +288,7 @@ bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
 	cout << prop::MSG_NUM_VISIBLE_STATES << cnt_new_top_cfg << "\n";
 	if (cnt_new_top_cfg == 0) {
 		if (is_convergent()) {
+			cout << ":PL: ............... I am convergent .......";
 			return true;
 		}
 		cout << prop::MSG_TR_PLATEAU_AT_K << k << "\n";
@@ -441,6 +450,19 @@ bool explicit_cuba::finite_context_reachability(const pushdown_automaton& PDA,
 	}
 	trace[s] = false;
 	return false;
+}
+
+void explicit_cuba::dump_top_R(const bool dump_size_only) const {
+	size_t size = 0;
+	for (const auto& visible_states : top_R) {
+		if (!dump_size_only) {
+			for (const auto& state : visible_states) {
+				cout << state << "\n";
+			}
+		}
+		size += visible_states.size();
+	}
+	cout << "The number of reachable visible states are: " << size << "\n";
 }
 
 } /* namespace cuba */

@@ -330,6 +330,8 @@ void cmd_line::create_argument_list() {
 	/// other options
 	this->add_switch(get_opt_index(opt_type::OTHER), "-p", "--print-all",
 			"print all output, including states and visible states, in each round");
+	this->add_switch(get_opt_index(opt_type::OTHER), "-s",
+			"--print-visible-states", "print all reachable visible states");
 	this->add_switch(get_opt_index(opt_type::OTHER), SHORT_VERSION_OPT,
 			LONG_VERSION_OPT, "show version information and exit");
 }

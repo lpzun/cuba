@@ -2,7 +2,7 @@
  * cpda.hh
  *
  * @date  : Aug 27, 2016
- * @author: TODO
+ * @author: Peizun Liu
  *
  * This file defines the data structures of a pushdown system (PDS), and a
  * concurrent pushdown system (CPDS):

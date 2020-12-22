@@ -18,6 +18,7 @@ prop::~prop() {
 bool prop::OPT_PRINT_ADJ = false;
 bool prop::OPT_PRINT_CMD = false;
 bool prop::OPT_PRINT_ALL = false;
+bool prop::OPT_PRINT_TOP_R = false;
 
 bool prop::OPT_PROB_REACHABILITY = false;
 
