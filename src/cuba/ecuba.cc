@@ -123,13 +123,6 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		}
 		/// 2.2.2: OS1 collapses
 		if (nextLevel.size() == 0) {
-			for (auto state = 0; state < generators.size(); ++state) {
-				cout << ":PL: state = " << state;
-				for (const auto & gen : generators[state]) {
-					cout << "  " << gen << "\n";
-				}
-				cout << "\n";
-			}
 			cout << prop::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1) << "\n";
 			return true;
 		}
@@ -277,7 +270,6 @@ bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k) {
 				/// updating approx_X
 				auto ifind = generators[top_c.get_state()].find(top_c);
 				if (ifind != generators[top_c.get_state()].end()) {
-					cout << " :PL: ............... generator = " << *ifind;
 					generators[top_c.get_state()].erase(ifind);
 				}
 			}
@@ -288,7 +280,6 @@ bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k) {
 	cout << prop::MSG_NUM_VISIBLE_STATES << cnt_new_top_cfg << "\n";
 	if (cnt_new_top_cfg == 0) {
 		if (is_convergent()) {
-			cout << ":PL: ............... I am convergent .......";
 			return true;
 		}
 		cout << prop::MSG_TR_PLATEAU_AT_K << k << "\n";
