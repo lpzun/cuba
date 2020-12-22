@@ -2,7 +2,7 @@
  * Pushdown automaton
  *
  * @date  : Sep 15, 2016
- * @author: TODO
+ * @author: Peizun Liu
  */
 
 #ifndef DS_PDA_HH_

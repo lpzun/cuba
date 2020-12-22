@@ -2,7 +2,7 @@
  * utilities.hh
  *
  * @date   Aug 29, 2016
- * @author TODO
+ * @author Peizun Liu
  */
 
 #ifndef UTILS_UTILITIES_HH_

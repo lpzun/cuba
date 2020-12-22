@@ -2,7 +2,7 @@
  * state.cc
  *
  * @date  : Aug 27, 2016
- * @author: TODO
+ * @author: Peizun Liu
  */
 
 #include "cpda.hh"

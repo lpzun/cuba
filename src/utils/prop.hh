@@ -2,7 +2,7 @@
  * prop.hh This is a property class
  *
  * @date   Aug 29, 2016
- * @author TODO
+ * @author Peizun Liu
  */
 
 #ifndef UTILS_PROP_HH_

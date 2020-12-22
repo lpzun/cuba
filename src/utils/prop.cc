@@ -2,7 +2,7 @@
  * prop.cc
  *
  * @date  : Aug 29, 2016
- * @author: TODO
+ * @author: Peizun Liu
  */
 
 #include "prop.hh"

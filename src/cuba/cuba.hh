@@ -2,7 +2,7 @@
  * cuba.hh
  *
  * @date   Aug 28, 2016
- * @author TODO
+ * @author Peizun Liu
  */
 
 #ifndef CUBA_CUBA_HH_

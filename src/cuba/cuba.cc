@@ -3,7 +3,7 @@
  *    The implementation of base_cuba class
  *
  * @date   Jun 13, 2017
- * @author TODO
+ * @author Peizun Liu
  */
 #include "cuba.hh"
 

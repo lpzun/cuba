@@ -2,7 +2,7 @@
  * generator.cc
  *
  * @date  : Jan 19, 2018
- * @author: TODO
+ * @author: Peizun Liu
  */
 
 #include <generator.hh>

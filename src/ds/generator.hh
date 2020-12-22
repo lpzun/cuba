@@ -2,7 +2,7 @@
  * generator.hh
  *
  * @date  : Jan 19, 2018
- * @author: TODO
+ * @author: Peizun Liu
  */
 
 #ifndef DS_GENERATOR_HH_
