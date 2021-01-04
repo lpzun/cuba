@@ -1,0 +1,19 @@
+#Global init: 0
+# s^I=0|1,4,6
+7
+# Machine1 initial local: 1
+PDA 1 2
+0 1 -> 1 2
+3 2 -> 0 1
+4 2 -> 2 2
+
+# Machine2 initial local: 4
+PDA 4 6
+1 4 -> 6 4 6
+6 4 -> 3 4 4
+4 4 -> 3 -
+
+# Machine3 initial local: 8
+PDA 7 8
+3 8 -> 4 8
+2 8 -> 4 8 8
