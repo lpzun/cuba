@@ -145,7 +145,7 @@ private:
 			map<thread_visible_state, bool>& visit,
 			map<thread_visible_state, bool>& trace);
 
-	void dump_top_R(const bool dump_size_only) const;
+	void dump_top_R() const;
 
 	/// <top_R>: the sequences of visible states. We obtained the
 	/// sequence from R directly.

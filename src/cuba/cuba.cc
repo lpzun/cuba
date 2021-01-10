@@ -31,7 +31,6 @@ base_cuba::base_cuba(const string& initl, const string& final,
 
 	generator gen(initl, CPDA, parser::parse_input_cfsm(filename));
 	generators = gen.get_generators();
-	cout << "context-(un)bounded analysis...\n";
 
 	if (flags::OPT_FILE_DUMP) {
 		auto idx = filename.find_first_of('.');

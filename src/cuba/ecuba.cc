@@ -35,6 +35,7 @@ explicit_cuba::~explicit_cuba() {
  * @param k: the number of context switches
  */
 void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
+	cout << "context-" << (k_bound == 0 ? "un" : "") << "bounded analysis...\n";
 	for (size_n tid = 0; tid < CPDA.size(); ++tid) {
 		if (finite_context_reachability(tid)) {
 			cout << "Finite-context reachability is unsatisfiable...\n";
@@ -49,7 +50,7 @@ void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
 		else if (convergent)
 			cout << "=> " << final_c << " is unreachable!" << endl;
 	}
-	this->dump_top_R(/*dump_size_only=*/true);
+	this->dump_top_R();
 }
 
 /**
@@ -458,18 +459,14 @@ bool explicit_cuba::finite_context_reachability(const pushdown_automaton& PDA,
 	return false;
 }
 
-void explicit_cuba::dump_top_R(const bool dump_size_only) const {
+void explicit_cuba::dump_top_R() const {
 	size_t size = 0;
 	for (const auto& visible_states : top_R) {
-		if (!dump_size_only) {
-			for (const auto& state : visible_states) {
-				cout << state << "\n";
-			}
-		}
 		size += visible_states.size();
 	}
+	cout << "The number of reachable visible states are: " << size << "\n";
 
-//	if (flags::OPT_FILE_DUMP) {
+	if (flags::OPT_FILE_DUMP) {
 //		ofstream osR(filename_global_R);
 //		if (osR.is_open()) {
 //			for (int k = 0; k < global_R.size(); ++k) {
@@ -480,18 +477,17 @@ void explicit_cuba::dump_top_R(const bool dump_size_only) const {
 //			}
 //			osR.close();
 //		}
-//
-//		ofstream osTR(filename_top_R);
-//		if (osTR.is_open()) {
-//			for (int k = 0; k < top_R.size(); ++k) {
-//				for (const auto& t : top_R[k]) {
-//					osTR << t << "\n";
-//				}
-//			}
-//			osTR.close();
-//		}
-//	}
-	cout << "The number of reachable visible states are: " << size << "\n";
+
+		ofstream osTR(filename_top_R);
+		if (osTR.is_open()) {
+			for (int k = 0; k < top_R.size(); ++k) {
+				for (const auto& t : top_R[k]) {
+					osTR << t << "\n";
+				}
+			}
+			osTR.close();
+		}
+	}
 }
 
 } /* namespace cuba */
