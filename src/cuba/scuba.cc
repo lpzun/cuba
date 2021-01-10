@@ -45,7 +45,7 @@ void symbolic_cuba::context_unbounded_analysis(const size_k k_bound) {
 	/// step 2: perform context-unbounded analysis
 	cout << "Initial symbolic state: " << cfg_I << endl;
 	const auto convergent = context_bounded_analysis(k_bound, cfg_I);
-	if (prop::OPT_PROB_REACHABILITY) {
+	if (flags::OPT_PROB_REACHABILITY) {
 		if (reachable)
 			cout << "=> " << final_c << " is reachable!" << endl;
 		else if (convergent)
@@ -107,7 +107,7 @@ bool symbolic_cuba::context_bounded_analysis(const size_k k_bound,
 		}
 
 		/// if reachability and the target visible state is reachable
-		if (prop::OPT_PROB_REACHABILITY && reachable) {
+		if (flags::OPT_PROB_REACHABILITY && reachable) {
 			break;
 		}
 
@@ -547,7 +547,7 @@ uint symbolic_cuba::top_mapping(const deque<symbolic_state>& R,
 	uint cnt_new_top_cfg = 0;
 	for (const auto& c : R) {
 		for (const auto& top_c : top_mapping(c)) {
-			if (prop::OPT_PROB_REACHABILITY && top_c == final_c) {
+			if (flags::OPT_PROB_REACHABILITY && top_c == final_c) {
 				reachable = true;
 			}
 			auto ret = topped_R[top_c.get_state()].emplace(top_c);

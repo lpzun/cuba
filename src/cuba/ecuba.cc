@@ -19,7 +19,7 @@ namespace cuba {
  */
 explicit_cuba::explicit_cuba(const string& initl, const string& final,
 		const string& filename) :
-		base_cuba(initl, final, filename) {
+		base_cuba(initl, final, filename), top_R(thread_visible_state::S) {
 	cout << logger::MSG_EXP_EXPLORATION;
 }
 
@@ -42,14 +42,14 @@ void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
 			return;
 		}
 	}
-
 	const auto convergent = k_bounded_reachability(k_bound, initl_c);
-	if (prop::OPT_PROB_REACHABILITY) {
+	if (flags::OPT_PROB_REACHABILITY) {
 		if (reachable)
 			cout << "=> " << final_c << " is reachable!" << endl;
 		else if (convergent)
 			cout << "=> " << final_c << " is unreachable!" << endl;
 	}
+	this->dump_top_R(/*dump_size_only=*/true);
 }
 
 /**
@@ -75,13 +75,10 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 	/// 1.3 <global_R>: the sequences of reachable global states.
 	vector<vector<antichain>> global_R;
 	global_R.reserve(k_bound + 1);
-	global_R.emplace_back(vector<antichain>(thread_visible_state::S));
+	global_R.push_back(vector<antichain>(thread_visible_state::S));
+	global_R.push_back(vector<antichain>(thread_visible_state::S));
 	global_R[k][c_I.get_state()].emplace_back(CPDA.size(), c_I.get_state(),
 			c_I.get_stacks());
-
-	/// 1.4 <top_R>: the sequences of visible states. We obtained the
-	/// sequence from R directly.
-	vector<set<visible_state>> top_R(thread_visible_state::S);
 	/// step 2: compute all reachable states with up to k_bound contexts.
 	while (k_bound == 0 || k <= k_bound) {
 		/// step 2.0 <nextLevel> = R_{k+1} \ R_{k}: the set of explicit
@@ -90,6 +87,10 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		antichain nextLevel;
 		/// step 2.1: compute nextLevel, or R_{k+1}: iterate over all elements
 		/// in the currLevel. This is a BFS-like procedure.
+		if (k >= global_R.size() || k + 1 >= global_R.size()) {
+			global_R.push_back(vector<antichain>(thread_visible_state::S));
+			global_R.push_back(vector<antichain>(thread_visible_state::S));
+		}
 		while (!currLevel.empty()) {
 			/// 2.1.1: remove an element from currLevel
 			const auto c = currLevel.front();
@@ -101,7 +102,7 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 				/// 2.1.4: skip _c if it's already been reached
 				if (!update_R(global_R, k, _c))
 					continue;
-				/// 2.1.5: add _c to worklist if it's unreachable
+				/// 2.1.5: add _c to worklist if it's not reached yet
 				currLevel.emplace_back(_c);
 			}
 			/// The successors with context switch
@@ -118,52 +119,28 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 		/// if convergence detection is required, then
 		/// step 2.2: convergence detection
 		///  2.2.1: OS1 collapses
-		if (nextLevel.size() == 0) {
-			if (k_bound == 0) {
-				cout << logger::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1)
-						<< "\n";
-				return true;
-			}
-		}
-
+//		if (nextLevel.empty()) {
+//			if (k_bound == 0) {
+//				cout << logger::MSG_GR_COLLAPSE_AT_K << k << "\n";
+//				return true;
+//			}
+//		}
 		///  2.2.2: OS3 collapses, i.e. T(R)
-		if (converge(global_R[k], k, top_R)) {
+		if (converge(global_R, k, top_R, nextLevel.empty())) {
 			if (k_bound == 0) {
-				cout << logger::MSG_TR_COLLAPSE_AT_K << (k == 0 ? k : k - 1)
+				cout << logger::MSG_TR_COLLAPSE_AT_K
+						<< (k == 0 ? k : k - (nextLevel.empty() ? 2 : 1))
 						<< "\n";
 				return true;
 			}
 		}
 		/// if reachability and the target visible state is reachable
-		if (prop::OPT_PROB_REACHABILITY && reachable) {
+		if (flags::OPT_PROB_REACHABILITY && reachable) {
 			break;
 		}
 		/// step 2.3: if all states in currLevel have been processed,
 		/// then move onto the (k+1)st contexts.
 		currLevel.swap(nextLevel), ++k;
-	}
-
-	if (prop::OPT_FILE_DUMP) {
-		ofstream osR(filename_global_R);
-		if (osR.is_open()) {
-			for (int k = 0; k < global_R.size(); ++k) {
-				for (const auto& antichains : global_R[k]) {
-					for (const auto& t : antichains)
-						osR << t << "\n";
-				}
-			}
-			osR.close();
-		}
-
-		ofstream osTR(filename_top_R);
-		if (osTR.is_open()) {
-			for (int k = 0; k < top_R.size(); ++k) {
-				for (const auto& t : top_R[k]) {
-					osTR << t << "\n";
-				}
-			}
-			osTR.close();
-		}
 	}
 
 	return false;
@@ -216,8 +193,8 @@ void explicit_cuba::step(const pda_state& q, const stack_vec& W, const uint tid,
 	if (tid >= CPDA.size() || W[tid].empty())
 		return;
 	/// step 2.2: iterator over all successors of current thread state
-	const auto ifind = CPDA[tid].get_program().find(
-			thread_visible_state(q, W[tid].top()));
+	const thread_visible_state src(q, W[tid].top());
+	const auto ifind = CPDA[tid].get_program().find(src);
 	if (ifind == CPDA[tid].get_program().end())
 		return;
 	for (const auto rid : ifind->second) { /// rid: transition id
@@ -264,8 +241,6 @@ bool explicit_cuba::update_R(vector<vector<antichain>>& R, const size_k k,
 	/// step 2.1.2: discard it if tau is already explored
 	if (is_reachable(c, k, R))
 		return false;
-	if (k >= R.size())
-		R.emplace_back(vector<antichain>(thread_visible_state::S));
 	R[k][c.get_state()].emplace_back(c);
 	return true;
 }
@@ -273,31 +248,45 @@ bool explicit_cuba::update_R(vector<vector<antichain>>& R, const size_k k,
 /**
  * Determine whether reaching a convergence in k contexts. It returns true
  * if converges, false otherwise.
- * @param R_k  the global states reached in kth context.
- * @param k    current context is k
+ * @param R  the global states reached in first k contexts.
+ * @param k  current context is k
  * @param top_R the set of reachable visible states
  * @return bool
  */
-bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
-		vector<set<visible_state>>& top_R) {
-	cout << logger::MSG_SEPARATOR;
-	cout << "context " << k << "\n";
+bool explicit_cuba::converge(const vector<vector<antichain>>& R, const size_k k,
+		vector<set<visible_state>>& top_R, const bool next_level) {
+//	cout << logger::MSG_SEPARATOR;
+//	cout << "context " << k << "\n";
+	uint cnt_new_top_cfg = update_top_R(R, k, top_R);
+//	cout << logger::MSG_NUM_VISIBLE_STATES << cnt_new_top_cfg << "\n";
+	if (cnt_new_top_cfg == 0) {
+		cout << logger::MSG_TR_PLATEAU_AT_K << (k - (next_level ? 2 : 1))
+				<< "\n";
+		if (is_convergent()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+uint explicit_cuba::update_top_R(const vector<vector<antichain>>& R,
+		const size_k k, vector<set<visible_state>>& top_R) {
 	/// the number of new reachable top states
 	uint cnt_new_top_cfg = 0;
 	for (uint q = 0; q < (uint) thread_visible_state::S; ++q) {
-		for (const auto& c : R_k[q]) {
-			if (prop::OPT_PRINT_ALL)
-				cout << string(2, ' ') << c;
+		for (const auto& c : R[k][q]) {
+//			if (flags::OPT_PRINT_ALL)
+//				cout << "  " << c;
 			const auto& top_c = top_mapping(c);
 
 			/// if reachability and the target visible state is reachable
-			if (prop::OPT_PROB_REACHABILITY && top_c == final_c) {
+			if (flags::OPT_PROB_REACHABILITY && top_c == final_c) {
 				reachable = true;
 			}
 			const auto& ret = top_R[c.get_state()].emplace(top_c);
 			if (ret.second) {
-				if (prop::OPT_PRINT_ALL)
-					cout << " : " << top_c;
+//				if (flags::OPT_PRINT_ALL)
+//					cout << " : " << top_c;
 				/// find a new top state
 				++cnt_new_top_cfg;
 				/// updating approx_X
@@ -305,18 +294,11 @@ bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
 				if (ifind != generators[top_c.get_state()].end())
 					generators[top_c.get_state()].erase(ifind);
 			}
-			if (prop::OPT_PRINT_ALL)
-				cout << "\n";
+//			if (flags::OPT_PRINT_ALL)
+//				cout << "\n";
 		}
 	}
-	cout << logger::MSG_NUM_VISIBLE_STATES << cnt_new_top_cfg << "\n";
-	if (cnt_new_top_cfg == 0) {
-		if (is_convergent()) {
-			return true;
-		}
-		cout << logger::MSG_TR_PLATEAU_AT_K << k << "\n";
-	}
-	return false;
+	return cnt_new_top_cfg;
 }
 
 /**
@@ -326,8 +308,9 @@ bool explicit_cuba::converge(const vector<antichain>& R_k, const size_k k,
  */
 bool explicit_cuba::is_convergent() {
 	for (const auto& s : generators) {
-		if (!s.empty())
+		if (!s.empty()) {
 			return false;
+		}
 	}
 	return true;
 }
@@ -473,6 +456,42 @@ bool explicit_cuba::finite_context_reachability(const pushdown_automaton& PDA,
 	}
 	trace[s] = false;
 	return false;
+}
+
+void explicit_cuba::dump_top_R(const bool dump_size_only) const {
+	size_t size = 0;
+	for (const auto& visible_states : top_R) {
+		if (!dump_size_only) {
+			for (const auto& state : visible_states) {
+				cout << state << "\n";
+			}
+		}
+		size += visible_states.size();
+	}
+
+//	if (flags::OPT_FILE_DUMP) {
+//		ofstream osR(filename_global_R);
+//		if (osR.is_open()) {
+//			for (int k = 0; k < global_R.size(); ++k) {
+//				for (const auto& antichains : global_R[k]) {
+//					for (const auto& t : antichains)
+//						osR << t << "\n";
+//				}
+//			}
+//			osR.close();
+//		}
+//
+//		ofstream osTR(filename_top_R);
+//		if (osTR.is_open()) {
+//			for (int k = 0; k < top_R.size(); ++k) {
+//				for (const auto& t : top_R[k]) {
+//					osTR << t << "\n";
+//				}
+//			}
+//			osTR.close();
+//		}
+//	}
+	cout << "The number of reachable visible states are: " << size << "\n";
 }
 
 } /* namespace cuba */

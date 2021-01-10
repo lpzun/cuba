@@ -8,7 +8,7 @@
 #ifndef WUBA_WUBA_HH_
 #define WUBA_WUBA_HH_
 
-#include "prop.hh"
+#include <flags.hh>
 #include "generator.hh"
 
 using namespace ruba;

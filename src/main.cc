@@ -78,30 +78,33 @@ int main(const int argc, const char * const * const argv) {
 
 		const string& final = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--target");
-
-		prop::OPT_MATCHING_FILE = cmd.arg_value(
+		flags::OPT_MATCHING_FILE = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--matching");
-		if (prop::OPT_MATCHING_FILE != "X") {
-			cout << prop::OPT_MATCHING_FILE << endl;
-			prop::OPT_NESTED_MATCH = true;
+		if (flags::OPT_MATCHING_FILE != "X") {
+			cout << flags::OPT_MATCHING_FILE << endl;
+			flags::OPT_NESTED_MATCH = true;
 		}
 
 		const string& mode = cmd.arg_value(
 				cmd_line::get_opt_index(opt_type::PROB), "--mode");
 
-		prop::OPT_PRINT_ADJ = cmd.arg_bool(
+		flags::OPT_PRINT_ADJ = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::PROB), "--list-input");
 
 		/// Sequential Mode
-		prop::OPT_SEQ_ATM = cmd.arg_bool(cmd_line::get_opt_index(opt_type::SEQ),
+		flags::OPT_SEQ_ATM = cmd.arg_bool(cmd_line::get_opt_index(opt_type::SEQ),
 				"--automaton");
 
 		/// Concurrent Mode
 		const string& resource = cmd.arg_value(
-				cmd_line::get_opt_index(opt_type::CON), "--resource");
+				cmd_line::get_opt_index(opt_type::CON), "--resource-type");
 
 		const string& k_bound = cmd.arg_value(
-				cmd_line::get_opt_index(opt_type::CON), "--res-bound");
+				cmd_line::get_opt_index(opt_type::CON), "--resource-bound");
+		const string& z_bound = cmd.arg_value(
+				cmd_line::get_opt_index(opt_type::CON), "--stack-bound-for-z");
+		flags::OPT_Z_APPROXIMATION_BOUND =
+				z_bound.size() == 0 ? 1 : std::stoul(z_bound);
 
 		size_k k = k_bound.size() == 0 ? 0 : std::stoul(k_bound);
 
@@ -109,20 +112,25 @@ int main(const int argc, const char * const * const argv) {
 				cmd_line::get_opt_index(opt_type::CON), "--explicit");
 
 		/// Other Options
-		prop::OPT_PRINT_CMD = cmd.arg_bool(
+		flags::OPT_PRINT_CMD = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--cmd-line");
 
-		prop::OPT_PRINT_ALL = cmd.arg_bool(
+		flags::OPT_PRINT_ALL = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--print-all");
 
-		prop::OPT_FILE_DUMP = cmd.arg_bool(
+		flags::OPT_FILE_DUMP = cmd.arg_bool(
 				cmd_line::get_opt_index(opt_type::OTHER), "--file-dump");
 
 		if (mode == "O") {
-			cout << "Overapproximation mode\n";
+			cout << "overapproximation mode......\n";
 			cout << filename << " " << initl << "\n";
+			const auto initl_c = parser::parse_input_cfg(initl);
+			const auto CPDA = parser::parse_input_cpds(filename);
+			const auto CFSM = parser::parse_input_cfsm(filename);
+			generator gen(initl, CPDA, CFSM);
+			gen.get_generators();
 		} else if (mode == "S") {
-			cout << "sequential mode\n";
+			cout << "sequential mode......\n";
 			cout << filename << " " << initl << " " << final << "\n";
 			cout << "sequential computation is not set up yet! \n";
 		} else {

@@ -19,23 +19,21 @@ namespace cuba {
  */
 base_cuba::base_cuba(const string& initl, const string& final,
 		const string& filename) :
-		reachable(false), initl_c(0, 1), final_c(0, 1), CPDA(), ///
+		reachable(false), initl_c(0, 1), final_c(0, 1), CPDA(parser::parse_input_cpds(filename)), ///
 		generators(), reachable_T(), ///
 		filename_global_R(""), filename_top_R("") {
-	CPDA = parser::parse_input_cpds(filename);
-
 	initl_c = parser::parse_input_cfg(initl);
 
 	if (final != "X") {
 		final_c = top_mapping(parser::parse_input_cfg(final));
-		prop::OPT_PROB_REACHABILITY = true;
+		flags::OPT_PROB_REACHABILITY = true;
 	}
 
-	generator gen(initl, filename);
+	generator gen(initl, CPDA, parser::parse_input_cfsm(filename));
 	generators = gen.get_generators();
 	cout << "context-(un)bounded analysis...\n";
 
-	if (prop::OPT_FILE_DUMP) {
+	if (flags::OPT_FILE_DUMP) {
 		auto idx = filename.find_first_of('.');
 		filename_global_R = filename.substr(0, idx) + "_global_R.txt";
 		filename_top_R = filename.substr(0, idx) + "_top_R.txt";

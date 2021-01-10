@@ -9,6 +9,8 @@
 
 namespace ruba {
 
+vector<set<pda_alpha>> parser::pop_candiate_sets;
+
 /**
  * Read and parse CPDS from file, to build concurrent pushdown automaton
  * @param filename
@@ -33,12 +35,13 @@ concurrent_finite_machine parser::parse_input_cfsm(const string& filename) {
 	concurrent_finite_machine CFSM;
 	set<pda_state> states;
 	const auto& sCPDA = read_input_cpds(filename, states);
-	if (prop::OPT_NESTED_MATCH) {
-		const auto& sMATCH = read_input_matching(prop::OPT_MATCHING_FILE);
+	if (flags::OPT_NESTED_MATCH) {
+		const auto& sMATCH = read_input_matching(flags::OPT_MATCHING_FILE);
 		for (size_t i = 0; i < sCPDA.size(); ++i) {
 			CFSM.emplace_back(parse_input_fsm(sCPDA[i], sMATCH[i]));
 		}
 	} else {
+		pop_candiate_sets.reserve(sCPDA.size());
 		for (size_t i = 0; i < sCPDA.size(); ++i) {
 			CFSM.emplace_back(parse_input_fsm(sCPDA[i]));
 		}
@@ -53,20 +56,20 @@ concurrent_finite_machine parser::parse_input_cfsm(const string& filename) {
  */
 vector<vector<string>> parser::read_input_cpds(const string& filename,
 		set<pda_state>& states) {
-/// original input file, possibly with comments
+    /// original input file, possibly with comments
 	ifstream org_in(filename.c_str());
 	if (!org_in.good())
 		throw cuba_runtime_error("Input file does not exist!");
-	remove_comments(org_in, "/tmp/tmp.pds.no_comment", prop::COMMENT);
+	remove_comments(org_in, "/tmp/tmp.pds.no_comment", flags::COMMENT);
 	org_in.close();
 
 	ifstream new_in("/tmp/tmp.pds.no_comment");
-/// read the set of control states
+    /// read the set of control states
 	if (!new_in.good())
 		throw cuba_runtime_error(
 				"Something wrong when reading the input CPDS!");
 
-/// parse the set of control states: MUST be in the first line
+    /// parse the set of control states: MUST be in the first line
 	new_in >> thread_visible_state::S;
 	for (pda_state s = 0; s < thread_visible_state::S; ++s) {
 		states.emplace(s);
@@ -93,7 +96,7 @@ pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
 		const vector<string>& sPDA) {
 	if (sPDA.size() == 0)
 		return pushdown_automaton();
-/// step 1: current PDA's stack symbols
+    /// step 1: current PDA's stack symbols
 	set<pda_alpha> alphas;
 	{
 		istringstream iss(sPDA[0]);
@@ -108,7 +111,7 @@ pushdown_automaton parser::parse_input_pda(const set<pda_state>& states,
 		}
 	}
 
-/// step 2: current PDA's actions and adjacency list
+	/// step 2: current PDA's actions and adjacency list
 	vector<pda_action> actions;
 	adj_list program;
 	id_action trans_id = 0;
@@ -213,9 +216,9 @@ finite_machine parser::parse_input_fsm(const vector<string>& sPDA) {
 		if (pda_mark != "PDA")
 			throw cuba_runtime_error("PDA input format error!");
 	}
-	set<pda_alpha> pop_candidate; /// collect all after-pop symbols
+	set<pda_alpha> pop_candidates; /// collect all after-pop symbols
 	deque<uint> pop_action_id; /// collect pop action ids
-	pop_candidate.emplace(alphabet::EPSILON);
+	pop_candidates.emplace(alphabet::EPSILON);
 	finite_machine fsm;
 	for (uint i = 1; i < sPDA.size(); ++i) {
 		/// three types of transition:
@@ -235,7 +238,7 @@ finite_machine parser::parse_input_fsm(const vector<string>& sPDA) {
 		thread_visible_state src(s1, parse_input_alpha(l1));
 		/// destination thread configuration
 		if (parse_input_alpha(l3) != alphabet::NULLPTR) { /// push operation
-			pop_candidate.emplace(parse_input_alpha(l3));
+			pop_candidates.emplace(parse_input_alpha(l3));
 			thread_visible_state dst(s2, parse_input_alpha(l2));
 			fsm[src].emplace_back(src, dst, type_stack_operation::PUSH);
 		} else if (parse_input_alpha(l2) != alphabet::EPSILON) { /// overwrite operation
@@ -255,11 +258,12 @@ finite_machine parser::parse_input_fsm(const vector<string>& sPDA) {
 		istringstream iss(sPDA[i]);
 		iss >> s1 >> l1 >> sep >> s2;
 		thread_visible_state src(s1, l1);
-		for (const auto l2 : pop_candidate) {
+		for (const auto l2 : pop_candidates) {
 			thread_visible_state dst(s2, l2);
 			fsm[src].emplace_back(src, dst, type_stack_operation::POP);
 		}
 	}
+	pop_candiate_sets.push_back(pop_candidates);
 	return fsm;
 }
 
@@ -385,10 +389,10 @@ explicit_state parser::create_global_config_from_str(const string& s_ts,
 		throw("The format of input state is wrong!");
 	}
 
-	const auto& stacks = split(vs_cfg[1], prop::THREAD_DELIMITER);
+	const auto& stacks = split(vs_cfg[1], flags::THREAD_DELIMITER);
 	stack_vec W(stacks.size());
 	for (uint i = 0; i < stacks.size(); ++i) {
-		const auto& symbols = split(stacks[i], prop::STACK_DELIMITER);
+		const auto& symbols = split(stacks[i], flags::STACK_DELIMITER);
 		for (const auto& s : symbols) {
 			if (s.front() == alphabet::OPT_EPSILON)
 				W[i].push(alphabet::EPSILON);
@@ -411,7 +415,7 @@ thread_state parser::create_thread_config_from_str(const string& s_ts,
 	if (vs_tg.size() != 2) {
 		throw("The format of input thread state is wrong!");
 	}
-	const auto& symbols = split(vs_tg[1], prop::STACK_DELIMITER);
+	const auto& symbols = split(vs_tg[1], flags::STACK_DELIMITER);
 	pda_stack w;
 	for (const auto& s : symbols) {
 		w.push(std::stoi(s));

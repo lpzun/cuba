@@ -5,17 +5,17 @@
  * @author TODO
  */
 
-#ifndef UTILS_PROP_HH_
-#define UTILS_PROP_HH_
+#ifndef UTILS_FLAGS_HH_
+#define UTILS_FLAGS_HH_
 
 #include "heads.hh"
 
 namespace ruba {
 
-class prop {
+class flags {
 public:
-	prop();
-	~prop();
+	flags();
+	~flags();
 
 	static bool OPT_PRINT_ALL;
 	static bool OPT_PRINT_CMD;
@@ -23,9 +23,11 @@ public:
 	static bool OPT_FILE_DUMP;
 
 	static bool OPT_PROB_REACHABILITY;
+	static bool OPT_GLOBAL_STATE;
 	static bool OPT_SEQ_ATM;
 	static bool OPT_NESTED_MATCH;
 	static string OPT_MATCHING_FILE;
+	static size_t OPT_Z_APPROXIMATION_BOUND;
 
 	static const string COMMENT;
 
@@ -36,4 +38,4 @@ public:
 
 } /* namespace ruba */
 
-#endif /* UTILS_PROP_HH_ */
+#endif /* UTILS_FLAGS_HH_ */

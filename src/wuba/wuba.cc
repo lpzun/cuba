@@ -28,7 +28,7 @@ base_wuba::base_wuba(const string& initl, const string& final,
 	CPDA = parser::parse_input_cpds(filename);
 
 	/// set up overapproximation of reachable top configurations
-	generator gen(initl, filename);
+	generator gen(initl, CPDA, parser::parse_input_cfsm(filename));
 	generators = gen.get_generators();
 }
 

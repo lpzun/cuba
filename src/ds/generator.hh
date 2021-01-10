@@ -18,27 +18,42 @@ namespace ruba {
 /////////////////////////////////////////////////////////////////////////
 class generator {
 public:
-	generator(const string& initl, const string& filename);
+	generator(const string& initl, const concurrent_pushdown_automata& CPDA,
+			const concurrent_finite_machine& CFSM);
 	~generator();
 
-	const vector<set<visible_state> >& get_generators() const {
-		return generators;
+	vector<set<visible_state>> get_generators() const {
+		return generators_for_dynamic_bound;
 	}
 
 private:
-	vector<set<visible_state>> generators;
+	vector<set<visible_state>> generators_for_fixed_bound_1;
+	/// 1.1 <approx_Z>: the overapproximation of the set of reachable
+	///     top configurations
+	vector<set<visible_state>> approx_Z;
+	vector<set<visible_state>> generators_for_dynamic_bound;
 
-	void context_insensitive(const string& initl, const string& filename);
+	const explicit_state initl_tau;
+	concurrent_pushdown_automata CPDA;
+	concurrent_finite_machine CFSM;
 
-	void context_insensitive(const visible_state& initl, const string& filename);
-	vector<set<visible_state>> context_insensitive(const visible_state& initl_c,
-			const vector<finite_machine>& CFSM);
-	vector<set<visible_state>> standard_FWS(const visible_state& initl_c,
-			const vector<finite_machine>& CFSM);
-	deque<visible_state> step(const visible_state& c,
-			const vector<finite_machine>& CFSM);
+	void context_insensitive();
+
+	void context_insensitive_with_dynamic_bound();
+	void dynamic_bound_standard_FWS();
+	deque<explicit_state> step(const explicit_state& c);
+	void step(const pda_state& q, const stack_vec& W, const uint tid,
+			deque<explicit_state>& successors);
+	bool update_R(const explicit_state& tau, vector<deque<explicit_state>>& R);
+
+	/// Build FSM and then compute Z
+	void context_insensitive_with_fixed_bound_1();
+	vector<set<visible_state>> fixed_bound_standard_FWS();
+	deque<visible_state> step(const visible_state& c);
+
+	/// Utilities to compute & print visible states
 	visible_state top_mapping(const explicit_state& tau);
-	void print_approximation(const vector<set<visible_state>>& approx_R);
+	void print_approximation(const vector<set<visible_state>>& approx_R) const;
 };
 
 } /* namespace ruba */

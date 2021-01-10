@@ -8,8 +8,8 @@
 #ifndef DS_PDA_HH_
 #define DS_PDA_HH_
 
+#include <flags.hh>
 #include "utilities.hh"
-#include "prop.hh"
 
 namespace ruba {
 
@@ -284,6 +284,17 @@ public:
 			return false;
 		worklist.pop_front();
 		return true;
+	}
+
+	bool pop_back() {
+		if (worklist.empty())
+			return false;
+		worklist.pop_back();
+		return true;
+	}
+
+	void push_back(const T& _value) {
+		worklist.emplace_back(_value);
 	}
 
 	bool overwrite(const T& _value) {

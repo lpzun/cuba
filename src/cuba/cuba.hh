@@ -8,7 +8,7 @@
 #ifndef CUBA_CUBA_HH_
 #define CUBA_CUBA_HH_
 
-#include "prop.hh"
+#include <flags.hh>
 #include "generator.hh"
 
 using namespace ruba;
@@ -127,7 +127,9 @@ private:
 			const explicit_state_tid& c);
 
 	/// determine convergence, reachability of a target and so on
-	bool converge(const vector<antichain>& R, const size_k k,
+	bool converge(const vector<vector<antichain>>& R, const size_k k,
+			vector<set<visible_state>>& top_R, const bool next_level);
+	uint update_top_R(const vector<vector<antichain>>& R, const size_k k,
 			vector<set<visible_state>>& top_R);
 	bool is_convergent();
 	bool is_reachable(const explicit_state_tid& tau, const size_k k,
@@ -142,6 +144,12 @@ private:
 			const thread_visible_state& s, stack<pda_alpha>& W,
 			map<thread_visible_state, bool>& visit,
 			map<thread_visible_state, bool>& trace);
+
+	void dump_top_R(const bool dump_size_only) const;
+
+	/// <top_R>: the sequences of visible states. We obtained the
+	/// sequence from R directly.
+	vector<set<visible_state>> top_R; /// The sequences of visible states.
 };
 }
 /* namespace cuba */

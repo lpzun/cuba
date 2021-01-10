@@ -235,12 +235,12 @@ bool explicit_wuba::converge(const vector<deque<explicit_state>>& Rk,
 	uint cnt_new_top_cfg = 0;
 	for (pda_state q = 0; q < thread_visible_state::S; ++q) {
 		for (const auto& c : Rk[q]) {
-			if (prop::OPT_PRINT_ALL)
+			if (flags::OPT_PRINT_ALL)
 				cout << string(2, ' ') << c;
 			const auto& top_c = top_mapping(c);
 			const auto& ret = top_R[c.get_state()].emplace(top_c);
 			if (ret.second) {
-				if (prop::OPT_PRINT_ALL)
+				if (flags::OPT_PRINT_ALL)
 					cout << " : " << top_c;
 				++cnt_new_top_cfg;
 				/// removing reachable generators
@@ -248,7 +248,7 @@ bool explicit_wuba::converge(const vector<deque<explicit_state>>& Rk,
 				if (ifind != generators[top_c.get_state()].end())
 					generators[top_c.get_state()].erase(ifind);
 			}
-			if (prop::OPT_PRINT_ALL)
+			if (flags::OPT_PRINT_ALL)
 				cout << "\n";
 		}
 	}

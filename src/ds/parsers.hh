@@ -25,6 +25,8 @@ public:
 
 	static string create_default_states_in_str(const size_n n);
 
+	static vector<set<pda_alpha>> pop_candiate_sets;
+
 private:
 	static vector<vector<string>> read_input_cpds(const string& filename,
 			set<pda_state>& states);
@@ -49,14 +51,14 @@ private:
 	static deque<string> split(const string &s, const char delim);
 
 	static thread_state create_thread_config_from_str(const string& s_ts,
-			const char delim = prop::SHARED_LOCAL_DELIMITER);
+			const char delim = flags::SHARED_LOCAL_DELIMITER);
 	static explicit_state create_global_config_from_str(const string& s_ts,
-			const char delim = prop::SHARED_LOCAL_DELIMITER);
+			const char delim = flags::SHARED_LOCAL_DELIMITER);
 
 	static thread_visible_state create_thread_state_from_str(const string& s_ts,
-			const char delim = prop::SHARED_LOCAL_DELIMITER);
+			const char delim = flags::SHARED_LOCAL_DELIMITER);
 	static visible_state create_global_state_from_str(const string& s_ts,
-			const char delim = prop::SHARED_LOCAL_DELIMITER);
+			const char delim = flags::SHARED_LOCAL_DELIMITER);
 };
 }
 /* namespace ruba */

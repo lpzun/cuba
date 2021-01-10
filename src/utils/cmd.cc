@@ -332,14 +332,14 @@ void cmd_line::create_argument_list() {
 			"show the pushdown store automaton");
 
 	/// concurrent mode
-	this->add_option(get_opt_index(opt_type::CON), "-s", "--resource",
+	this->add_option(get_opt_index(opt_type::CON), "-s", "--resource-type",
 			(string("the type of resource-unbounded analysis (default = C):\n") /// row 1
 			.append(string(28, ' ')).append(
 					" \'C\': CBA or CUBA (context-(un)bounded analysis)\n") /// row 2
 			.append(string(28, ' ')).append(
 					" \'W\': WBA or WUBA (write-(un)bounded analysis)")).c_str(),
 			""); /// row 3
-	this->add_option(get_opt_index(opt_type::CON), "-k", "--res-bound",
+	this->add_option(get_opt_index(opt_type::CON), "-k", "--resource-bound",
 			(string("resource bound, ").append(
 					"performing resource-unbounded analysis if unspecified\n") /// row 1
 			.append(string(26, ' ')).append(
@@ -349,6 +349,8 @@ void cmd_line::create_argument_list() {
 			.append(string(29, ' ')).append(
 					"if -s = \'W\', then k represents the write access bound")),
 			""); /// row 4
+	this->add_option(get_opt_index(opt_type::CON), "-z", "--stack-bound-for-z",
+			string("stack bound for Z approximation (default = 1): Value must be > 0").c_str(), "");
 	this->add_switch(get_opt_index(opt_type::CON), "-x", "--explicit",
 			"run the explicit exploration assuming finite resource reachability holds");
 

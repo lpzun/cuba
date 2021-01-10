@@ -68,7 +68,7 @@ private:
  * @return a reference to output stream
  */
 inline ostream& operator<<(ostream& os, const visible_state& s) {
-	os << "(" << s.get_state() << prop::SHARED_LOCAL_DELIMITER;
+	os << "(" << s.get_state() << flags::SHARED_LOCAL_DELIMITER;
 	if (s.get_local().size() > 0) {
 		if (s.get_local()[0] == alphabet::EPSILON)
 			os << alphabet::OPT_EPSILON;
@@ -166,11 +166,11 @@ private:
  * @return ostream
  */
 inline ostream& operator<<(ostream& os, const explicit_state& c) {
-	os << "(" << c.get_state() << prop::SHARED_LOCAL_DELIMITER;
+	os << "(" << c.get_state() << flags::SHARED_LOCAL_DELIMITER;
 	if (c.get_stacks().size() > 0)
 		os << c.get_stacks()[0];
 	for (uint i = 1; i < c.get_stacks().size(); ++i)
-		os << prop::THREAD_DELIMITER << c.get_stacks()[i];
+		os << flags::THREAD_DELIMITER << c.get_stacks()[i];
 	os << ")";
 	return os;
 }
@@ -272,11 +272,11 @@ inline ostream& operator<<(ostream& os, const explicit_state_tid& c) {
 		os << "t=" << "* ";
 	else
 		os << "t=" << c.get_thread_id() << " ";
-	os << "<" << c.get_state() << prop::SHARED_LOCAL_DELIMITER;
+	os << "<" << c.get_state() << flags::SHARED_LOCAL_DELIMITER;
 	if (c.get_stacks().size() > 0)
 		os << c.get_stacks()[0];
 	for (uint i = 1; i < c.get_stacks().size(); ++i)
-		os << prop::THREAD_DELIMITER << c.get_stacks()[i];
+		os << flags::THREAD_DELIMITER << c.get_stacks()[i];
 	os << ">";
 	return os;
 }
@@ -414,7 +414,7 @@ inline ostream& operator<<(ostream& os, const symbolic_state& c) {
 /// We definite a finite state machine in the form of adjacency list.
 using finite_machine = map<thread_visible_state, deque<transition<thread_visible_state, thread_visible_state>>>;
 
-/// Concurrent finite machine: a vector of finite state machine
+/// Concurrent finite machine: a vector of finite state machines
 using concurrent_finite_machine = vector<finite_machine>;
 
 /**
