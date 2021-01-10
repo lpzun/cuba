@@ -92,7 +92,7 @@ short cmd_line::get_opt_index(const opt_type& opt) {
 ///////////////////////////////////////////////////////////////////////////////
 cmd_line::cmd_line() :
 		SHORT_HELP_OPT("-h"), LONG_HELP_OPT("--help"), SHORT_VERSION_OPT("-v"), ///
-		LONG_VERSION_OPT("--version"), VERSION("v1.0"), name_width(0), ///
+		LONG_VERSION_OPT("--version"), VERSION("v2.0"), name_width(0), ///
 		xwidth(10), help_message(
 				"Use " + string(SHORT_HELP_OPT) + " or " + string(LONG_HELP_OPT)
 						+ " for help"), v_info(), cmd_options(), cmd_switches(), types() {
