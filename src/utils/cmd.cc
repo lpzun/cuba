@@ -371,14 +371,14 @@ void cmd_line::create_argument_list() {
 string cmd_line::create_version_info() {
 	string info = ""; ///
 	info ///.append("-----------------------------------------------------------\n") ///
-	.append("* *       _/_/_/    _/    _/    _/_/_/_/      _/_/_/    * *\n") ///
-	.append("* *     _/         _/    _/    _/     _/    _/    _/    * *\n") ///
-	.append("* *    _/         _/    _/    _/_/_/_/     _/_/_/_/     * *\n") ///
-	.append("* *    _/        _/    _/    _/     _/    _/    _/      * *\n") ///
-	.append("* *    _/_/_/    _/_/_/     _/_/_/_/     _/    _/  " + VERSION  ///
+	.append("* *      _/_/_/_/    _/    _/    _/_/_/_/      _/_/_/   * *\n") ///
+	.append("* *     _/     _/   _/    _/    _/     _/    _/    _/   * *\n") ///
+	.append("* *    _/_/_/_/    _/    _/    _/_/_/_/     _/_/_/_/    * *\n") ///
+	.append("* *   _/  _/      _/    _/    _/     _/    _/    _/     * *\n") ///
+	.append("* *  _/     _/    _/_/_/     _/_/_/_/     _/    _/  " + VERSION  ///
 			+ " * *\n") ///
 	.append("-----------------------------------------------------------\n") ///
-	.append("* *    Interprocedural Context-Unbounded Analysis for   * *\n") ///
+	.append("* *   Interprocedural Resource-Unbounded Analysis for   * *\n") ///
 	.append("* *               Concurrent Programs                   * *\n") ///
 	.append("* *          Peizun Liu @ Thomas Wahl's Group           * *\n") ///
 	.append("* *       Northeastern University, United States        * *\n") ///
