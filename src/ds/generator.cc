@@ -19,13 +19,15 @@ namespace ruba {
  * @param initl   : initial configuration
  * @param filename: input CPDS
  */
-generator::generator(const string& initl, const concurrent_pushdown_automata& CPDA,
+generator::generator(const string& initl,
+		const concurrent_pushdown_automata& CPDA,
 		const concurrent_finite_machine& CFSM) :
 		generators_for_fixed_bound_1(
 				vector<set<visible_state>>(thread_visible_state::S)), approx_Z(
 				vector<set<visible_state>>(thread_visible_state::S)), generators_for_dynamic_bound(
 				vector<set<visible_state>>(thread_visible_state::S)), initl_tau(
-				parser::parse_input_cfg(initl)), CPDA(CPDA), CFSM(CFSM) {
+				parser::parse_input_cfg(initl)), CPDA(CPDA), CFSM(CFSM), number_of_image_calls(
+				0) {
 	context_insensitive();
 }
 
@@ -77,6 +79,8 @@ void generator::context_insensitive() {
 		cout << "G intersects Z:\n";
 		this->print_approximation(get_generators());
 	}
+	cout << "The number of image calls in computing generators: "
+			<< get_number_of_image_calls() << "\n";
 	cout << logger::MSG_SEPARATOR;
 }
 
@@ -173,6 +177,7 @@ void generator::step(const pda_state& q, const stack_vec& W, const uint tid,
 			break;
 		}
 	}
+	++number_of_image_calls;
 }
 
 bool generator::update_R(const explicit_state& tau,
@@ -283,6 +288,10 @@ void generator::print_approximation(
 			cout << c << " ";
 		cout << "\n";
 	}
+}
+
+uint generator::get_number_of_image_calls() const {
+	return number_of_image_calls;
 }
 
 } /* namespace ruba */

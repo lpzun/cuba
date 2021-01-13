@@ -19,7 +19,8 @@ namespace cuba {
  */
 base_cuba::base_cuba(const string& initl, const string& final,
 		const string& filename) :
-		reachable(false), initl_c(0, 1), final_c(0, 1), CPDA(parser::parse_input_cpds(filename)), ///
+		reachable(false), initl_c(0, 1), final_c(0, 1), CPDA(
+				parser::parse_input_cpds(filename)), ///
 		generators(), reachable_T(), ///
 		filename_global_R(""), filename_top_R("") {
 	initl_c = parser::parse_input_cfg(initl);

@@ -26,6 +26,7 @@ public:
 		return generators_for_dynamic_bound;
 	}
 
+	uint get_number_of_image_calls() const;
 private:
 	vector<set<visible_state>> generators_for_fixed_bound_1;
 	/// 1.1 <approx_Z>: the overapproximation of the set of reachable
@@ -54,6 +55,8 @@ private:
 	/// Utilities to compute & print visible states
 	visible_state top_mapping(const explicit_state& tau);
 	void print_approximation(const vector<set<visible_state>>& approx_R) const;
+
+	uint number_of_image_calls;
 };
 
 } /* namespace ruba */

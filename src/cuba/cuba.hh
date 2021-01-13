@@ -116,8 +116,9 @@ public:
 	virtual ~explicit_cuba();
 
 	virtual void context_unbounded_analysis(const size_k k_bound = 0);
-private:
 
+	uint get_number_of_image_calls() const;
+private:
 	bool k_bounded_reachability(const size_k k_bound,
 			const explicit_state& c_I);
 	antichain step(const explicit_state_tid& tau, const bool is_switch);
@@ -145,11 +146,10 @@ private:
 			map<thread_visible_state, bool>& visit,
 			map<thread_visible_state, bool>& trace);
 
-	void dump_top_R() const;
+	void dump_metrics(const vector<vector<antichain>>& global_R,
+			const vector<set<visible_state>>& top_R) const;
 
-	/// <top_R>: the sequences of visible states. We obtained the
-	/// sequence from R directly.
-	vector<set<visible_state>> top_R; /// The sequences of visible states.
+	uint number_of_image_calls;
 };
 }
 /* namespace cuba */

@@ -19,7 +19,7 @@ namespace cuba {
  */
 explicit_cuba::explicit_cuba(const string& initl, const string& final,
 		const string& filename) :
-		base_cuba(initl, final, filename), top_R(thread_visible_state::S) {
+		base_cuba(initl, final, filename), number_of_image_calls(0) {
 	cout << logger::MSG_EXP_EXPLORATION;
 }
 
@@ -50,7 +50,6 @@ void explicit_cuba::context_unbounded_analysis(const size_k k_bound) {
 		else if (convergent)
 			cout << "=> " << final_c << " is unreachable!" << endl;
 	}
-	this->dump_top_R();
 }
 
 /**
@@ -75,6 +74,10 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 	size_k k = 0;
 	/// 1.3 <global_R>: the sequences of reachable global states.
 	vector<vector<antichain>> global_R;
+	/// 1.4 <top_R>: the sequences of visible states. We obtained the sequence
+	/// from R directly.
+	vector<set<visible_state>> top_R(thread_visible_state::S,
+			set<visible_state>());
 	global_R.reserve(k_bound + 1);
 	global_R.push_back(vector<antichain>(thread_visible_state::S));
 	global_R.push_back(vector<antichain>(thread_visible_state::S));
@@ -132,6 +135,7 @@ bool explicit_cuba::k_bounded_reachability(const size_k k_bound,
 				cout << logger::MSG_TR_COLLAPSE_AT_K
 						<< (k == 0 ? k : k - (nextLevel.empty() ? 2 : 1))
 						<< "\n";
+				this->dump_metrics(global_R, top_R);
 				return true;
 			}
 		}
@@ -178,6 +182,7 @@ antichain explicit_cuba::step(const explicit_state_tid& tau,
 			step(q, W, tid, successors);
 		}
 	}
+	++number_of_image_calls;
 	return successors; /// the set of successors of tau
 }
 
@@ -459,12 +464,23 @@ bool explicit_cuba::finite_context_reachability(const pushdown_automaton& PDA,
 	return false;
 }
 
-void explicit_cuba::dump_top_R() const {
-	size_t size = 0;
+void explicit_cuba::dump_metrics(const vector<vector<antichain>>& global_R,
+		const vector<set<visible_state>>& top_R) const {
+	cout << logger::MSG_SEPARATOR;
+	ulong size_of_top_R = 0;
 	for (const auto& visible_states : top_R) {
-		size += visible_states.size();
+		size_of_top_R += visible_states.size();
 	}
-	cout << "The number of reachable visible states are: " << size << "\n";
+	cout << "The number of reachable visible states: " << size_of_top_R << "\n";
+	ulong size_of_R = 0;
+	for (const auto& global_R_k : global_R) {
+		for (const auto& concrete_states : global_R_k) {
+			size_of_R += concrete_states.size();
+		}
+	}
+	cout << "The number of reachable concrete states: " << size_of_R << "\n";
+	cout << "The number of image calls in analysis: "
+			<< get_number_of_image_calls() << "\n";
 
 	if (flags::OPT_FILE_DUMP) {
 //		ofstream osR(filename_global_R);
@@ -488,6 +504,10 @@ void explicit_cuba::dump_top_R() const {
 			osTR.close();
 		}
 	}
+}
+
+uint explicit_cuba::get_number_of_image_calls() const {
+	return number_of_image_calls;
 }
 
 } /* namespace cuba */
